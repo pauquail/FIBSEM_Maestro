@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="src folder added">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/microscope_control/abstract_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/microscope_control/abstract_control.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/microscope_control/autoscript_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/microscope_control/autoscript_control.py" afterDir="false" />
     </list>
@@ -29,12 +30,12 @@
     &quot;assignee&quot;: &quot;pauquail&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/pauquail/FIBSEM_Maestro.git",
-    "accountId": "da31eabe-8958-4cf9-9ffb-304e6dedfbfd"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/pauquail/FIBSEM_Maestro.git&quot;,
+    &quot;accountId&quot;: &quot;da31eabe-8958-4cf9-9ffb-304e6dedfbfd&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -51,7 +52,7 @@
     "Python.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "/home/cemcof/MiMiMi/save_param.py",
+    "last_opened_file_path": "/home/pavelkrep/PycharmProjects/MiMiMi/imaging.py",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",

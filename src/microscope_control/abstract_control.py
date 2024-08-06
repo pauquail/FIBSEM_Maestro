@@ -1,21 +1,53 @@
+import math
 from abc import ABC, abstractmethod
 
 
-class MicroscopeControl(ABC):
+class StagePosition:
     """
-    This is an abstract base class for controlling a microscope.
-
-    The class provides the interface methods that should be implemented by any specific microscope control class (such as
-    FIBSEM API, or direct Autoscript
-
-
-    These methods include basic functionalities for controlling the various components
-    and parameters of a microscope such as the stage, lens alignment, detector properties, beam controls, and acquisition.
+    Class representing the stage position
+    Rotation and tilt is in deg
     """
 
-    @abstractmethod
-    def move_stage(self):
-        pass
+    def __init__(self, x=0.0, y=0.0, z=0.0, rotation=0.0, tilt=0.0):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.rotation = rotation
+        self.tilt = tilt
+
+    @staticmethod
+    def from_stage_position_as(stage_position_as):
+        """Create a StagePosition instance from a StagePositionAS instance."""
+        return StagePosition(x=stage_position_as.x, y=stage_position_as.y, z=stage_position_as.z,
+                             rotation=math.degrees(stage_position_as.r),
+                             tilt=math.degrees(stage_position_as.t))
+
+    def to_dict(self):
+        return vars(self)
+
+
+
+class BeamControl(ABC):
+    """
+    This is an abstract base class providing an interface for controlling a beam (can be electron or ion) in a microscope.
+
+    Methods:
+        working_distance: Getter and setter for the working distance associated with the current beam control.
+        stigmator_x, stigmator_y: Getter and setter for the x, y stigmatism of the current beam control.
+        lens_alignment_x, lens_alignment_y: Getter and setter for the x, y alignment of the beam lens.
+        beam_shift_x, beam_shift_y: Getter and setter for the x, y shift of the beam control.
+        detector_contrast, detector_brightness: Getter and setter for the contrast and brightness of the detector in the beam control.
+        blank, unblank: Method to blank and unblank the beam.
+        start_acquisition, stop_acquisition: Methods to start and stop the beam acquisition.
+        grab_frame: Method to retrieve a frame.
+        get_image: Method to retrieve the actual image.
+        line_integration: Method to perform line integration on the currently scanned line.
+        dwell_time: Getter and setter for the dwell time of the beam control.
+        bit_depth: Getter and setter for the bit depth of the image from the microscope.
+        resolution: Getter and setter for the resolution of the image.
+        hfw: Getter and setter for the horizontal field width.
+        pixel_size: Getter for the pixel size of the image from the microscope.
+    """
 
     @property
     @abstractmethod
@@ -24,7 +56,7 @@ class MicroscopeControl(ABC):
 
     @working_distance.setter
     @abstractmethod
-    def working_distance(self, value):
+    def working_distance(self, wd: float):
         pass
 
     @property
@@ -67,16 +99,52 @@ class MicroscopeControl(ABC):
     def lens_alignment_y(self, value):
         pass
 
+    @property
+    @abstractmethod
+    def beam_shift_x(self):
+        pass
+
+    @beam_shift_x.setter
+    @abstractmethod
+    def beam_shift_x(self, value):
+        pass
+
+    @property
+    @abstractmethod
+    def beam_shift_y(self):
+        pass
+
+    @beam_shift_y.setter
+    @abstractmethod
+    def beam_shift_y(self, value):
+        pass
+
+    @property
     @abstractmethod
     def detector_contrast(self):
         pass
 
+    @detector_contrast.setter
+    @abstractmethod
+    def detector_contrast(self, value):
+        pass
+
+    @property
     @abstractmethod
     def detector_brightness(self):
         pass
 
+    @detector_brightness.setter
     @abstractmethod
-    def blank_unblank_beam(self):
+    def detector_brightness(self, value):
+        pass
+
+    @abstractmethod
+    def blank(self):
+        pass
+
+    @abstractmethod
+    def unblank(self):
         pass
 
     @abstractmethod
@@ -87,18 +155,106 @@ class MicroscopeControl(ABC):
     def stop_acquisition(self):
         pass
 
+    @abstractmethod
+    def grab_frame(self):
+        pass
 
-class StagePosition:
-    """
-    Class representing the stage position
-    Rotation and tilt is in deg
-    """
-    def __init__(self, x=0, y=0, z=0, rotation=0, tilt=0):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.rotation = rotation
-        self.tilt = tilt
+    @abstractmethod
+    def get_image(self):
+        pass
 
-    def to_dict(self):
-        return vars(self)
+    @abstractmethod
+    def line_integration(self, li:int):
+        pass
+
+    @property
+    @abstractmethod
+    def dwell_time(self):
+        pass
+
+    @dwell_time.setter
+    @abstractmethod
+    def dwell_time(self, value):
+        pass
+
+    @property
+    @abstractmethod
+    def bit_depth(self):
+        pass
+
+    @bit_depth.setter
+    @abstractmethod
+    def bit_depth(self, value):
+        pass
+
+    @property
+    @abstractmethod
+    def resolution(self):
+        pass
+
+    @resolution.setter
+    @abstractmethod
+    def resolution(self, value):
+        pass
+
+    @property
+    @abstractmethod
+    def hfw(self):
+        pass
+
+    @hfw.setter
+    @abstractmethod
+    def hfw(self, value):
+        pass
+
+    @property
+    @abstractmethod
+    def pixel_size(self):
+        pass
+
+
+class MicroscopeControl(ABC):
+    """
+    This is an abstract base class designated for controlling a microscope.
+
+    The methods provided by this class serve as an interface that should be
+    concretely implemented by any microscope-specific control class
+    (for example: FIBSEM API, direct Autoscript).
+
+    These methods include the basic functionalities needed for controlling
+    the various components and parameters of a microscope such as the stage,
+    and beams.
+
+    Methods:
+        position - Getter and setter for the position of the microscope stage.
+    """
+
+    @property
+    @abstractmethod
+    def position(self):
+        pass
+
+    @position.setter
+    @abstractmethod
+    def position(self, goal: StagePosition):
+        pass
+
+    @property
+    @abstractmethod
+    def electron_beam(self) -> BeamControl:
+        """
+        Returns the electron beam of the microscope.
+
+        :return: The electron_beam instance of BeamControl
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def ion_beam(self) -> BeamControl:
+        """
+        Returns the ion beam of the microscope.
+
+        :return: The ion_beam instance of BeamControl
+        """
+        pass
