@@ -86,3 +86,19 @@ class MicroscopeControl(ABC):
     @abstractmethod
     def stop_acquisition(self):
         pass
+
+
+class StagePosition:
+    """
+    Class representing the stage position
+    Rotation and tilt is in deg
+    """
+    def __init__(self, x=0, y=0, z=0, rotation=0, tilt=0):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.rotation = rotation
+        self.tilt = tilt
+
+    def to_dict(self):
+        return vars(self)

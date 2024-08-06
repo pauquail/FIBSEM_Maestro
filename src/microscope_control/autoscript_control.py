@@ -1,12 +1,24 @@
 import logging
-from abstract_control import MicroscopeControl
+from abstract_control import MicroscopeControl, StagePosition
+
+from autoscript_sdb_microscope_client import SdbMicroscopeClient
+from autoscript_sdb_microscope_client.structures import StagePosition as StagePositionAS
 
 class AutoscriptMicroscopeControl(MicroscopeControl):
 
-    def __init__(self):
+    def __init__(self, ip_address = "localhost"):
+        """ Connect to AS server """
+        self._microscope = SdbMicroscopeClient()
+        self._microscope.connect(ip_address)
 
-    def move_stage(self):
-        logging.debug("Moving stage...")
+    def move_stage(self, goal: StagePosition, min_tolerance: float = None):
+        """ Move stage to goal position
+        min_tolerance - if set, the final stage position is verified (only in x and y)"""
+        sp = StagePositionAS(**goal.to_dict(), coordinate_system = "raw")
+        self._microscope.specimen.stage.absolute_move(sp)
+        logging.debug(f"Moving stage to {goal.to_dict()}...")
+        if min_tolerance is not None:
+
 
     @property
     def working_distance(self):
