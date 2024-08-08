@@ -1,10 +1,11 @@
 import logging
 import math
 from abstract_control import MicroscopeControl, StagePosition, BeamControl
+from fibsem_maestro.tools.support import Point
 
 from autoscript_sdb_microscope_client import SdbMicroscopeClient
 from autoscript_sdb_microscope_client.structures import StagePosition as StagePositionAS
-from autoscript_sdb_microscope_client.structures import Point
+from autoscript_sdb_microscope_client.structures import Point as PointAS
 from autoscript_sdb_microscope_client.enumerations import ScanningResolution, ImagingDevice
 
 
@@ -118,7 +119,7 @@ class Beam(BeamControl):
         Setter method for the stigmator_x property.
         """
         logging.debug(f"Setting stigmator x: {value}")
-        self._beam.stigmator.value = Point(value, self.stigmator_y)
+        self._beam.stigmator.value = PointAS(value, self.stigmator_y)
 
     @property
     def stigmator_y(self):
@@ -137,7 +138,17 @@ class Beam(BeamControl):
         :return: The current value of the stigmator_y.
         """
         logging.debug(f"Setting stigmator y: {value}")
-        self._beam.stigmator.value = Point(self.stigmator_x, value)
+        self._beam.stigmator.value = PointAS(self.stigmator_x, value)
+
+    @property
+    def stigmator(self):
+        return self._beam.stigmator.value
+
+    @stigmator.setter
+    def stigmator(self, p: Point):
+        if not isinstance(p, Point):
+            raise TypeError('Expected a Point instance')
+        self._beam.stigmator.value = PointAS(p.x, p.y)
 
     @property
     def lens_alignment_x(self):
@@ -157,7 +168,7 @@ class Beam(BeamControl):
 
         """
         logging.debug(f"Setting lens alignment x: {value}")
-        self._beam.lens_alignment.value = Point(value, self.lens_alignment_y)
+        self._beam.lens_alignment.value = PointAS(value, self.lens_alignment_y)
 
     @property
     def lens_alignment_y(self):
@@ -177,8 +188,17 @@ class Beam(BeamControl):
         :return: None
         """
         logging.debug(f"Setting lens alignment y: {value}")
-        self._beam.lens_alignment.value = Point(self.lens_alignment_y, value)
+        self._beam.lens_alignment.value = PointAS(self.lens_alignment_y, value)
 
+    @property
+    def lens_alignment(self):
+        return self._beam.lens_alignment.value
+
+    @lens_alignment.setter
+    def lens_alignment(self, point: Point):
+        if not isinstance(point, Point):
+            raise TypeError('Expected a Point instance')
+        self._beam.lens_alignment.value = PointAS(point.x, point.y)
 
     @property
     def beam_shift_x(self):
@@ -189,7 +209,7 @@ class Beam(BeamControl):
     def beam_shift_x(self, value):
         """Set the x value of the beam shift."""
         logging.debug(f"Setting beam shift x: {value}")
-        self._beam.beam_shift.value = Point(value, self.beam_shift_y)
+        self._beam.beam_shift.value = PointAS(value, self.beam_shift_y)
 
     @property
     def beam_shift_y(self):
@@ -200,7 +220,17 @@ class Beam(BeamControl):
     def beam_shift_y(self, value):
         """Set the y value of the beam shift."""
         logging.debug(f"Setting beam shift y: {value}")
-        self._beam.beam_shift.value = Point(self.beam_shift_x, value)
+        self._beam.beam_shift.value = PointAS(self.beam_shift_x, value)
+
+    @property
+    def beam_shift(self):
+        return self._beam.beam_shift.value
+
+    @beam_shift.setter
+    def beam_shift(self, point: Point):
+        if not isinstance(point, Point):
+            raise TypeError('Expected a Point instance')
+        self._beam.beam_shift.value = PointAS(point.x, point.y)
 
     @property
     def detector_contrast(self):

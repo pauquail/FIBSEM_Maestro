@@ -81,6 +81,15 @@ class BeamControl(ABC):
 
     @property
     @abstractmethod
+    def stigmator(self):
+        pass
+
+    @stigmator.setter
+    def stigmator(self, value):
+        pass
+
+    @property
+    @abstractmethod
     def lens_alignment_x(self):
         pass
 
@@ -101,6 +110,15 @@ class BeamControl(ABC):
 
     @property
     @abstractmethod
+    def lens_alignment(self):
+        pass
+
+    @lens_alignment.setter
+    def lens_alignment(self, point):
+        pass
+
+    @property
+    @abstractmethod
     def beam_shift_x(self):
         pass
 
@@ -117,6 +135,15 @@ class BeamControl(ABC):
     @beam_shift_y.setter
     @abstractmethod
     def beam_shift_y(self, value):
+        pass
+
+    @property
+    @abstractmethod
+    def beam_shift(self):
+        pass
+
+    @beam_shift.setter
+    def beam_shift(self, point):
         pass
 
     @property
