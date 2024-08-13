@@ -1,31 +1,6 @@
 import math
 from abc import ABC, abstractmethod
-
-
-class StagePosition:
-    """
-    Class representing the stage position
-    Rotation and tilt is in deg
-    """
-
-    def __init__(self, x=0.0, y=0.0, z=0.0, rotation=0.0, tilt=0.0):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.rotation = rotation
-        self.tilt = tilt
-
-    @staticmethod
-    def from_stage_position_as(stage_position_as):
-        """Create a StagePosition instance from a StagePositionAS instance."""
-        return StagePosition(x=stage_position_as.x, y=stage_position_as.y, z=stage_position_as.z,
-                             rotation=math.degrees(stage_position_as.r),
-                             tilt=math.degrees(stage_position_as.t))
-
-    def to_dict(self):
-        return vars(self)
-
-
+from fibsem_maestro.tools.support import StagePosition, Imaging
 
 class BeamControl(ABC):
     """
@@ -268,6 +243,21 @@ class MicroscopeControl(ABC):
 
     @property
     @abstractmethod
+    def relative_position(self):
+        pass
+
+    @relative_position.setter
+    @abstractmethod
+    def relative_position(self, goal: StagePosition):
+        pass
+
+    @position.setter
+    @abstractmethod
+    def position(self, goal: StagePosition):
+        pass
+
+    @property
+    @abstractmethod
     def electron_beam(self) -> BeamControl:
         """
         Returns the electron beam of the microscope.
@@ -284,4 +274,8 @@ class MicroscopeControl(ABC):
 
         :return: The ion_beam instance of BeamControl
         """
+        pass
+
+    def beam(self, beam_select: Imaging) -> BeamControl:
+        """ Select the beam base on Imaging enum """
         pass
