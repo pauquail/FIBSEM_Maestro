@@ -43,7 +43,13 @@ class Point:
         if isinstance(other, Point):
             return Point(self.x * other.x, self.y * other.y)
         else:
-            return NotImplemented
+            return TypeError("Unsupported operand type")
+
+    def __add__(self, other):
+        if isinstance(other, Point):
+            return Point(self.x + other.x, self.y + other.y)
+        else:
+            raise TypeError("Unsupported operand type")
 
 class StagePosition:
     """

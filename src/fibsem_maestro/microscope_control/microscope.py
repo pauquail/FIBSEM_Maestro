@@ -5,26 +5,24 @@ from fibsem_maestro.tools.support import StagePosition, Point, Imaging
 from fibsem_maestro.microscope_control.autoscript_control import AutoscriptMicroscopeControl
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl
 
-def create_microscope(control: MicroscopeControl):
-    """
-    Factory for Microscope object.
-    Based on argument type (AutoscriptMicroscopeControl), it return Microscope object
-    that is inherited from the same class as argument.
-    """
 
-    if isinstance(control, AutoscriptMicroscopeControl):
+def create_microscope(control: str):
+    """
+    :param control: The type of microscope control. Possible values are: 'autoscript'
+    :type control: str
+    :return: A dynamically created Microscope class based on the given control type.
+
+    """
+    if control.lower() == 'autoscript':
         microscope_base = AutoscriptMicroscopeControl
     else:
         raise ValueError(f"Invalid microscope control type: {control}")
 
     class Microscope(microscope_base):
-        def __init__(self, microscope_control, stage_tolerance=1e-7, stage_trials=3,
-                     beamshift_tolerance=50e-9, beam_shift_to_stage_move = (-1, -1)):
+        def __init__(self, stage_tolerance=1e-7, stage_trials=3,
+                     beamshift_tolerance=50e-9, beam_shift_to_stage_move = (-1, -1), **kwargs):
             """
             Initializes a new instance of the class.
-
-            :param microscope_control: The microscope control object.
-            :type microscope_control: object
 
             :param stage_tolerance: The tolerance value for stage movement.
                                     Default is 1e-6.
@@ -40,8 +38,7 @@ def create_microscope(control: MicroscopeControl):
                                      Default is (-1, -1).
             :type beam_shift_to_stage_move: Tuple[int, int]
             """
-            super().__init__(kwargs)
-            self.microscope_control = microscope_control
+            super().__init__(**kwargs)
             self.stage_tolerance = stage_tolerance
             self.stage_trials = stage_trials
             self.stage_trial_counter = stage_trials
