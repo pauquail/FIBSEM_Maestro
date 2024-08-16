@@ -86,4 +86,42 @@ def create_microscope(control: str):
                 self.relative_position = StagePosition(x=new_stage_move.x, y=new_stage_move.y)
                 self.beam(selected_beam).beam_shift = Point(0, 0)  # zero beam shift
 
+        def blank_screen(self, beam_type=Imaging.electron):
+            """
+            Make a black screen (blank and grab frame).
+            :param beam_type: (str) The type of beam to be used for imaging. Defaults to Imaging.electron.
+            :return: None
+            """
+            beam = self.beam(beam_type)
+            contrast_backup = beam.detector_contrast
+            brightness_backup = beam.detector_brightness
+            dwell_backup = beam.dwell_time
+            beam.detector_contrast = 0
+            beam.detector_brightness = 0
+            beam.blank()
+            beam.grab_frame()
+            beam.dwell_time = dwell_backup
+            beam.contrast = contrast_backup
+            beam.brightness = brightness_backup
+
+        def total_blank(self, beam_type=Imaging.electron):
+            """
+            Blank with zero contrast and brightness
+            :param beam_type: (str) The type of beam to be used for imaging. Defaults to Imaging.electron.
+            :return:
+            """
+            beam = self.beam(beam_type)
+            self._detector_contrast_backup = beam.detector_contrast
+            self._detector_brightness_backup = beam.detector_brightness
+            beam.detector_contrast = 0
+            beam.detector_brightness = 0
+            beam.blank()
+
+        def total_unblank(self, beam_type=Imaging.electron):
+            beam = self.beam(beam_type)
+            beam.detector_contrast = self._detector_contrast_backup
+            beam.detector_brightness = self._detector_brightness_backup
+            beam.unblank()
+
     return Microscope  # factory
+

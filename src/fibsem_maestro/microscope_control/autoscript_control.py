@@ -333,41 +333,31 @@ class Beam(BeamControl):
         """
         Unblank the beam.
         """
-        self.select_modality(self._modality)
+        self.select_modality()
         logging.debug(f"Unblanking beam ({self._modality}).")
         self._beam.unblank()
 
     def start_acquisition(self):
         logging.debug(f"Starting acquisition ({self._modality})...")
-        self.select_modality(self._modality)  # activate right quad
+        self.select_modality()  # activate right quad
         self._microscope.imaging.start_acquisition()
 
     def stop_acquisition(self):
         logging.debug(f"Stopping acquisition ({self._modality})...")
-        self.select_modality(self._modality)  # activate right quad
+        self.select_modality()  # activate right quad
         self._microscope.imaging.stop_acquisition()
-    def select_modality(self, modality):
+    def select_modality(self):
         """
         This method is used to switch the microscope's modality between the Electron Beam (eb) mode and the Ion Beam (ib) mode.
         The selection of the modality will have an impact on starting and stopping the acquisition, grab and get image, and on the selected detector.
 
         The Electron Beam mode is always in Quad 1, while the Ion Beam mode is always in Quad 2.
 
-        Parameters:
-            modality (str): The type of beam to use. This can either be 'eb' for Electron Beam or 'ib' for Ion Beam.
-
-        Raises:
-            ValueError: If the input value is not 'eb' or 'ib'.
-
-        Usage:
-            select_modality('eb')  # Switches to Electron Beam mode in Q1
-            select_modality('ib')  # Switches to Ion Beam mode in Q2
         """
-
-        if modality.lower() == 'eb':
+        if self._modality.lower() == 'eb':
             self._microscope.imaging.set_active_view(1)
             self._microscope.imaging.set_active_device(ImagingDevice.ELECTRON_BEAM)
-        elif modality.lower() == 'ib':
+        elif self._modality.lower() == 'ib':
             self._microscope.imaging.set_active_view(2)
             self._microscope.imaging.set_active_device(ImagingDevice.ION_BEAM)
         else:
@@ -380,7 +370,7 @@ class Beam(BeamControl):
         Returns:
             Frame data
         """
-        self.select_modality(self._modality)  # activate right quad
+        self.select_modality()  # activate right quad
         logging.debug(f"Grabbing frame ({self._modality}).")
         return self._microscope.imaging.grab_frame()
 
@@ -391,7 +381,7 @@ class Beam(BeamControl):
         Returns:
             Current image data
         """
-        self.select_modality(self._modality)  # activate right quad
+        self.select_modality()  # activate right quad
         logging.debug(f"Getting image ({self._modality}).")
         return self._microscope.imaging.get_image().data
 
