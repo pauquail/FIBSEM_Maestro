@@ -1,31 +1,23 @@
 import logging
 import math
+import tempfile
 
 from abstract_control import MicroscopeControl, StagePosition, BeamControl
-from fibsem_maestro.tools.support import Point, Imaging
+from fibsem_maestro.tools.support import Point, Imaging, ScanningArea
 
 try:
     from autoscript_sdb_microscope_client import SdbMicroscopeClient
-    from autoscript_sdb_microscope_client.structures import StagePosition as StagePositionAS
-    from autoscript_sdb_microscope_client.structures import Point as PointAS
+    from autoscript_sdb_microscope_client.structures import Point as PointAS, GrabFrameSettings, AdornedImage
     from autoscript_sdb_microscope_client.enumerations import ImagingDevice
     virtual_mode = False
     logging.info("AS library imported.")
 except:
     from fibsem_maestro.microscope_control.virtual_control import VirtualMicroscope
-    from fibsem_maestro.microscope_control.virtual_control import StagePosition as StagePositionAS, ImagingDevice
+    from fibsem_maestro.microscope_control.virtual_control import (StagePosition as StagePositionAS, ImagingDevice,
+                                                                   ImageFileFormat)
     from fibsem_maestro.tools.support import Point as PointAS
     virtual_mode = True
     logging.warning("AS library could not be imported. Virtual mode used.")
-
-def to_stage_position_as(stage_position: StagePosition) -> StagePositionAS:
-    """Convert stage StagePosition to StagePositionAS."""
-    stage_dict = stage_position.to_dict()
-    stage_dict['r'] = math.radians(stage_dict['rotation'])
-    stage_dict['t'] = math.radians(stage_dict['tilt'])
-    del stage_dict['rotation']
-    del stage_dict['tilt']
-    return StagePositionAS(**stage_dict, coordinate_system="raw")
 
 
 class AutoscriptMicroscopeControl(MicroscopeControl):
@@ -55,7 +47,7 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
     @position.setter
     def position(self, goal: StagePosition):
         """Set stage position"""
-        self._microscope.specimen.stage.absolute_move(to_stage_position_as(goal))
+        self._microscope.specimen.stage.absolute_move(goal.to_stage_position_as())
         logging.debug(f"Moving stage to {goal.to_dict()}...")
 
     @property
@@ -65,7 +57,7 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
     @relative_position.setter
     def relative_position(self, goal: StagePosition):
         logging.debug(f"Moving stage to {goal.to_dict()} (relative) ...")
-        self._microscope.specimen.stage.relative_move(to_stage_position_as(goal))
+        self._microscope.specimen.stage.relative_move(goal.to_stage_position_as())
 
     @property
     def electron_beam(self) -> BeamControl:
@@ -85,12 +77,6 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
         """
         return self._ion_beam
 
-    def beam(self, beam_select: Imaging) -> BeamControl:
-        """ Select the beam base on Imaging enum """
-        if beam_select == Imaging.electron:
-            return self.electron_beam
-        if beam_select == Imaging.ion:
-            return self.ion_beam
 
 class Beam(BeamControl):
     """ Implementation of Microscope Beam. The class is universal for electrons and ions"""
@@ -102,6 +88,7 @@ class Beam(BeamControl):
         :param microscope: A concrete instance of a microscope control object.
         :param modality: Must be eb (electron beam) or ib (ion beam).
         """
+        self._scanning_area = None  # reduced area. If none, reduced area is not applied
         self._microscope = microscope
         self._modality = modality
 
@@ -114,6 +101,9 @@ class Beam(BeamControl):
 
         # default values
         self._line_integration = 1
+        self._extended_resolution = None  # extended resolution is set only if the required resolution is not standard
+        self._standard_resolutions = ([1024, 884], [1536, 1024], [2048, 1768], [3072, 2048], [4096, 3536], [512, 442],
+                                      [6144, 4096], [768, 512])  # available resolutions supported in standard mode
 
     @property
     def working_distance(self):
@@ -372,7 +362,24 @@ class Beam(BeamControl):
         """
         self.select_modality()  # activate right quad
         logging.debug(f"Grabbing frame ({self._modality}).")
-        return self._microscope.imaging.grab_frame()
+
+        img_settings = GrabFrameSettings(line_integration=self._line_integration)
+        if self._extended_resolution is not None:
+            img_settings.resolution = self._extended_resolution
+        if self._scanning_area is not None:
+            img_settings.reduced_area = self._scanning_area.to_as()
+
+        logging.info(f"Acquiring image..")
+        try:
+            grabbed_image = self._microscope.imaging.grab_frame()
+            logging.info(f"Image grabbed.")
+            return grabbed_image
+        except:
+            logging.warning('Image grab failed. It must be grabbed to disk')
+            img_name = tempfile.NamedTemporaryFile(delete=True)
+            self._microscope.imaging.grab_frame_to_disk(img_name, ImageFileFormat.TIFF, img_settings)
+            return AdornedImage.load(img_name)
+
 
     def get_image(self):
         """
@@ -383,7 +390,7 @@ class Beam(BeamControl):
         """
         self.select_modality()  # activate right quad
         logging.debug(f"Getting image ({self._modality}).")
-        return self._microscope.imaging.get_image().data
+        return self._microscope.imaging._get_image().data
 
     def line_integration(self, li:int):
         """
@@ -450,25 +457,12 @@ class Beam(BeamControl):
             tuple: The resolution of the image
         """
         r = str(self._beam.scanning.resolution.value)
-        logging.debug(f"Getting resolution ({self._modality}): {r}.")
-        if r == "1024x884":
-            return 1024, 884
-        elif r == "1536x1024":
-            return 1536, 1024
-        elif r == "2048x1768":
-            return 2048, 1768
-        elif r == "3072x2048":
-            return 3072, 2048
-        elif r == "4096x3536":
-            return 4096, 3536
-        elif r == "512x442":
-            return 512, 442
-        elif r == "6144x4096":
-            return 6144, 4096
-        elif r == "768x512":
-            return 768, 512
+        if self._extended_resolution is not None:
+            logging.debug(f"Getting standard resolution ({self._modality}): {r}.")
+            return r.split('x')
         else:
-            raise ValueError("Invalid resolution")
+            logging.debug(f"Getting extended resolution ({self._modality}): {self._extended_resolution}.")
+            return self._extended_resolution
 
     @resolution.setter
     def resolution(self, resolution):
@@ -479,8 +473,15 @@ class Beam(BeamControl):
             resolution (tuple): The new resolution
         """
         value = f'{resolution[0]}x{resolution[1]}'
-        logging.debug(f"Setting resolution to ({self._modality}): {value}.")
-        self._beam.scanning.resolution.value = value
+        for r in self._standard_resolutions:
+            if resolution[0]==r[0] and resolution[1]==r[1]:
+                logging.debug(f"Setting standard resolution to ({self._modality}): {value}.")
+                self._beam.scanning.resolution.value = value
+                return
+        logging.debug(f"Setting extended resolution to ({self._modality}): {value}.")
+        self._extended_resolution = resolution
+
+
 
     @property
     def hfw(self):
@@ -516,3 +517,16 @@ class Beam(BeamControl):
         ps = self.hfw / self.resolution[0]  # x resolution
         logging.debug(f"Getting pixel size ({self._modality}): {ps}.")
         return ps
+
+    @property
+    def scanning_area(self):
+        logging.debug(f"Getting scanning area ({self._modality}): {self._scanning_area}.")
+        return self._scanning_area
+
+    @scanning_area.setter
+    def scanning_area(self, value):
+        if value is None:
+            logging.debug(f"Disabling scanning area({self._modality}).")
+        else:
+            logging.debug(f"Setting scanning area to ({self._modality}): {value}.")
+        self._scanning_area = value

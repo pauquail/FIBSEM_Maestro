@@ -2,11 +2,6 @@ import math
 from enum import Enum
 
 
-class Imaging(Enum):
-    electron = "eb"
-    ion = "ib"
-
-
 class Point:
     def __init__(self, x=0, y=0):
         self._x = x
@@ -42,6 +37,8 @@ class Point:
     def __mul__(self, other):
         if isinstance(other, Point):
             return Point(self.x * other.x, self.y * other.y)
+        elif isinstance(other, list):
+            return Point(self.x * other[0], self.y * other[1])
         else:
             return TypeError("Unsupported operand type")
 
@@ -71,8 +68,45 @@ class StagePosition:
                              rotation=math.degrees(stage_position_as.r),
                              tilt=math.degrees(stage_position_as.t))
 
+    def to_stage_position_as(self):
+        """Convert StagePosition to AS StagePosition instance."""
+        from autoscript_sdb_microscope_client.structures import StagePosition as StagePositionAS
+        stage_dict = self.to_dict()
+        stage_dict['r'] = math.radians(stage_dict['rotation'])
+        stage_dict['t'] = math.radians(stage_dict['tilt'])
+        del stage_dict['rotation']
+        del stage_dict['tilt']
+        return StagePositionAS(**stage_dict, coordinate_system="raw")
+
     def to_dict(self):
         return vars(self)
 
     def to_xy(self):
         return (self.x, self.y)
+
+class ScanningArea:
+    def __init__(self, center: Point, width: float, height: float):
+        """ Area defined as the fraction (center of the image = 0.5)"""
+        self.center = center
+        self.width = width
+        self.height = height
+
+    def to_as(self):
+        """ Convert the coordinates to AS coordinates """
+        raise NotImplementedError("Not implemented yet")
+
+    def to_img_coordinates(self, img_shape):
+        """
+        Calculate the coordinates of an object in an image based on its relative position and size.
+
+        :param img_shape: The shape of the image as a tuple (height, width).
+        :type img_shape: tuple
+        :return: The left top coordinates of the object and its size as a tuple.
+        :rtype: tuple
+        """
+        center_pix = self.center * img_shape
+        height_pix = img_shape[0] * self.height
+        width_pix = img_shape[1] * self.width
+        left_top = [center_pix[0] - height_pix // 2,
+                    center_pix[1] - width_pix // 2]
+        return left_top, [height_pix, width_pix]

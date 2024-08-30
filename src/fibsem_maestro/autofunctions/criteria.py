@@ -1,5 +1,9 @@
+import logging
+
 import numpy as np
 from scipy.ndimage import gaussian_filter
+
+from fibsem_maestro.tools.math_tools import largest_rectangles_in_mask, crop_image
 
 
 def gauss_filter(x, px_size, detail):
@@ -104,3 +108,35 @@ def fft_criterion(img, px_size, lowest_detail, highest_detail):
         return fft_criterion_2d()
     else:
         raise NotImplementedError('Only 1D and 2D images are currently supported for focus criterion.')
+
+
+def criterion_on_masked_image(img, mask, min_fraction, criterion_func, **kwargs):
+    """
+    :param img: The input image array.
+    :type img: numpy.ndarray
+
+    :param mask: The mask array. It should have the same shape as the input image. Only 1 and 0
+    :type mask: numpy.ndarray
+
+    :param min_fraction: The minimum fraction of masked pixels required for the criterion to be applied.
+    :type min_fraction: float
+
+    :param criterion_func: The function used to calculate the focus criterion on the masked image.
+    :type criterion_func: function
+
+    :param kwargs: Additional keyword arguments that can be passed to the criterion function. px_size, lowest_detail, highest_detail
+    :type kwargs: dict
+
+    :return: The result of the criterion function applied on the masked image if the minimum fraction of masked pixels is satisfied, None otherwise.
+    :rtype: Any
+    """
+    if sum(mask)/len(img) < min_fraction:
+        logging.warning('Focus criterion: Not enough masked pixels')
+        return None
+    else:
+        masking_rectangles = largest_rectangles_in_mask(mask)
+        resolutions = []
+        for r in masking_rectangles:
+            resolutions.append(
+                criterion_func(crop_image(r), **kwargs))
+        return np.mean(resolutions)

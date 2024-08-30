@@ -1,6 +1,6 @@
 import math
 from abc import ABC, abstractmethod
-from fibsem_maestro.tools.support import StagePosition, Imaging
+from fibsem_maestro.tools.support import StagePosition, Imaging, ScanningArea
 
 class BeamControl(ABC):
     """
@@ -212,6 +212,16 @@ class BeamControl(ABC):
     @property
     @abstractmethod
     def pixel_size(self):
+        pass
+
+    @property
+    @abstractmethod
+    def scanning_area(self):
+        pass
+
+    @scanning_area.setter
+    @abstractmethod
+    def scanning_area(self, value: ScanningArea):
         pass
 
 
