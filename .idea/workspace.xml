@@ -5,12 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="dev progress">
-      <change afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/masking.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/email_attention.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction_control.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/FIBSEM_Maestro.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FIBSEM_Maestro.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/tools/dirs_management.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/dirs_management.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/sweeping.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/sweeping.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/serial_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial_control.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/settings.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/settings.yaml" afterDir="false" />
     </list>
@@ -164,6 +165,8 @@
       <workItem from="1725008740145" duration="7248000" />
       <workItem from="1725037236303" duration="2349000" />
       <workItem from="1725041666167" duration="1826000" />
+      <workItem from="1725213055657" duration="29000" />
+      <workItem from="1725213094965" duration="5456000" />
     </task>
     <task id="LOCAL-00001" summary="init commit">
       <option name="closed" value="true" />

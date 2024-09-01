@@ -19,31 +19,13 @@ def create_microscope(control: str):
         raise ValueError(f"Invalid microscope control type: {control}")
 
     class Microscope(microscope_base):
-        def __init__(self, stage_tolerance=1e-7, stage_trials=3,
-                     beamshift_tolerance=50e-9, beam_shift_to_stage_move = (-1, -1), **kwargs):
+        def __init__(self, settings):
             """
             Initializes a new instance of the class.
 
-            :param stage_tolerance: The tolerance value for stage movement.
-                                    Default is 1e-6.
-            :type stage_tolerance: float
-
-            :param stage_trials: The number of trials to perform for stage movement.
-                                 Default is 3.
-            :type stage_trials: int
-            :param beamshift_tolerance: The tolerance value for beam shift.
-                            Default is 50e-9.
-            :type beamshift_tolerance: float
-            :param beam_shift_to_stage_move: Relative axis direction between beam shift and stage movement.
-                                     Default is (-1, -1).
-            :type beam_shift_to_stage_move: Tuple[int, int]
             """
-            super().__init__(**kwargs)
-            self.stage_tolerance = stage_tolerance
-            self.stage_trials = stage_trials
-            self.stage_trial_counter = stage_trials
-            self.beamshift_tolerance = beamshift_tolerance
-            self.beam_shift_to_stage_move = beam_shift_to_stage_move
+            super().__init__(settings['ip_address'])
+            self.settings = settings
             self.beam = self.electron_beam  # default setting for actual beam
 
         def stage_move_with_verification(self, new_stage_position: StagePosition):
@@ -58,7 +40,7 @@ def create_microscope(control: str):
             # after movement, verify whether the movement is within tolerance
             dist = distance.euclidean(position.to_xy(), new_stage_position.to_xy())
 
-            if dist > self.stage_tolerance:
+            if dist > self.settings['stage_tolerance']:
                 logging.warning(
                     f"Stage reached position {new_stage_position} is too far ({dist}) from defined position {new_stage_position} ")
                 self.stage_trial_counter -= 1
@@ -68,7 +50,7 @@ def create_microscope(control: str):
                     raise Exception("Stage movement failed after multiple trials")
             else:
                 # reset trials counter
-                self.stage_trial_counter = self.stage_trials
+                self.stage_trial_counter = self.settings['stage_trials']
 
         def beam_shift_with_verification(self, new_beam_shift: Point):
             """
@@ -78,12 +60,13 @@ def create_microscope(control: str):
             try:
                 self.beam.beam_shift = new_beam_shift  # set beam shift
                 dist = distance.euclidean(self.beam.beam_shift.to_xy(), new_beam_shift.to_xy())
-                if dist > self.beamshift_tolerance:
+                if dist > self.settings['beam_shift_tolerance']:
                     raise Exception("Beam shift out of range")
-            except:  # if any problem with beam shift or out of range -> stage move
-                logging.warning("Beam shift is out of range. Stage position needs to be adjusted.")
+            except Exception as e:  # if any problem with beam shift or out of range -> stage move
+                logging.warning("Beam shift is out of range. Stage position needs to be adjusted. " + repr(e))
                 # stage move = beam shift * axis reversion
-                new_stage_move = new_beam_shift * Point(self.beam.beam_shift_to_stage_move[0], self.beam.beam_shift_to_stage_move[1])
+                new_stage_move = new_beam_shift * Point(self.settings['beam_shift_to_stage_move'][0],
+                                                        self.settings['beam_shift_to_stage_move'][1])
                 self.relative_position = StagePosition(x=new_stage_move.x, y=new_stage_move.y)
                 self.beam.beam_shift = Point(0, 0)  # zero beam shift
 

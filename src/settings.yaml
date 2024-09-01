@@ -6,13 +6,13 @@ acquisition:
   drift_correction: 'y' # Drift correction strategy. Possible values 'y' for simple y correction
   additive_beamshift: (0, 0) # Additive beam shift applied in every cycle
   setting_file: 'microscope_settings.yaml' # Actual microscope setting
-
+  log: True
 
 microscope:
   ip_address: 'localhost'  # ASV server address
   stage_tolerance: 1e-7  # Maximal stage error that is considered as ok
   stage_trials: 3  # Number of trials to reach the goal position before raise error
-  beamshift_tolerance: 50e-9 # Maximal beam shift error that is considered as ok
+  beam_shift_tolerance: 50e-9 # Maximal beam shift error that is considered as ok
   beam_shift_to_stage_move: (-1, -1) # Axis transformation between beamshift and stage
 
 # Directories
@@ -21,24 +21,61 @@ dirs:
   log: 'logs'
 
 autofunction:
-  autofunction: 'image'  # type of autofunction. Values: 'image', 'line'
-  sweeping_var: 'working_distance'
-  sweeping_strategy: 'basic' # values: 'basic', 'spiral'
+  execute: 1 # execute condition - if int = number of slices, if float = image resolution
+
+  step_mode: False # Determines whether to perform step mode (it acquires only one image step by step)
+
   criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion'
   lowest_detail: 10e-9
   highest_detail: 100e-9
-  min_fraction: 0.1
+
   pre_imaging_delay: 1
   keep_time: 10
   forbidden_sections: [0]
-  mask_image_li: 32
-  af_values: ['working_distance', 'stigmator_x', 'stigmator_y', 'working_distance',  'lens_alignment_x', 'lens_alignment_y',
-              'working_distance'] # list of sweeping values
-  delta_x: 0
-  log: True
-  mask: True
-  update_mask: True # grab image before focus in order to calculate mask. If False, last image is selected
+  min_fraction: 0.1
 
+  delta_x: 0
+
+  af_values:
+    - variable: 'working_distance'
+      sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
+      autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
+      sweeping_range: (-1, 1) # The range of the sweeping variable.
+      sweeping_max_limits: (-1, 1) # Limits of sweeping_var
+      sweeping_steps: 10
+      sweeping_total_cycles: 1 # sweeping cycles
+    - variable: 'stigmator'
+      sweeping_strategy: 'SpiralSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
+      autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
+      sweeping_range: (-1, 1) # The range of the sweeping variable.
+      sweeping_max_limits: (-1, 1) # Limits of sweeping_var
+      sweeping_steps: 10
+      sweeping_total_cycles: 1 # sweeping cycles
+    - variable: 'working_distance'
+      sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
+      autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
+      sweeping_range: (-1, 1) # The range of the sweeping variable.
+      sweeping_max_limits: (-1, 1) # Limits of sweeping_var
+      sweeping_steps: 10
+      sweeping_total_cycles: 1 # sweeping cycles
+    - variable: 'lens_alignment'
+      sweeping_strategy: 'SpiralSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
+      autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
+      sweeping_range: (-1, 1) # The range of the sweeping variable.
+      sweeping_max_limits: (-1, 1) # Limits of sweeping_var
+      sweeping_steps: 10
+      sweeping_total_cycles: 1 # sweeping cycles
+    - variable: 'working_distance'
+      sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
+      autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
+      sweeping_range: (-1, 1) # The range of the sweeping variable.
+      sweeping_max_limits: (-1, 1) # Limits of sweeping_var
+      sweeping_steps: 10
+      sweeping_total_cycles: 1 # sweeping cycles
+
+  mask: True
+  mask_image_li: 32 # line integration of mask acquisition
+  update_mask: True # grab image before focus in order to calculate mask. If False, last image is selected
 
   email:
     sender: 'pavel.emcf@gmail.com'

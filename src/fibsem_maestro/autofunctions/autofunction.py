@@ -4,8 +4,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import time
 
-from matplotlib import patches
-
 from fibsem_maestro.autofunctions.criteria import criterion_on_masked_image
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl
 from fibsem_maestro.autofunctions.sweeping import BasicSweeping
@@ -17,13 +15,12 @@ class AutoFunction:
     It selects the variable with the highest criterion.
     """
     def __init__(self, criterion_function, sweeping: BasicSweeping, microscope,
-                 show_plot=True, mask=None, update_mask=True, af_settings=None):
+                 mask=None, af_settings=None):
         """
         Initializes autofunction.
 
         :param criterion_function: The function used to determine the criterion value.
         :param sweeping: An instance of the any sweeping class (BasicSweeping, CircularSweeping).
-        :param show_plot: Determines whether to show a plot (default: True).
         :param mask: Mask class for smart masking.
 
         """
@@ -31,16 +28,12 @@ class AutoFunction:
         self._microscope = microscope
         self._criterion_function = criterion_function
         self._step_number = 0
-        self._show_plot = show_plot
         self._mask = mask
         # init criterion dict (array of values for each variable value
         self._criterion = {}
         for i in range(len(list(self._sweeping.sweep()))):
             self._criterion[i] = []
         self.settings = af_settings
-
-        if update_mask and self._mask is not None:
-            self.update_mask()
 
         self.af_curve_plot = None
         self.masks_plot = None
@@ -52,7 +45,7 @@ class AutoFunction:
         self._mask.update_img(img)
         self.masks_plot = self._mask.plot()
 
-    def _get_image(self, value, step_mode = False):
+    def _get_image(self, value):
         """
         Sets the value, take image and measure criterion.
 
@@ -66,13 +59,12 @@ class AutoFunction:
         image = self._microscope.area_scanning()  # grab image with reduced area cropping
 
         #  update mask if step mode active and masking enabled
-        if step_mode and self._mask is not None:
+        if self.settings['step_mode'] and self._mask is not None:
             self._mask.update_img(image)
             self.masks_plot = self._mask.plot()
 
         if self._mask is not None:
-            criterion = self._criterion_function(image, self._microscope.pixel_size, self.settings['lowest_detail'],
-                                                 self.settings['highest_detail'))
+            criterion = self._criterion_function(image, self._microscope.pixel_size, self.settings['lowest_detail'], self.settings['highest_detail')
         else:
             criterion, rectangles = criterion_on_masked_image(image, self._mask, self.settings['min_fraction'], self._criterion_function,
                                                   self._microscope.pixel_size, self.settings['lowest_detail'], self.settings['highest_detail'])
@@ -100,23 +92,22 @@ class AutoFunction:
 
         return best_value
 
-    def __call__(self, step_mode=False):
+    def __call__(self):
         """
         Perform all steps of setting values, grab images (or line) and criteria measurement.
 
-        :param step_mode: Determines whether to perform step mode (it acquires only one image step by step)
         :return:
         """
         # non-step image mode
-        if not step_mode:
+        if not self.settings['step_mode']:
             for s in self._sweeping.sweep():
-                self._get_image(s, step_mode)
+                self._get_image(s)
             return self._evaluate()
         else:
             # step image mode
             sweep_list = list(self._sweeping.sweep())
             value = sweep_list[self._step_number]  # select sweeping variable based on current step
-            self._get_image(value, step_mode)
+            self._get_image(value)
             self._step_number += 1
             if self._step_number >= len(sweep_list):
                 return self._evaluate()
@@ -175,7 +166,7 @@ class LineAutoFunction(AutoFunction):
                         for line_index in bin[bin_index]:
                             if self._mask is not None:
                                 f = self._criterion_function(img[line_index], self._microscope.pixel_size, self.settings['lowest_detail'],
-                                                 self.settings['highest_detail'))
+                                                 self.settings['highest_detail')
                             else:
                                 f, _ = criterion_on_masked_image(img[line_index], self._mask,
                                                                                   self.settings['min_fraction'],
@@ -193,8 +184,8 @@ class LineAutoFunction(AutoFunction):
         self.line_focus_plot = self.show_line_focus(img)
         return self._evaluate()
 
-    def __call__(self, step_mode=False):
-        if step_mode:
+    def __call__(self):
+        if self.settings['step_mode']:
             raise NotImplementedError("Not implemented yet")
         return self.line_focus()
 
