@@ -115,8 +115,8 @@ def criterion_on_masked_image(img, mask, min_fraction, criterion_func, **kwargs)
     :param img: The input image array.
     :type img: numpy.ndarray
 
-    :param mask: The mask array. It should have the same shape as the input image. Only 1 and 0
-    :type mask: numpy.ndarray
+    :param mask: The mask class for smart masking
+    :type mask: Mask class
 
     :param min_fraction: The minimum fraction of masked pixels required for the criterion to be applied.
     :type min_fraction: float
@@ -134,9 +134,9 @@ def criterion_on_masked_image(img, mask, min_fraction, criterion_func, **kwargs)
         logging.warning('Focus criterion: Not enough masked pixels')
         return None
     else:
-        masking_rectangles = largest_rectangles_in_mask(mask)
+        masking_rectangles = largest_rectangles_in_mask(mask.get_mask_array())
         resolutions = []
         for r in masking_rectangles:
             resolutions.append(
                 criterion_func(crop_image(r), **kwargs))
-        return np.mean(resolutions)
+        return np.mean(resolutions), masking_rectangles

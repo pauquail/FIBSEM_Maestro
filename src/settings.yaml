@@ -20,3 +20,27 @@ dirs:
   output_images: 'images'
   log: 'logs'
 
+autofunction:
+  autofunction: 'image'  # type of autofunction. Values: 'image', 'line'
+  sweeping_var: 'working_distance'
+  sweeping_strategy: 'basic' # values: 'basic', 'spiral'
+  criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion'
+  lowest_detail: 10e-9
+  highest_detail: 100e-9
+  min_fraction: 0.1
+  pre_imaging_delay: 1
+  keep_time: 10
+  forbidden_sections: [0]
+  mask_image_li: 32
+  af_values: ['working_distance', 'stigmator_x', 'stigmator_y', 'working_distance',  'lens_alignment_x', 'lens_alignment_y',
+              'working_distance'] # list of sweeping values
+  delta_x: 0
+  log: True
+  mask: True
+  update_mask: True # grab image before focus in order to calculate mask. If False, last image is selected
+
+
+  email:
+    sender: 'pavel.emcf@gmail.com'
+    receiver: 'pavel.krep@gmail.com'
+    password_file: 'email_password.txt'

@@ -4,6 +4,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import time
 
+from matplotlib import patches
+
 from fibsem_maestro.autofunctions.criteria import criterion_on_masked_image
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl
 from fibsem_maestro.autofunctions.sweeping import BasicSweeping
@@ -14,22 +16,19 @@ class AutoFunction:
     Sets the selected variable and measure criterion.
     It selects the variable with the highest criterion.
     """
-    def __init__(self, criterion_function, sweeping: BasicSweeping, beam, scan='image',
-                 show_plot=True, mask=None, **kwargs):
+    def __init__(self, criterion_function, sweeping: BasicSweeping, microscope,
+                 show_plot=True, mask=None, update_mask=True, af_settings=None):
         """
         Initializes autofunction.
 
         :param criterion_function: The function used to determine the criterion value.
         :param sweeping: An instance of the any sweeping class (BasicSweeping, CircularSweeping).
-        :param scan: The scan type to be performed (image, line) (default: 'image').
         :param show_plot: Determines whether to show a plot (default: True).
-        :param kwargs: Additional keyword arguments for criterion function.
-        :param beam: Select beam for autofunction.
+        :param mask: Mask class for smart masking.
+
         """
-        self.__dict__.update(kwargs)  # save kwargs as properties
         self._sweeping = sweeping
-        self._scan = scan
-        self._beam = beam
+        self._microscope = microscope
         self._criterion_function = criterion_function
         self._step_number = 0
         self._show_plot = show_plot
@@ -38,32 +37,45 @@ class AutoFunction:
         self._criterion = {}
         for i in range(len(list(self._sweeping.sweep()))):
             self._criterion[i] = []
-        if show_plot:
-            # init matplotlib
-            try:
-                matplotlib.use('TkAgg')
-            except:
-                print("TkAgg backend cannot be used")
-            plt.ion()
+        self.settings = af_settings
 
-    def _get_image(self, value):
+        if update_mask and self._mask is not None:
+            self.update_mask()
+
+        self.af_curve_plot = None
+        self.masks_plot = None
+
+    def update_mask(self):
+        """ Grab image and update mask based on grabbed image."""
+        logging.info('Autofunction - grabbing image for mask creation')
+        img = self._microscope.area_scanning()  # grab image and crop reduced area if needed
+        self._mask.update_img(img)
+        self.masks_plot = self._mask.plot()
+
+    def _get_image(self, value, step_mode = False):
         """
         Sets the value, take image and measure criterion.
 
         :param value: The new value for the measure criterion.
         :return: None
         """
-        logging.info(f'Autofunction setting {self.sweeping_var}: {value}')
+        sweeping_var = self.settings['sweeping_var']
+        logging.info(f'Autofunction setting {sweeping_var} to {value}')
         self._sweeping.value = value
-        if self._scan.lower() == 'image':
-            image = self._beam.grab_image()
-        else:
-            logging.warning("Invalid scan type")
+
+        image = self._microscope.area_scanning()  # grab image with reduced area cropping
+
+        #  update mask if step mode active and masking enabled
+        if step_mode and self._mask is not None:
+            self._mask.update_img(image)
+            self.masks_plot = self._mask.plot()
+
         if self._mask is not None:
-            criterion = self._criterion_function(image, self.px_size, self.lowest_detail, self.highest_detail)
+            criterion = self._criterion_function(image, self._microscope.pixel_size, self.settings['lowest_detail'],
+                                                 self.settings['highest_detail'))
         else:
-            criterion = criterion_on_masked_image(image, self._mask, self.min_fraction, self._criterion_function,
-                                                  self.px_size, self.lowest_detail, self.highest_detail)
+            criterion, rectangles = criterion_on_masked_image(image, self._mask, self.settings['min_fraction'], self._criterion_function,
+                                                  self._microscope.pixel_size, self.settings['lowest_detail'], self.settings['highest_detail'])
         if criterion is not None:
             self._criterion[value].append(criterion)
         else:
@@ -81,17 +93,12 @@ class AutoFunction:
         self._criterion = {key: np.mean(value_list) for key, value_list in self._criterion.items()}
         best_value = max(self._criterion, key=self._criterion)
         self._sweeping.value = best_value  # set best value
-        logging.info(f'Autofunction best value {self.sweeping_var} is {best_value}.')
+        sweeping_var = self.settings['sweeping_var']
+        logging.info(f'Autofunction best value {sweeping_var} is {best_value}.')
 
-        plots = []
-        if self._show_plot:
-            af_fig = self.show_af_curve()
-            plots.append(af_fig)
-            if self._scan.lower() == 'line':
-                line_fig = self.show_line_focus()
-                plots.append(line_fig)
+        self.af_curve_plot = self.show_af_curve()
 
-        return best_value, plots
+        return best_value
 
     def __call__(self, step_mode=False):
         """
@@ -100,22 +107,19 @@ class AutoFunction:
         :param step_mode: Determines whether to perform step mode (it acquires only one image step by step)
         :return:
         """
-        self._beam.select_modality()  # select quad and beam
-
-        if self._scan.lower() == 'image':
-            # non-step image mode
-            if not step_mode:
-                for s in self._sweeping.sweep():
-                    self._get_image(s)
+        # non-step image mode
+        if not step_mode:
+            for s in self._sweeping.sweep():
+                self._get_image(s, step_mode)
+            return self._evaluate()
+        else:
+            # step image mode
+            sweep_list = list(self._sweeping.sweep())
+            value = sweep_list[self._step_number]  # select sweeping variable based on current step
+            self._get_image(value, step_mode)
+            self._step_number += 1
+            if self._step_number >= len(sweep_list):
                 return self._evaluate()
-            else:
-                # step image mode
-                sweep_list = list(self._sweeping.sweep())
-                value = sweep_list[self._step_number]  # select sweeping variable based on current step
-                self._get_image(value)
-                self._step_number += 1
-                if self._step_number >= len(sweep_list):
-                    return self._evaluate()
 
     def show_af_curve(self):
         criteria = list(self._criterion.values())
@@ -124,34 +128,31 @@ class AutoFunction:
         plt.plot(values, criteria , 'r.')
         plt.axvline(x=values[len(values) // 2], color='b')  # make horizontal line in the middle
         plt.tight_layout()
-        fig.canvas.draw()
-        fig.canvas.flush_events()
         return fig
+
 
 class LineAutoFunction(AutoFunction):
     def line_focus(self):
-        # estimate line time
-        self._beam.select_modality()  # select quad and beam
         # line time estimation
-        line_time = (self._beam.dwell_time * self._beam.line_integration
-                     * self._beam.resolution[0])
-        self._beam.blank_screen()
+        line_time = (self._microscope.beam.dwell_time * self._microscope.beam.line_integration
+                     * self._microscope.beam.resolution[0])
+        self._microscope.beam.blank_screen()
 
         # variable sweeping
         for step, s in enumerate(self._sweeping.sweep()):
             if step == 0:
-                self._beam.start_acquisition()
+                self._microscope.beam.start_acquisition()
             # blank and wait
-            self._beam.total_blank()
+            self._microscope.total_blank()
             if step == 0:
-                time.sleep(self.pre_imaging_delay)
-            time.sleep(self.keep_time * line_time)
+                time.sleep(self.settings['pre_imaging_delay'])
+            time.sleep(self.settings['keep_time'] * line_time)
             # unblank and wait
-            self._beam.total_unblank()
-            time.sleep(self.keep_time * line_time)
-        self._beam.stop_acquisition()
+            self._microscope.total_unblank()
+            time.sleep(self.settings['keep_time'] * line_time)
+        self._microscope.beam.stop_acquisition()
 
-        img = self._beam.get_image().data
+        img = self._microscope.beam.get_image().data
 
         # image processing
         # identify the blank spaces
@@ -165,7 +166,7 @@ class LineAutoFunction(AutoFunction):
             x1 = zero_pos[i + 1]  # 2 blank lines
             # if these 2 blank lines are far from each other (it makes the image section)
             if x1 - x0 >= focus_steps:
-                if image_section_index not in self.forbiden_sections:
+                if image_section_index not in self.settings['forbiden_sections']:
                     bin = np.arange(x0 + 1, x1)  # list of bin indices
                     bin = np.array_split(bin, focus_steps)  # split bins to equal focus_steps parts
                     # go over all variable values
@@ -173,24 +174,26 @@ class LineAutoFunction(AutoFunction):
                         # each line
                         for line_index in bin[bin_index]:
                             if self._mask is not None:
-                                f = self._criterion_function(img[line_index], self.px_size, self.lowest_detail,
-                                                                     self.highest_detail)
+                                f = self._criterion_function(img[line_index], self._microscope.pixel_size, self.settings['lowest_detail'],
+                                                 self.settings['highest_detail'))
                             else:
-                                f = criterion_on_masked_image(img[line_index], self._mask, self.min_fraction,
-                                                                      self._criterion_function,
-                                                                      self.px_size, self.lowest_detail,
-                                                                      self.highest_detail)
-
+                                f, _ = criterion_on_masked_image(img[line_index], self._mask,
+                                                                                  self.settings['min_fraction'],
+                                                                                  self._criterion_function,
+                                                                                  self._microscope.pixel_size,
+                                                                                  self.settings['lowest_detail'],
+                                                                                  self.settings['highest_detail'])
                             if f is not None:
                                 self._criterion[focus_criterion].append(f)
                                 self._line_focuses[line_index] = f
                             else:
                                 logging.warning('Criterion omitted')
                 image_section_index += 1
+        # set focus plot
+        self.line_focus_plot = self.show_line_focus(img)
         return self._evaluate()
 
     def __call__(self, step_mode=False):
-        self._beam.select_modality()  # select quad and beam
         if step_mode:
             raise NotImplementedError("Not implemented yet")
         return self.line_focus()
@@ -205,6 +208,4 @@ class LineAutoFunction(AutoFunction):
         plt.axis('off')
         plt.plot(values_y * scale, values_x, c='r.')
         plt.tight_layout()
-        fig.canvas.draw()
-        fig.canvas.flush_events()
         return fig
