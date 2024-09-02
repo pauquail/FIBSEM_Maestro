@@ -32,7 +32,7 @@ class AutofunctionControl:
         # select autofunction based on autofunction (settings.yaml)
         autofunction_module = importlib.import_module('fibsem_maestro.autofunctions.autofunction')
         Autofunction = getattr(autofunction_module, af_value['autofunction'])
-        return Autofunction(criterion, sweeping, self._microscope, self.af_settings)
+        return Autofunction(criterion, sweeping, self._microscope, self.af_settings + af_value)
 
     def move_stage_x(self, back=False):
         x = 1 if back else -1
@@ -95,13 +95,13 @@ class AutofunctionControl:
             # logging
             if self._logging:
                 if af.af_curve_plot is not None:
-                    plot_filename = os.path.join(self._log_dir, 'af_curve.png')
+                    plot_filename = os.path.join(self._log_dir, f'{slice_number:05}/af_curve.png')
                     af.af_curve_plot.savefig(plot_filename)
                 if af.mask_plot is not None:
-                    mask_filename = os.path.join(self._log_dir, 'mask.png')
+                    mask_filename = os.path.join(self._log_dir, f'{slice_number:05}/mask.png')
                     af.mask_plot.savefig(mask_filename)
                 if af.af_line_plot is not None:
-                    line_filename = os.path.join(self._log_dir, 'af_line.png')
+                    line_filename = os.path.join(self._log_dir, f'{slice_number:05}/af_line.png')
                     af.af_line_plot.savefig(line_filename)
         else:
             self.attempts = 0 # zero attempts

@@ -52,7 +52,7 @@ class AutoFunction:
         :param value: The new value for the measure criterion.
         :return: None
         """
-        sweeping_var = self.settings['sweeping_var']
+        sweeping_var = self.settings['variable']
         logging.info(f'Autofunction setting {sweeping_var} to {value}')
         self._sweeping.value = value
 
@@ -82,7 +82,7 @@ class AutoFunction:
         self._criterion = {key: np.mean(value_list) for key, value_list in self._criterion.items()}
         best_value = max(self._criterion, key=self._criterion)
         self._sweeping.value = best_value  # set best value
-        sweeping_var = self.settings['sweeping_var']
+        sweeping_var = self.settings['variable']
         logging.info(f'Autofunction best value {sweeping_var} is {best_value}.')
 
         self.af_curve_plot = self.show_af_curve()

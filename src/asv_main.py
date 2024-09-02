@@ -1,9 +1,10 @@
-import logging
 import os
 import sys
 import json
 
-logging.info('ASV script started')
+print('ASV script started')
+
+
 
 # change work directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
