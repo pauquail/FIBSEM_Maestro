@@ -165,8 +165,14 @@ class BeamControl(ABC):
     def get_image(self):
         pass
 
+    @property
     @abstractmethod
-    def line_integration(self, li:int):
+    def line_integration(self):
+        pass
+
+    @line_integration.setter
+    @abstractmethod
+    def line_integration(self, li):
         pass
 
     @property

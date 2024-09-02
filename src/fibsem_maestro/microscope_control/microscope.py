@@ -1,4 +1,6 @@
 import logging
+import os
+
 from scipy.spatial import distance
 
 from fibsem_maestro.tools.support import StagePosition, Point, ScanningArea
@@ -19,7 +21,7 @@ def create_microscope(control: str):
         raise ValueError(f"Invalid microscope control type: {control}")
 
     class Microscope(microscope_base):
-        def __init__(self, settings):
+        def __init__(self, settings, dir):
             """
             Initializes a new instance of the class.
 
@@ -27,6 +29,19 @@ def create_microscope(control: str):
             super().__init__(settings['ip_address'])
             self.settings = settings
             self.beam = self.electron_beam  # default setting for actual beam
+            self.vfw = None # vertical field of view. serves for resolution calculation
+            self._dir = dir
+        @property
+        def pixel_size(self):
+            return super().pixel_size
+        @pixel_size.setter
+        def pixel_size(self, pixel):
+            """ pixel size is not possible to set directly to microscope, but it is needed for resolution calculation"""
+            extended_res_i_x = int(self.hfw / pixel)
+            extended_res_i_y = int(self.vfv / pixel)
+            extended_res = f"{extended_res_i_x}x{extended_res_i_y}"
+            logging.info(f'Extended resolution set to: {extended_res}')
+            self.resolution = [extended_res_i_x, extended_res_i_y]
 
         def stage_move_with_verification(self, new_stage_position: StagePosition):
             """
@@ -110,6 +125,26 @@ def create_microscope(control: str):
             img_cropped = img[left_top[0]:left_top[0] + size[0], left_top[1]:left_top[1] + size[1]]
             return img_cropped
 
+        def acquire_image(self, slice_number=None):
+            self.beam = self.electron_beam
+            self.pixel_size = self.settings['pixel_size']  # set correct resolution
+            li = self.settings['images_line_integration']
+
+            for i in range(len(li)):
+                self.line_integration = li[i]
+
+                if slice_number is not None:
+                    img_name = f"slice_{slice_number:05}_({i}).tif"
+                else:
+                    img_name = f"slice_test_({i}).tif"
+
+                img_name = os.path.join(self.settings["data_dir"], img_name)
+                logging.info(f"Acquiring {img_name}.")
+                image = self.area_scanning()
+                if slice_number is not None:
+                    print(f"Image {slice_number} acquired.")
+                image.save(img_name)
+                return image
 
     return Microscope  # factory
 

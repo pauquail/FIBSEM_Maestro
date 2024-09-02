@@ -392,6 +392,12 @@ class Beam(BeamControl):
         logging.debug(f"Getting image ({self._modality}).")
         return self._microscope.imaging._get_image().data
 
+    @property
+    def line_integration(self):
+        logging.debug(f"Getting line integration ({self._modality}): {self._line_integration}.")
+        return self._line_integration
+
+    @line_integration.setter
     def line_integration(self, li:int):
         """
         Set line integration for grab_frame

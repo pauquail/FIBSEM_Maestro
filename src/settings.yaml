@@ -6,10 +6,15 @@ acquisition:
   drift_correction: 'y' # Drift correction strategy. Possible values 'y' for simple y correction
   additive_beamshift: (0, 0) # Additive beam shift applied in every cycle
   setting_file: 'microscope_settings.yaml' # Actual microscope setting
+  variables_to_save: ['working_distance','stigmator','lens_alignment','beam_shift','detector_contrast','detector_brightness',
+  'dwell_time','bit_depth','hfw','vfw','scanning_area']
   log: True
 
 microscope:
   ip_address: 'localhost'  # ASV server address
+  pixel_size: 5e-9
+  images_line_integration: [ 64, 64 ] # li of images acquisition. it is array for multiple acquisition
+
   stage_tolerance: 1e-7  # Maximal stage error that is considered as ok
   stage_trials: 3  # Number of trials to reach the goal position before raise error
   beam_shift_tolerance: 50e-9 # Maximal beam shift error that is considered as ok
@@ -21,20 +26,14 @@ dirs:
   log: 'logs'
 
 autofunction:
-  execute: 1 # execute condition - if int = number of slices, if float = image resolution
-
   step_mode: False # Determines whether to perform step mode (it acquires only one image step by step)
-
-  criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion'
-  lowest_detail: 10e-9
-  highest_detail: 100e-9
 
   pre_imaging_delay: 1
   keep_time: 10
   forbidden_sections: [0]
-  min_fraction: 0.1
 
   delta_x: 0
+  max_attempts: 8
 
   af_values:
     - variable: 'working_distance'
@@ -44,6 +43,9 @@ autofunction:
       sweeping_max_limits: (-1, 1) # Limits of sweeping_var
       sweeping_steps: 10
       sweeping_total_cycles: 1 # sweeping cycles
+      criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
+      detail: [10e-9, 100e-9]
+      execute: 1 # execute condition - if int = number of slices, if float = image resolution
     - variable: 'stigmator'
       sweeping_strategy: 'SpiralSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
       autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
@@ -51,6 +53,9 @@ autofunction:
       sweeping_max_limits: (-1, 1) # Limits of sweeping_var
       sweeping_steps: 10
       sweeping_total_cycles: 1 # sweeping cycles
+      criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
+      detail: [10e-9, 100e-9]
+      execute: 1 # execute condition - if int = number of slices, if float = image resolution
     - variable: 'working_distance'
       sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
       autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
@@ -58,6 +63,9 @@ autofunction:
       sweeping_max_limits: (-1, 1) # Limits of sweeping_var
       sweeping_steps: 10
       sweeping_total_cycles: 1 # sweeping cycles
+      criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
+      detail: [10e-9, 100e-9]
+      execute: 1 # execute condition - if int = number of slices, if float = image resolution
     - variable: 'lens_alignment'
       sweeping_strategy: 'SpiralSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
       autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
@@ -65,6 +73,9 @@ autofunction:
       sweeping_max_limits: (-1, 1) # Limits of sweeping_var
       sweeping_steps: 10
       sweeping_total_cycles: 1 # sweeping cycles
+      criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
+      detail: [10e-9, 100e-9]
+      execute: 1 # execute condition - if int = number of slices, if float = image resolution
     - variable: 'working_distance'
       sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
       autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
@@ -72,12 +83,25 @@ autofunction:
       sweeping_max_limits: (-1, 1) # Limits of sweeping_var
       sweeping_steps: 10
       sweeping_total_cycles: 1 # sweeping cycles
+      criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
+      detail: [10e-9, 100e-9]
+      execute: 1 # execute condition - if int = number of slices, if float = image resolution
 
-  mask: True
+criterion_calculation:
+  border: 0.1 # part of image that doesnt go to calculation
+  tile_size: 500 # calculation tile size
+  final_resolution: 'min' # how to calculate final resolution from tiles resolution
+  final_regions_resolution: 'min' # how to calculate final resolution from different masked regions
+  criterion: 'frc_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
+  detail: [10e-9, 100e-9]
+
+mask:
+  use_mask: True
   mask_image_li: 32 # line integration of mask acquisition
   update_mask: True # grab image before focus in order to calculate mask. If False, last image is selected
+  min_fraction: 0.1 # minimal fraction of mask to proceed to calculation
 
-  email:
-    sender: 'pavel.emcf@gmail.com'
-    receiver: 'pavel.krep@gmail.com'
-    password_file: 'email_password.txt'
+email:
+  sender: 'pavel.emcf@gmail.com'
+  receiver: 'pavel.krep@gmail.com'
+  password_file: 'email_password.txt'

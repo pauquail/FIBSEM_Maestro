@@ -4,6 +4,7 @@ import math
 from colorama import Fore, Style, init as colorama_init
 import yaml
 
+from fibsem_maestro.autofunctions.autofunction_control import AutofunctionControl
 from fibsem_maestro.microscope_control.microscope import create_microscope
 from fibsem_maestro.microscope_control.settings import load_settings
 from fibsem_maestro.tools.dirs_management import make_dirs
@@ -36,6 +37,11 @@ class SerialControl:
         self._microscope = Microscope(self.acquisition_settings['microscope'])
         self._electron = self._microscope.electron_beam
 
+        self._autofunctions = AutofunctionControl(self._microscope, self.autofunction_settings, self.email_settings,
+                                                  logging=self.acquisition_settings['log'],
+                                                  log_dir=self.acquisition_settings['dir']['log'])
+        self.image_res = 0 # initial image resolution
+
     def imaging(self, slice_number):
         # set microscope
         try:
@@ -62,5 +68,17 @@ class SerialControl:
             except Exception as e:
                 logging.error('Y correction failed! '+repr(e))
 
+        # autofunctions
+        self._autofunctions(slice_number, self.image_res)
+
+        # acquire image
+        image = self._microscope.acquire_image(slice_number)
+
+        # resolution
 
 
+        # dc
+
+        # save settings
+
+        # log

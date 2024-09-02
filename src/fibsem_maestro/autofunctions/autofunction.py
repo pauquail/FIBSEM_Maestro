@@ -63,11 +63,8 @@ class AutoFunction:
             self._mask.update_img(image)
             self.masks_plot = self._mask.plot()
 
-        if self._mask is not None:
-            criterion = self._criterion_function(image, self._microscope.pixel_size, self.settings['lowest_detail'], self.settings['highest_detail')
-        else:
-            criterion, rectangles = criterion_on_masked_image(image, self._mask, self.settings['min_fraction'], self._criterion_function,
-                                                  self._microscope.pixel_size, self.settings['lowest_detail'], self.settings['highest_detail'])
+        criterion = self._criterion_function(image)
+
         if criterion is not None:
             self._criterion[value].append(criterion)
         else:
@@ -90,8 +87,6 @@ class AutoFunction:
 
         self.af_curve_plot = self.show_af_curve()
 
-        return best_value
-
     def __call__(self):
         """
         Perform all steps of setting values, grab images (or line) and criteria measurement.
@@ -102,7 +97,8 @@ class AutoFunction:
         if not self.settings['step_mode']:
             for s in self._sweeping.sweep():
                 self._get_image(s)
-            return self._evaluate()
+            self._evaluate()
+            return True # af finished
         else:
             # step image mode
             sweep_list = list(self._sweeping.sweep())
@@ -110,7 +106,11 @@ class AutoFunction:
             self._get_image(value)
             self._step_number += 1
             if self._step_number >= len(sweep_list):
-                return self._evaluate()
+                self._evaluate()
+                self._step_number = 0 # restart steps
+                return True # af finished
+            else:
+                return False # not finished yet
 
     def show_af_curve(self):
         criteria = list(self._criterion.values())
@@ -164,16 +164,8 @@ class LineAutoFunction(AutoFunction):
                     for bin_index, focus_criterion in enumerate(self._sweeping.sweep_inner(image_section_index)):
                         # each line
                         for line_index in bin[bin_index]:
-                            if self._mask is not None:
-                                f = self._criterion_function(img[line_index], self._microscope.pixel_size, self.settings['lowest_detail'],
-                                                 self.settings['highest_detail')
-                            else:
-                                f, _ = criterion_on_masked_image(img[line_index], self._mask,
-                                                                                  self.settings['min_fraction'],
-                                                                                  self._criterion_function,
-                                                                                  self._microscope.pixel_size,
-                                                                                  self.settings['lowest_detail'],
-                                                                                  self.settings['highest_detail'])
+                            f = self._criterion_function(img[line_index])
+
                             if f is not None:
                                 self._criterion[focus_criterion].append(f)
                                 self._line_focuses[line_index] = f
@@ -182,12 +174,13 @@ class LineAutoFunction(AutoFunction):
                 image_section_index += 1
         # set focus plot
         self.line_focus_plot = self.show_line_focus(img)
-        return self._evaluate()
+        self._evaluate()
 
     def __call__(self):
         if self.settings['step_mode']:
             raise NotImplementedError("Not implemented yet")
-        return self.line_focus()
+        self.line_focus()
+        return True # af finshed
 
     def show_line_focus(self, img):
         assert self._scan.lower() == 'line', "Line graph is supported only by line mode"
