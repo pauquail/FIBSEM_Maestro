@@ -40,7 +40,10 @@ class SerialControl:
 
         self.logger = logging.getLogger()  # Create a logger object.
         self.logger.setLevel(self.acquisition_settings['log_level'])
+        fmt = '%(module)s - %(levelname)s - %(message)s'
+        self.logger_formatter = logging.Formatter(fmt)
         self.logging_file_handler = None
+        self.set_log_file('init')
 
         # calculate increments
         imaging_angle = float(self.acquisition_settings["imaging_angle"])
@@ -105,6 +108,19 @@ class SerialControl:
             self.drift_correction = None
             print('No drift correction found')
 
+    def set_log_file(self, slice_number):
+        # make dir (log/slice_number
+        os.makedirs(os.path.join(self.dirs_settings['log'], f'{slice_number}'), exist_ok=True)
+        log_filename = os.path.join(self.dirs_settings['log'], f'{slice_number}/app.log')
+
+        # remove last logging file handler
+        if self.logging_file_handler is not None:
+            self.logger.removeHandler(self.logging_file_handler)
+        # set a new logging file handler
+        self.logging_file_handler = logging.FileHandler(log_filename)  # Configure the logger to write into a file
+        self.logging_file_handler.setFormatter(self.logger_formatter)
+        self.logger.addHandler(self.logging_file_handler)  # Add the handler to the logger object
+
     def separate_thread(self, slice_number):
         self.calculate_resolution()
         self.log_params['resolution'] = self.image_resolution
@@ -139,21 +155,11 @@ class SerialControl:
         if self._thread is not None:
             self._thread.join()
 
-
         print(Fore.YELLOW + f'Current slice number: {slice_number}')
 
         # set logging file
         if self.acquisition_settings['log']:
-            # make dir (log/slice_number
-            os.makedirs(os.path.join(self.dirs_settings['log'], f'{slice_number}'), exist_ok=True)
-            log_filename = os.path.join(self.dirs_settings['log'], f'{slice_number}/app.log')
-
-            # remove last logging file handler
-            if self.logging_file_handler is not None:
-                self.logger.removeHandler(self.logging_file_handler)
-            # set a new logging file handler
-            self.logging_file_handler = logging.FileHandler(log_filename)  # Configure the logger to write into a file
-            self.logger.addHandler(self.logging_file_handler)  # Add the handler to the logger object
+            self.set_log_file(slice_number)
 
         # logging dict (important parameters)
         self.log_params.clear()
