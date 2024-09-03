@@ -24,11 +24,11 @@ def gauss_filter(x, px_size, detail):
 
 class Criterion:
     def __init__(self, criterion_settings, mask_settings, criterion_calculation_settings, mask=None):
-        self.criterion_func = locals()[criterion_settings['criterion']]
+        self.criterion_func = getattr(self, criterion_settings['criterion'])
         self.border = criterion_calculation_settings['border']
         self.tile_size = criterion_calculation_settings['tile_size']
-        self.final_resolution = globals()[criterion_calculation_settings['final_resolution']]
-        self.final_regions_resolution = globals()[criterion_calculation_settings['final_regions_resolution']]
+        self.final_resolution = getattr(np, criterion_calculation_settings['final_resolution'])
+        self.final_regions_resolution = getattr(np,criterion_calculation_settings['final_regions_resolution'])
         self.lowest_detail = criterion_settings['detail'][0]
         self.highest_detail = criterion_settings['detail'][1]
         self.mask = mask

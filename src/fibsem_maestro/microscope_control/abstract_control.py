@@ -1,6 +1,6 @@
 import math
 from abc import ABC, abstractmethod
-from fibsem_maestro.tools.support import StagePosition, Imaging, ScanningArea
+from fibsem_maestro.tools.support import StagePosition, ScanningArea
 
 class BeamControl(ABC):
     """
@@ -207,12 +207,12 @@ class BeamControl(ABC):
 
     @property
     @abstractmethod
-    def hfw(self):
+    def horizontal_field_width(self):
         pass
 
-    @hfw.setter
+    @horizontal_field_width.setter
     @abstractmethod
-    def hfw(self, value):
+    def horizontal_field_width(self, value):
         pass
 
     @property
@@ -290,8 +290,4 @@ class MicroscopeControl(ABC):
 
         :return: The ion_beam instance of BeamControl
         """
-        pass
-
-    def beam(self, beam_select: Imaging) -> BeamControl:
-        """ Select the beam base on Imaging enum """
         pass

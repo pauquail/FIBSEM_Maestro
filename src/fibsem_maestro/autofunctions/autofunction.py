@@ -4,7 +4,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import time
 
-from fibsem_maestro.autofunctions.criteria import criterion_on_masked_image
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl
 from fibsem_maestro.autofunctions.sweeping import BasicSweeping
 
@@ -56,7 +55,8 @@ class AutoFunction:
         logging.info(f'Autofunction setting {sweeping_var} to {value}')
         self._sweeping.value = value
 
-        image = self._microscope.area_scanning()  # grab image with reduced area cropping
+        # settings
+        image = self._microscope.g  # grab image with reduced area cropping
 
         #  update mask if step mode active and masking enabled
         if self.settings['step_mode'] and self._mask is not None:
@@ -120,6 +120,17 @@ class AutoFunction:
         plt.axvline(x=values[len(values) // 2], color='b')  # make horizontal line in the middle
         plt.tight_layout()
         return fig
+
+    def check_firing(self, slice_number, image_res):
+        execute = self.settings['execute']
+
+        return (type(execute) is int and slice_number % execute == 0) or (type(
+                execute) is float and image_res > execute)
+
+    @property
+    def name(self):
+        return self.settings['name']
+
 
 
 class LineAutoFunction(AutoFunction):

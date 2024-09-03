@@ -2,8 +2,8 @@ import logging
 import math
 import tempfile
 
-from abstract_control import MicroscopeControl, StagePosition, BeamControl
-from fibsem_maestro.tools.support import Point, Imaging, ScanningArea
+from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl, StagePosition, BeamControl
+from fibsem_maestro.tools.support import Point, ScanningArea
 
 try:
     from autoscript_sdb_microscope_client import SdbMicroscopeClient
@@ -365,13 +365,13 @@ class Beam(BeamControl):
 
         img_settings = GrabFrameSettings(line_integration=self._line_integration)
         if self._extended_resolution is not None:
-            img_settings.resolution = self._extended_resolution
+            img_settings.resolution = f'{self._extended_resolution[0]}x{self._extended_resolution[1]}'
         if self._scanning_area is not None:
             img_settings.reduced_area = self._scanning_area.to_as()
 
         logging.info(f"Acquiring image..")
         try:
-            grabbed_image = self._microscope.imaging.grab_frame()
+            grabbed_image = self._microscope.imaging.grab_frame(img_settings)
             logging.info(f"Image grabbed.")
             return grabbed_image
         except:
@@ -490,7 +490,7 @@ class Beam(BeamControl):
 
 
     @property
-    def hfw(self):
+    def horizontal_field_width(self):
         """
         Gets the horizontal field value of the image from the microscope.
 
@@ -501,8 +501,8 @@ class Beam(BeamControl):
         logging.debug(f"Getting hfw ({self._modality}): {value}.")
         return value
 
-    @hfw.setter
-    def hfw(self, value):
+    @horizontal_field_width.setter
+    def horizontal_field_width(self, value):
         """
         Sets the horizontal pixel values.
 

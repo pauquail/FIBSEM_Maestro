@@ -1,5 +1,5 @@
-import FRC.frc_utils as frc_util
-import FRC.secondary_utils as su 
+import fibsem_maestro.FRC.frc_utils as frc_util
+import fibsem_maestro.FRC.secondary_utils as su
 import numpy as np
 import matplotlib.pyplot as plt
 

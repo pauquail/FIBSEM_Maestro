@@ -13,6 +13,7 @@ def make_dirs(dirs):
         make_dirs(dirs=['/path/to/dir1', '/path/to/dir2'])
     """
     for d in dirs:
-        if not os.path.isdir(d):
-            logging.info(f"{d} created.")
-            os.makedirs(d)
+        new_dir = dirs[d]
+        if not os.path.isdir(new_dir):
+            logging.info(f"{new_dir} created.")
+            os.makedirs(new_dir)

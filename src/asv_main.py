@@ -1,21 +1,42 @@
 import os
 import sys
-import json
+import socket
+import time
+from fibsem_maestro.serial_control import SerialControl
 
-print('ASV script started')
+#  remove serial_control.imaging(1) # !!!
+#  bordel v beam
 
+settings_path = 'settings.yaml'
 
+# set the listening socket
+sock = socket.socket()
+sock.bind(("localhost", 6287))
 
-# change work directory
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+print('The microscope control FIBSEM Maestro now')
 
-# open json for slice number (filename is passed as argument)
-if len(sys.argv) > 1:
-    with open(sys.argv[1]) as json_file:
-        data = json.load(json_file)
-        json_file.close()
-    slice_number = data["sliceNumber"]
-    print(f"Json file loaded. Slice no. {slice_number}")
-else:
-    slice_number = None
+serial_control = SerialControl(settings_path)
+
+print('The microscope successfully initalized')
+
+serial_control.imaging(1) # !!!
+
+# run FIBSEM control
+def run(slice_number):
+    serial_control.imaging(slice_number)
+
+print('Waiting for imaging call...')
+while True:
+    sock.listen(1)
+    conn, addr = sock.accept()
+    data = conn.recv(1024)
+    received_data = int(data.decode())
+    if not data:
+        break
+    print("Running the imaging routine of slice: " + str(received_data))
+    run(received_data)
+    conn.sendall(b'close')
+
+conn.close()
+
 

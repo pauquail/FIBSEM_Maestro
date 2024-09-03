@@ -21,7 +21,7 @@ def create_microscope(control: str):
         raise ValueError(f"Invalid microscope control type: {control}")
 
     class Microscope(microscope_base):
-        def __init__(self, settings, dir):
+        def __init__(self, settings, data_dir):
             """
             Initializes a new instance of the class.
 
@@ -29,19 +29,21 @@ def create_microscope(control: str):
             super().__init__(settings['ip_address'])
             self.settings = settings
             self.beam = self.electron_beam  # default setting for actual beam
-            self.vfw = None # vertical field of view. serves for resolution calculation
-            self._dir = dir
+            self.vertical_field_width = None # vertical field of view. serves for resolution calculation
+            self.li = self.settings['images_line_integration']
+            self.data_dir = data_dir
+
         @property
         def pixel_size(self):
             return super().pixel_size
         @pixel_size.setter
         def pixel_size(self, pixel):
             """ pixel size is not possible to set directly to microscope, but it is needed for resolution calculation"""
-            extended_res_i_x = int(self.hfw / pixel)
-            extended_res_i_y = int(self.vfv / pixel)
+            extended_res_i_x = int(self.horizontal_field_width / pixel)
+            extended_res_i_y = int(self.vertical_field_width / pixel)
             extended_res = f"{extended_res_i_x}x{extended_res_i_y}"
             logging.info(f'Extended resolution set to: {extended_res}')
-            self.resolution = [extended_res_i_x, extended_res_i_y]
+            self.beam.resolution = [extended_res_i_x, extended_res_i_y]
 
         def stage_move_with_verification(self, new_stage_position: StagePosition):
             """
@@ -75,7 +77,7 @@ def create_microscope(control: str):
             try:
                 self.beam.beam_shift = new_beam_shift  # set beam shift
                 dist = distance.euclidean(self.beam.beam_shift.to_xy(), new_beam_shift.to_xy())
-                if dist > self.settings['beam_shift_tolerance']:
+                if dist > float(self.settings['beam_shift_tolerance']):
                     raise Exception("Beam shift out of range")
             except Exception as e:  # if any problem with beam shift or out of range -> stage move
                 logging.warning("Beam shift is out of range. Stage position needs to be adjusted. " + repr(e))
@@ -127,20 +129,21 @@ def create_microscope(control: str):
 
         def acquire_image(self, slice_number=None):
             self.beam = self.electron_beam
-            self.pixel_size = self.settings['pixel_size']  # set correct resolution
-            li = self.settings['images_line_integration']
+            self.beam.horizontal_field_width = self.settings['field_of_view'][0]
+            self.vertical_field_width = self.settings['field_of_view'][1]
+            self.pixel_size = float(self.settings['pixel_size'])  # set correct resolution
 
-            for i in range(len(li)):
-                self.line_integration = li[i]
+            for i in range(len(self.li)):
+                self.line_integration = self.li[i]
 
                 if slice_number is not None:
                     img_name = f"slice_{slice_number:05}_({i}).tif"
                 else:
                     img_name = f"slice_test_({i}).tif"
 
-                img_name = os.path.join(self.settings["data_dir"], img_name)
+                img_name = os.path.join(self.data_dir, img_name)
                 logging.info(f"Acquiring {img_name}.")
-                image = self.area_scanning()
+                image = self.beam.grab_frame()
                 if slice_number is not None:
                     print(f"Image {slice_number} acquired.")
                 image.save(img_name)

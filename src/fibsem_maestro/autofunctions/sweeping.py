@@ -11,11 +11,11 @@ class BasicSweeping:
     """
     def __init__(self, microscope, settings):
         self._microscope = microscope
-        self._sweeping_var = settings['sweeping_var']
+        self._sweeping_var = settings['variable']
         self._range = settings['sweeping_range']
-        self._max_limits =  settings['sweeping_max_limits']
-        self._steps =  settings['sweeping_steps']
-        self._total_cycles =  settings['sweeping_total_cycles']
+        self._max_limits = settings['sweeping_max_limits']
+        self._steps = int(settings['sweeping_steps'])
+        self._total_cycles = int(settings['sweeping_total_cycles'])
 
         self._base = None # initial sweeping variable
         self.set_sweep()
@@ -29,7 +29,7 @@ class BasicSweeping:
         setattr(self._microscope, self._sweeping_var, value)
 
     def set_sweep(self):
-        self._base = self.value()
+        self._base = self.value
 
     def sweep_inner(self, repetition):
         """ Basic sweeping"""
@@ -64,10 +64,10 @@ class BasicSweeping:
         return i
 
 class SpiralSweeping(BasicSweeping):
-    def __init__(self, step_per_cycle = 20, cycles = 4, **kwargs):
-        super().__init__(**kwargs)
-        self._step_per_cycle = step_per_cycle
-        self._cycles = cycles
+    def __init__(self, microscope, settings):
+        super().__init__(microscope, settings)
+        self._step_per_cycle = int(settings['sweeping_steps'])
+        self._cycles = int(settings['sweeping_spiral_cycles'])
 
     def sweep_inner(self, repetition):
         """ Basic sweeping"""

@@ -5,7 +5,7 @@ import ast
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl
 
 
-def save_settings(microscope: MicroscopeControl, settings: list, path: Path):
+def save_settings(microscope: MicroscopeControl, settings: list, path):
     # populate settings dict with settings names and their values read from microscope
     settings_dict = {}
     for setting in settings:
@@ -17,13 +17,13 @@ def save_settings(microscope: MicroscopeControl, settings: list, path: Path):
 
         settings_dict[setting] = value
     # write to file
-    with path.open('w') as f:
+    with open(path, 'w') as f:
         f.write(str(settings_dict))
 
 
-def load_settings(microscope: MicroscopeControl, path: Path):
+def load_settings(microscope: MicroscopeControl, path):
     # read settings from file
-    with path.open('r') as f:
+    with open(path, "r") as f:
         settings_dict = ast.literal_eval(f.read())
 
     # apply each setting to the microscope
