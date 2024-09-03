@@ -16,8 +16,9 @@ from fibsem_maestro.tools.dirs_management import make_dirs
 from fibsem_maestro.tools.support import Point
 
 colorama_init(autoreset=True) # colorful console
+
 class SerialControl:
-    def __init__(self, settings_path = 'settings.yml'):
+    def __init__(self, settings_path = 'settings.yaml'):
         self.image = None # actual image
         self.image_resolution = 0 # initial image resolution = 0 # initial image res
         self._thread = None
@@ -29,6 +30,7 @@ class SerialControl:
             print(f'Settings file {settings_path} successfully loaded')
 
         self.acquisition_settings = settings['acquisition']
+        self.microscope_settings = settings['microscope']
         self.autofunction_settings = settings['autofunction']
         self.email_settings = settings['email']
         self.criterion_calculation_settings = settings['criterion_calculation']
@@ -36,9 +38,23 @@ class SerialControl:
         self.dc_settings = settings['drift_correction']
         self.dirs_settings = settings['dirs']
 
+        self.logger = logging.getLogger()  # Create a logger object.
+        self.logger.setLevel(self.acquisition_settings['log_level'])
+        self.logging_file_handler = None
+
         # calculate increments
-        self.wd_increment = self.acquisition_settings["slice_distance"] / math.sin(math.radians(self.acquisition_settings["imaging_angle"]))  # z correction
-        self.y_increment = math.tan(math.radians(self.acquisition_settings["imaging_angle"])) * self.acquisition_settings["slice_distance"]
+        imaging_angle = float(self.acquisition_settings["imaging_angle"])
+        slice_distance = float(self.acquisition_settings["slice_distance"])
+        if imaging_angle == 38: # no stage tilting between milling and imaging
+            self.wd_increment = slice_distance / math.cos(math.radians(imaging_angle))  # z correction
+            self.y_increment = math.tan(math.radians(imaging_angle)) * slice_distance
+        elif imaging_angle == 90:  # stage tilting to 90 degrees imaging angle
+            self.wd_increment = slice_distance
+            self.y_increment = 0
+        else:
+            logging.error(f'Invalid imaging angle {imaging_angle} only 38 and 90 are allowed')
+            raise ValueError("Invalid value of imaging angle.")
+
         logging.info(f"wd increment: {self.wd_increment}")
         logging.info(f"y increment: {self.y_increment}")
         print(f'Calculated increments: wd {self.wd_increment}, y {self.y_increment}')
@@ -48,21 +64,22 @@ class SerialControl:
 
         # microscope init
         try:
-            Microscope = create_microscope(self.acquisition_settings['microscope']['library'])(self.acquisition_settings['microscope'])
-            self._microscope = Microscope(self.acquisition_settings['microscope'])
+            self._microscope = create_microscope(self.acquisition_settings['library'])(self.microscope_settings, self.dirs_settings['output_images']) # return the right class and call initializer
             self._electron = self._microscope.electron_beam
             print('Microscope initialized')
         except Exception as e:
             logging.error("Microscope initialization failed! "+repr(e))
+            raise RuntimeError('"Microscope initialization failed!') from e
 
-        # autofuncition init
+        # autofunction init
         try:
             self._autofunctions = AutofunctionControl(self._microscope, settings,
-                                                      logging=self.acquisition_settings['log'],
+                                                      logging_enabled=self.acquisition_settings['log'],
                                                       log_dir=self.dirs_settings['log'])
             print(f'{len(self._autofunctions.af_values)} autofunctions found')
         except Exception as e:
             logging.error("Autofunction initialization failed! "+repr(e))
+            raise RuntimeError('"Autofunction initialization failed!') from e
 
         # criterion of resolution calculation of final image - it uses parameters from criterion_calculation settings
         try:
@@ -71,6 +88,7 @@ class SerialControl:
             print(f'Image resolution criterion: {self._criterion_resolution.criterion_func.__name__}')
         except Exception as e:
             logging.error("Initialization of resolution criteria failed! "+repr(e))
+            raise RuntimeError("Initialization of resolution criteria failed!") from e
 
         # drift correction init
         if self.dc_settings['type'] == 'template_matching':
@@ -78,27 +96,29 @@ class SerialControl:
                 self.drift_correction = TemplateMatchingDriftCorrection(self._microscope, self.dc_settings,
                                                                         template_matching_dir=self.dirs_settings['template_matching'],
                                                                         logging_dict=self.log_params,
-                                                                        logging=self.autofunction_settings['log'],
-                                                                        log_dir=self.dirs_settings['logs'])
+                                                                        logging_enabled=self.acquisition_settings['log'],
+                                                                        log_dir=self.dirs_settings['log'])
             except Exception as e:
                 logging.error("Initialization of template matching failed! " + repr(e))
+                raise RuntimeError("Initialization of template matching failed!") from e
         else:
             self.drift_correction = None
             print('No drift correction found')
 
-    def separate_thread(self):
+    def separate_thread(self, slice_number):
         self.calculate_resolution()
         self.log_params['resolution'] = self.image_resolution
         del self.image
-        self.save_log_dict()
+        self.save_log_dict(slice_number)
 
     def calculate_resolution(self):
         try:
             self.image_resolution = self._criterion_resolution(self.image)
             print(Fore.GREEN + f'Resolution calculated: {self.image_resolution}')
         except Exception as e:
-            logging.error('Image resolution calculation error. '+repr(e))
+            logging.error('Image resolution calculation error. Setting resolution to 0.'+repr(e))
             print(Fore.RED + 'Resolution measurement failed')
+            self.image_resolution = 0
 
     def logging_params(self):
         self.log_params['wd'] = self._electron.working_distance
@@ -108,8 +128,8 @@ class SerialControl:
         self.log_params['stage_x'] = position.x
         self.log_params['stage_y'] = position.y
 
-    def save_log_dict(self):
-        with open(os.path.join(self.dirs_settings.log, f'{slice}/log_dict.yaml'), 'w') as f:
+    def save_log_dict(self, slice_number):
+        with open(os.path.join(self.dirs_settings['log'], f'{slice_number}/log_dict.yaml'), 'w') as f:
             yaml.dump(self.log_params, f, default_flow_style=False)
         self.log_params.clear()
 
@@ -119,6 +139,7 @@ class SerialControl:
         if self._thread is not None:
             self._thread.join()
 
+
         print(Fore.YELLOW + f'Current slice number: {slice_number}')
 
         # set logging file
@@ -126,9 +147,13 @@ class SerialControl:
             # make dir (log/slice_number
             os.makedirs(os.path.join(self.dirs_settings['log'], f'{slice_number}'), exist_ok=True)
             log_filename = os.path.join(self.dirs_settings['log'], f'{slice_number}/app.log')
-            # set log file
-            logging.basicConfig(filename=log_filename, filemode='w', format='%(name)s - %(levelname)s - %(message)s',
-                                force=True)
+
+            # remove last logging file handler
+            if self.logging_file_handler is not None:
+                self.logger.removeHandler(self.logging_file_handler)
+            # set a new logging file handler
+            self.logging_file_handler = logging.FileHandler(log_filename)  # Configure the logger to write into a file
+            self.logger.addHandler(self.logging_file_handler)  # Add the handler to the logger object
 
         # logging dict (important parameters)
         self.log_params.clear()
@@ -154,10 +179,11 @@ class SerialControl:
             print(Fore.RED + 'Working distance settings failed!')
 
         # y correction
-        if self.acquisition_settings == 'y':
+        if self.acquisition_settings['y_correction'] == 'y':
             try:
                 logging.info('Y correction: '+str(self.y_increment))
-                bs = Point(*self.acquisition_settings['additive_beam_shift'])
+                bs = self._electron.beam_shift
+                bs = bs + Point(*self.acquisition_settings['additive_beam_shift'])
                 bs = bs + Point(0, self.y_increment)
                 self._microscope.beam_shift_with_verification(bs) # check y_increment direction
                 print(Fore.GREEN + 'Y correction applied')
@@ -195,7 +221,7 @@ class SerialControl:
                 print(Fore.RED + 'Application of drift correction failed!')
 
         # resolution calculation (separate thread)
-        self._thread = threading.Thread(target=self.separate_thread)
+        self._thread = threading.Thread(target=self.separate_thread, args=[slice_number])
         self._thread.start()
 
         # save settings

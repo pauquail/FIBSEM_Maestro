@@ -13,8 +13,8 @@ try:
     logging.info("AS library imported.")
 except:
     from fibsem_maestro.microscope_control.virtual_control import VirtualMicroscope
-    from fibsem_maestro.microscope_control.virtual_control import (StagePosition as StagePositionAS, ImagingDevice,
-                                                                   ImageFileFormat)
+    from fibsem_maestro.microscope_control.virtual_control import StagePosition as StagePositionAS, ImagingDevice
+
     from fibsem_maestro.tools.support import Point as PointAS
     virtual_mode = True
     logging.warning("AS library could not be imported. Virtual mode used.")
@@ -284,7 +284,7 @@ class Beam(BeamControl):
     @property
     def detector_contrast(self):
         """Get the contrast of the detector."""
-        self.select_modality(self._modality) # activate right quad
+        self.select_modality() # activate right quad
         value = self._microscope.detector.contrast.value
         logging.debug(f"Getting detector contrast ({self._modality}): {value}")
         return value
@@ -292,14 +292,14 @@ class Beam(BeamControl):
     @detector_contrast.setter
     def detector_contrast(self, value):
         """Set the contrast of the detector."""
-        self.select_modality(self._modality)  # activate right quad
+        self.select_modality()  # activate right quad
         logging.debug(f"Setting detector contrast ({self._modality}) to: {value}")
         self._microscope.detector.contrast.value = value
 
     @property
     def detector_brightness(self):
         """Get the brightness of the detector."""
-        self.select_modality(self._modality)  # activate right quad
+        self.select_modality()  # activate right quad
         value = self._microscope.detector.brightness.value
         logging.debug(f"Getting detector brightness ({self._modality}): {value}")
         return value
@@ -307,7 +307,7 @@ class Beam(BeamControl):
     @detector_brightness.setter
     def detector_brightness(self, value):
         """Set the brightness of the detector."""
-        self.select_modality(self._modality)  # activate right quad
+        self.select_modality()  # activate right quad
         logging.debug(f"Setting detector brightness ({self._modality}) to: {value}")
         self._microscope.detector.brightness.value = value
 
@@ -315,7 +315,7 @@ class Beam(BeamControl):
         """
         Blank the beam.
         """
-        self.select_modality(self._modality)  # activate right quad
+        self.select_modality()  # activate right quad
         logging.debug(f"Blanking beam ({self._modality}).")
         self._beam.blank()
 
@@ -336,6 +336,7 @@ class Beam(BeamControl):
         logging.debug(f"Stopping acquisition ({self._modality})...")
         self.select_modality()  # activate right quad
         self._microscope.imaging.stop_acquisition()
+
     def select_modality(self):
         """
         This method is used to switch the microscope's modality between the Electron Beam (eb) mode and the Ion Beam (ib) mode.
@@ -379,7 +380,6 @@ class Beam(BeamControl):
             img_name = tempfile.NamedTemporaryFile(delete=True)
             self._microscope.imaging.grab_frame_to_disk(img_name, ImageFileFormat.TIFF, img_settings)
             return AdornedImage.load(img_name)
-
 
     def get_image(self):
         """

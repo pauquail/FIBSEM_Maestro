@@ -19,7 +19,7 @@ class StagePosition:
 class EmptyClass:
     """Empty class for fake classes in AS Microscope instance"""
     def __getattr__(self, attr):
-        raise AttributeError(f"'Simulation object has no attribute {attr}. You need to set it first!")
+        raise AttributeError(f"Simulation object has no attribute {attr}. You need to set it first!")
 
 
 class VirtualMicroscope:

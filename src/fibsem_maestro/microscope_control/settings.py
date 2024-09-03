@@ -10,8 +10,16 @@ def save_settings(microscope: MicroscopeControl, settings: list, path):
     settings_dict = {}
     for setting in settings:
         try:
-            value = getattr(microscope, setting)
+            if '.' in setting:
+                # inner attribute
+                [beam, setting_attribute] = setting.split('.')
+                value = getattr(getattr(microscope, beam), setting_attribute)
+            else:
+                # simple attribute
+                value = getattr(microscope, setting)
         except:
+
+
             logging.error(f'The value {setting} cannot be read from microscope. Setting to None.')
             value = None
 

@@ -6,9 +6,12 @@ acquisition:
   y_correction: 'y' # Drift correction strategy. Possible values 'y' for simple y correction
   additive_beam_shift: [0, 0] # Additive beam shift applied in every cycle
   settings_file: 'microscope_settings.yaml' # Actual microscope setting
-  variables_to_save: ['working_distance','stigmator','lens_alignment','beam_shift','detector_contrast','detector_brightness',
-  'dwell_time','bit_depth','horizontal_field_width','vertical_field_width','scanning_area']
+  variables_to_save: ['electron_beam.working_distance','electron_beam.stigmator','electron_beam.lens_alignment',
+                      'electron_beam.beam_shift','electron_beam.detector_contrast','electron_beam.detector_brightness',
+                      'electron_beam.dwell_time','electron_beam.bit_depth','electron_beam.horizontal_field_width',
+                      'electron_beam.vertical_field_width']
   log: True
+  log_level: 10 # 10 - debug, 20 - info, 30 - warning, 40 - error, 50 - critical
 
 microscope:
   ip_address: 'localhost'  # ASV server address
