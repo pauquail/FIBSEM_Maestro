@@ -55,7 +55,7 @@ autofunction:
       field_of_view: [10.0e-6, 10.0e-6]
 
 criterion_calculation:
-  border: 0.1 # part of image that doesnt go to calculation
+  border: 0.1 # part of image that does not go to calculation
   tile_size: 500 # calculation tile size
   final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
   final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
@@ -65,9 +65,10 @@ criterion_calculation:
 
 mask:
   use_mask: True
-  mask_image_li: 32 # line integration of mask acquisition
   update_mask: True # grab image before focus in order to calculate mask. If False, last image is selected
+  mask_image_li: 32 # line integration for mask acquisition
   min_fraction: 0.1 # minimal fraction of mask to proceed to calculation
+
 
 email:
   sender: 'pavel.emcf@gmail.com'
