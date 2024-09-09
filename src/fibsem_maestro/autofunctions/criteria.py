@@ -22,19 +22,16 @@ def gauss_filter(x, px_size, detail):
 
 
 class Criterion:
-    def __init__(self, criterion_settings, mask_settings, criterion_calculation_settings, mask=None):
+    def __init__(self, criterion_settings, mask=None):
+        self.name = criterion_settings['name']
+        self.border = criterion_settings['border']
+        self.tile_size = criterion_settings['tile_size']
+        self.final_resolution = getattr(np, criterion_settings['final_resolution'])
+        self.final_regions_resolution = getattr(np, criterion_settings['final_regions_resolution'])
         self.criterion_func = getattr(self, criterion_settings['criterion'])
-        self.border = criterion_calculation_settings['border']
-        self.tile_size = criterion_calculation_settings['tile_size']
-        self.final_resolution = getattr(np, criterion_calculation_settings['final_resolution'])
-        self.final_regions_resolution = getattr(np,criterion_calculation_settings['final_regions_resolution'])
         self.lowest_detail = criterion_settings['detail'][0]
         self.highest_detail = criterion_settings['detail'][1]
-        self.min_fraction = mask_settings['min_fraction']
-        self.use_mask = criterion_settings['use_mask']
-        self.pixel_size = criterion_settings['pixel_size']
-        self.name = criterion_settings['criterion']
-        self.mask = mask if self.use_mask else None
+        self.mask = mask
 
     def __call__(self, image, line_number=None):
         # line_number - if set, the mask is selected based on the line number
@@ -57,7 +54,6 @@ class Criterion:
         return self.final_regions_resolution(region_resolutions)
 
     def tiles_resolution(self, img):
-        assert self.tile_size > 0, "Invalid definition if tile size."
 
         if min(img.shape) == 1:  # line
             logging.info('Line image does not support tiling')
@@ -72,7 +68,14 @@ class Criterion:
 
         # Get resolution of each tile and calculate final resolution
         res_arr = []
-        for tile_img in self.generate_image_fractions(img_with_border, tile_width_px):
+
+        # if tile size = 0, not apply tilling
+        if self.tile_size == 0:
+            tiles = [img_with_border]
+        else:
+            tiles = self.generate_image_fractions(img_with_border, tile_width_px)
+
+        for tile_img in tiles:
             try:
                 res = self.criterion_func(tile_img)
             except:

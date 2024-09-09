@@ -134,6 +134,10 @@ def create_microscope(control: str):
             img_cropped = img[left_top[0]:left_top[0] + size[0], left_top[1]:left_top[1] + size[1]]
             return img_cropped
 
+        def apply_beam_settings(self, settings):
+            for s in settings:
+                setattr(self.beam, s, settings[s])
+
         def acquire_image(self, slice_number=None):
             self.beam = self.electron_beam
             self.beam.horizontal_field_width = self.field_of_view[0]

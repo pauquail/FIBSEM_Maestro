@@ -15,20 +15,17 @@ class AutoFunction:
     It selects the variable with the highest criterion.
     """
     def __init__(self, criterion: Criterion, sweeping: BasicSweeping, microscope,
-                 af_settings=None):
-        """
-        Initializes autofunction.
+                 af_settings, image_settings):
 
-        :param criterion_function: The function used to determine the criterion value.
-        :param sweeping: An instance of the any sweeping class (BasicSweeping, CircularSweeping).
-        :param mask: Mask class for smart masking.
-
-        """
         # settings
+        self.name = af_settings['name']
         self.variable = af_settings['variable']
         self.step_mode = af_settings['step_mode']
+
         self.execute = af_settings['execute']
-        self.af_name = af_settings['name']
+        self.delta_x = af_settings['delta_x']
+
+        self.image_settings = image_settings
 
         self._sweeping = sweeping
         self._microscope = microscope
@@ -90,6 +87,12 @@ class AutoFunction:
 
         :return:
         """
+        # grab the image for masking if mask enabled
+        if self._criterion.mask_used:
+            self._criterion.mask.update_img(self._microscope.beam)
+
+        self._microscope.apply_beam_settings(self.image_settings)  # apply resolution, li...
+
         # non-step image mode
         if not self.step_mode:
             for s in self._sweeping.sweep():
@@ -124,10 +127,12 @@ class AutoFunction:
         return (type(execute) is int and slice_number % execute == 0) or (type(
                 execute) is float and image_res > execute)
 
-    @property
-    def name(self):
-        return self.af_name
-
+    def move_stage_x(self, back=False):
+        x = 1 if back else -1
+        # Move to focusing area
+        if self.delta_x != 0:
+            self._microscope.relative_position(Point(x=self.delta_x*x, y=0))
+            logging.info(f"Stage relative move for focusing. dx={self.delta_x*x}")
 
 
 class LineAutoFunction(AutoFunction):
@@ -141,11 +146,6 @@ class LineAutoFunction(AutoFunction):
         self._line_focuses = []
 
     def line_focus(self):
-        # grab the image for masking if mask used
-        if self._criterion.mask_used:
-            self._criterion.mask.update_img(self._microscope.beam)
-            logging.debug('New mask grabbed')
-
         # line time estimation
         line_time = (self._microscope.beam.dwell_time * self._microscope.beam.line_integration
                      * self._microscope.beam.resolution[0])
@@ -199,6 +199,11 @@ class LineAutoFunction(AutoFunction):
         self._evaluate()
 
     def __call__(self):
+        if self._criterion.mask_used:
+            self._criterion.mask.update_img(self._microscope.beam)
+
+        self._microscope.apply_beam_settings(self.image_settings)  # apply resolution, li...
+
         if self.step_mode:
             raise NotImplementedError("Not implemented yet")
         self.line_focus()

@@ -110,3 +110,16 @@ class ScanningArea:
         left_top = [center_pix[0] - height_pix // 2,
                     center_pix[1] - width_pix // 2]
         return left_top, [height_pix, width_pix]
+
+
+def find_in_dict(name, list_of_dicts):
+    if name == 'none':
+        return None
+    else:
+        return [dic for dic in list_of_dicts if dic['name'] == name]
+
+def find_in_objects(name, list_of_objects):
+    if name == 'none':
+        return None
+    else:
+        return [dic for dic in list_of_objects if dic.name == name]

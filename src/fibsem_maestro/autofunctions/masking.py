@@ -12,6 +12,7 @@ from fibsem_maestro.tools.math_tools import crop_image
 class Masking:
     def __init__(self, settings):
         # settings
+        self.name = settings['mame']
         self.update_mask = settings['update_mask']
         self.mask_image_li = settings['mask_image_li']
         self.min_fraction = settings['min_fraction']
@@ -52,9 +53,11 @@ class Masking:
             return images
 
     def update_img(self, beam):
-        beam.line_integration = self.mask_image_li
-        img = beam.grab_frame()
-        self.set_img(img)
+        if self.update_mask:
+            beam.line_integration = self.mask_image_li
+            img = beam.grab_frame()
+            self.set_img(img)
+            logging.debug('New mask grabbed')
 
     def set_img(self, img):
         self._image = np.array(img)

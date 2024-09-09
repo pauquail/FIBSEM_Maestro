@@ -14,30 +14,32 @@ from fibsem_maestro.drift_correction.template_matching import TemplateMatchingDr
 from fibsem_maestro.microscope_control.microscope import create_microscope
 from fibsem_maestro.microscope_control.settings import load_settings, save_settings
 from fibsem_maestro.tools.dirs_management import make_dirs
-from fibsem_maestro.tools.support import Point
+from fibsem_maestro.tools.support import Point, find_in_dict, find_in_objects
 
-colorama_init(autoreset=True) # colorful console
+colorama_init(autoreset=True)  # colorful console
+
 
 class SerialControl:
-    def __init__(self, settings_path = 'settings.yaml'):
-        self.image = None # actual image
-        self.image_resolution = 0 # initial image resolution = 0 # initial image res
-        self._thread = None
-        # logging dict (important parameters)
-        self.log_params = {}
+    def __init__(self, settings_path='settings.yaml'):
+        self.image = None  # actual image
+        self.image_resolution = 0  # initial image resolution = 0 # initial image res
+        self._thread = None  # thread on the end of acquisition (for resolution calculation)
+        self.log_params = {}  # logging dict (important parameters to log)
 
         with open(settings_path, "r") as yamlfile:
             settings = yaml.safe_load(yamlfile)
             print(f'Settings file {settings_path} successfully loaded')
 
+        # read settings
         self.acquisition_settings = settings['acquisition']
-        self.microscope_settings = settings['microscope']
-        self.autofunction_settings = settings['autofunction']
-        self.email_settings = settings['email']
-        self.criterion_calculation_settings = settings['criterion_calculation']
-        self.mask_settings = settings['mask']
-        self.dc_settings = settings['drift_correction']
         self.dirs_settings = settings['dirs']
+        self.microscope_settings = settings['microscope']
+        self.image_settings = settings['image']
+        self.criterion_calculation_settings = settings['criterion_calculation']
+        self.autofunction_settings = settings['autofunction']
+        self.mask_settings = settings['mask']
+        self.email_settings = settings['email']
+        self.dc_settings = settings['drift_correction']
 
         self.library = self.acquisition_settings['library']
         self.wd_correction = self.acquisition_settings['wd_correction']
@@ -51,6 +53,13 @@ class SerialControl:
         self.dirs_output_images = self.dirs_settings['output_images']
         self.dirs_template_matching = self.dirs_settings['template_matching']
         self.dirs_log = self.dirs_settings['log']
+
+        self.image_name = self.microscope_settings['image_name']
+        self.criterion_name = self.microscope_settings['criterion_name']
+
+        self.actual_image_settings = find_in_dict(self.image_name, self.image_settings)
+        self.actual_criterion = find_in_dict(self.criterion_name, self.criterion_calculation_settings)
+
 
         # logger settings
         self.logger = logging.getLogger()  # Create a logger object.
@@ -66,7 +75,7 @@ class SerialControl:
         # microscope init
         try:
             # return the right class and call initializer
-            self._microscope = create_microscope(self.library)(self.microscope_settings,
+            self._microscope = create_microscope(self.library)({**self.microscope_settings, **self.actual_image_settings},
                                                                self.dirs_output_images)
             self._electron = self._microscope.electron_beam
             print('Microscope initialized')
@@ -76,17 +85,18 @@ class SerialControl:
 
         # Masking
         try:
-            self._mask = Masking(self.mask_settings)
+            # init all masks
+            self._masks = [Masking(m) for m in self.mask_settings]
         except Exception as e:
-            logging.error("Mask loading failed! Mask will be omitted. " + repr(e))
-            self._mask = None
+            logging.error("Mask loading failed! Masks will be omitted. " + repr(e))
+            self._masks = None
 
         # autofunction init
         try:
             self._autofunctions = AutofunctionControl(self._microscope, settings,
                                                       logging_enabled=self.log_enabled,
                                                       log_dir=self.dirs_log,
-                                                      mask=self._mask)
+                                                      masks=self._masks)
             print(f'{len(self._autofunctions.af_values)} autofunctions found')
         except Exception as e:
             logging.error("Autofunction initialization failed! "+repr(e))
@@ -94,8 +104,8 @@ class SerialControl:
 
         # criterion of resolution calculation of final image - it uses parameters from criterion_calculation settings
         try:
-            self._criterion_resolution = Criterion(self.criterion_calculation_settings, self.mask_settings,
-                                                   self.criterion_calculation_settings, mask=self._mask)
+            mask = find_in_objects(self.actual_criterion['mask_name'], self._masks)
+            self._criterion_resolution = Criterion(self.actual_criterion, mask=mask)
             print(f'Image resolution criterion: {self._criterion_resolution.name}')
         except Exception as e:
             logging.error("Initialization of resolution criteria failed! "+repr(e))
@@ -218,6 +228,7 @@ class SerialControl:
         # acquire image
         self.logging_params()
         try:
+            self._microscope.apply_beam_settings(self.actual_image_settings) # apply resolution, li...
             self.image = self._microscope.acquire_image(slice_number)
             print(Fore.GREEN + 'Image acquired')
         except Exception as e:

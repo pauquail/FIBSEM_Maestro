@@ -11,6 +11,8 @@ from fibsem_maestro.serial_control import SerialControl
 #  mask online training
 #  refactor
 
+# test: multiple masking, spiral af, email
+
 
 settings_path = 'settings.yaml'
 
