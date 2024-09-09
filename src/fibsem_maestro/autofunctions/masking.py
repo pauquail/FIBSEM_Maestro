@@ -35,7 +35,7 @@ class Masking:
             self.use_mask = False
 
     def get_masked_images(self, line_number=None):
-        self._mask = self.get_mask_array()
+        self._mask = self._get_mask_array()
 
         if line_number is not None:
             mask_image = self._mask[line_number]
@@ -46,7 +46,7 @@ class Masking:
             logging.warning('Focus criterion: Not enough masked pixels')
             return None
         else:
-            self._rectangles = self.largest_rectangles_in_mask()
+            self._rectangles = self._largest_rectangles_in_mask()
             images = []
             for r in self._rectangles:
                 images.append(crop_image(self._image, r))
@@ -62,7 +62,7 @@ class Masking:
     def set_img(self, img):
         self._image = np.array(img)
 
-    def get_mask_array(self):
+    def _get_mask_array(self):
         # shape to patches (with padding)
         pad_height = self.patch_size[0] - (self._image.shape[0] % self.patch_size[0]) \
             if (self._image.shape[0] % self.patch_size[0]) != 0 else 0
@@ -110,7 +110,7 @@ class Masking:
         fig.tight_layout()
         return fig
 
-    def get_labeled_mask(self):
+    def _get_labeled_mask(self):
         # Perform connected component analysis, the `structure` parameter defines
         # how pixels are connected
         structure = np.ones((3, 3), dtype=np.int)
@@ -129,9 +129,9 @@ class Masking:
 
         return labeled_mask, num_features
 
-    def largest_rectangles_in_mask(self):
+    def _largest_rectangles_in_mask(self):
 
-        labeled_mask, num_features = self.get_labeled_mask()
+        labeled_mask, num_features = self._get_labeled_mask()
 
         rectangles = []
 
@@ -167,8 +167,8 @@ class Masking:
 
         return rectangles
 
-    def get_center(self):
-        labeled_mask, num_features = self.get_labeled_mask()
+    def _get_center(self):
+        labeled_mask, num_features = self._get_labeled_mask()
         if num_features > 1:
             logging.warning(f"Too much features ({num_features}) found in mask. Drift correction skipped.")
             return None

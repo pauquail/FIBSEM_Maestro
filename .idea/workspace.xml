@@ -4,19 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="abstract and autoscript_control added">
-      <change beforePath="$PROJECT_DIR$/.idea/FIBSEM_Maestro.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FIBSEM_Maestro.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="dev progress">
       <change beforePath="$PROJECT_DIR$/src/asv_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/asv_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction_control.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/masking.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/masking.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/tools/support.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/support.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/settings.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/settings.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/mask_drift_correction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/mask_drift_correction.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -256,7 +249,15 @@
       <option name="project" value="LOCAL" />
       <updated>1723824416697</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="dev progress">
+      <option name="closed" value="true" />
+      <created>1725903292649</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1725903292649</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -310,9 +311,9 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="init commit" />
     <MESSAGE value="src folder added" />
-    <MESSAGE value="dev progress" />
     <MESSAGE value="abstract and autoscript_control added" />
-    <option name="LAST_COMMIT_MESSAGE" value="abstract and autoscript_control added" />
+    <MESSAGE value="dev progress" />
+    <option name="LAST_COMMIT_MESSAGE" value="dev progress" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

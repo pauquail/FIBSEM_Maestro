@@ -10,7 +10,7 @@ class MaskDriftCorrection:
         self.logging_dict = logging_dict
 
     def __call__(self, slice_number):
-        self.current_position = self._mask.get_center()
+        self.current_position = self._mask._get_center()
         center = self._mask.image_ceter
         pixel_size = self._mask.image_pixel_size
         if self.current_position is not None:

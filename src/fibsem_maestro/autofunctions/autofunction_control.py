@@ -106,13 +106,13 @@ class AutofunctionControl:
             # logging
             if self._logging:
                 if af.af_curve_plot is not None:
-                    plot_filename = os.path.join(self._log_dir, f'{slice_number:05}/af_curve.png')
+                    plot_filename = os.path.join(self._log_dir, f'{slice_number:05}/{af.name}_curve.png')
                     af.af_curve_plot.savefig(plot_filename)
-                if af.mask_plot is not None:
+                if af
                     mask_filename = os.path.join(self._log_dir, f'{slice_number:05}/mask.png')
                     af.mask_plot.savefig(mask_filename)
                 if af.af_line_plot is not None:
-                    line_filename = os.path.join(self._log_dir, f'{slice_number:05}/af_line.png')
+                    line_filename = os.path.join(self._log_dir, f'{slice_number:05}/{af.name}_line.png')
                     af.af_line_plot.savefig(line_filename)
         else:
             self.attempts = 0 # zero attempts

@@ -37,7 +37,14 @@ class AutoFunction:
             self._criterion_values[i] = []
 
         self.af_curve_plot = None
-        self.masks_plot = None
+        self.line_focus_plot = None
+
+    @property
+    def mask_plot(self):
+        if self._criterion.mask_used:
+
+        else:
+            return None
 
     def _get_image(self, value):
         """
@@ -81,18 +88,23 @@ class AutoFunction:
 
         self.af_curve_plot = self.show_af_curve()
 
-    def __call__(self):
-        """
-        Perform all steps of setting values, grab images (or line) and criteria measurement.
-
-        :return:
-        """
+    def _prepare(self):
         # grab the image for masking if mask enabled
         if self._criterion.mask_used:
             self._criterion.mask.update_img(self._microscope.beam)
 
         self._microscope.apply_beam_settings(self.image_settings)  # apply resolution, li...
 
+        self.af_curve_plot = None
+        self.line_focus_plot = None
+
+    def __call__(self):
+        """
+        Perform all steps of setting values, grab images (or line) and criteria measurement.
+
+        :return:
+        """
+        self._prepare()
         # non-step image mode
         if not self.step_mode:
             for s in self._sweeping.sweep():
@@ -199,10 +211,7 @@ class LineAutoFunction(AutoFunction):
         self._evaluate()
 
     def __call__(self):
-        if self._criterion.mask_used:
-            self._criterion.mask.update_img(self._microscope.beam)
-
-        self._microscope.apply_beam_settings(self.image_settings)  # apply resolution, li...
+        self._prepare()
 
         if self.step_mode:
             raise NotImplementedError("Not implemented yet")
