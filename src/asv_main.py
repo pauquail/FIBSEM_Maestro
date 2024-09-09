@@ -4,8 +4,13 @@ import socket
 import time
 from fibsem_maestro.serial_control import SerialControl
 
-#  remove serial_control.imaging(1) # !!!
-#  bordel v beam
+#  remove line 22: serial_control.imaging(1) # !!!
+#  plots
+#  bordel v beam (az bude milling)
+#  mask for acb
+#  mask online training
+#  refactor
+
 
 settings_path = 'settings.yaml'
 

@@ -12,10 +12,11 @@ from fibsem_maestro.tools.support import Point
 class TemplateMatchingDriftCorrection:
     def __init__(self, microscope, settings, template_matching_dir, logging_dict, logging_enabled=False, log_dir=None):
         self._microscope = microscope
-        self.settings = settings
-        self._log_dir = log_dir
-        self._logging = logging_enabled
-        self._template_matching_dir = template_matching_dir
+        self.min_confidence = settings['min_confidence']
+
+        self.log_dir = log_dir
+        self.logging = logging_enabled
+        self.template_matching_dir = template_matching_dir
         self.logging_dict = logging_dict
         try:
             self.areas = self._microscope.template_matching_areas
@@ -44,7 +45,7 @@ class TemplateMatchingDriftCorrection:
         log_img = self.save_log()
         
         for i, area in enumerate(self.areas):
-            template_image_name = os.path.join(self._template_matching_dir, f"dc_template_{i}.tiff")
+            template_image_name = os.path.join(self.template_matching_dir, f"dc_template_{i}.tiff")
 
             template_image = tifffile.imread(template_image_name)
 
@@ -61,7 +62,7 @@ class TemplateMatchingDriftCorrection:
             self.logging_dict[f"template{i}_confidence"] = maxVal
 
             # save shift
-            if maxVal > self.settings['min_confidence']:
+            if maxVal > self.min_confidence:
                 shift_x.append(center_x * pixel_size)
                 shift_y.append(center_y * pixel_size)
             else:
@@ -96,10 +97,10 @@ class TemplateMatchingDriftCorrection:
             a[0] += int(-shift_x // pixel_size)
             a[1] += int(-shift_y // pixel_size)
 
-        if self._logging:
+        if self.logging:
             plt.axis('off')
             plt.tight_layout()
-            plt.savefig(os.path.join(self._log_dir, f"{slice_number:05}/template_matching.png"))
+            plt.savefig(os.path.join(self.log_dir, f"{slice_number:05}/template_matching.png"))
 
         shift_x = -shift_x  # beam shift X axis is reversed to image axis
 
@@ -108,7 +109,9 @@ class TemplateMatchingDriftCorrection:
         self.logging_dict['shift_y'] = shift_y
 
         # perform beam shift
-        self._microscope.beam_shift_with_verification(Point(shift_x, shift_y))
+        bs = Point(shift_x, shift_y)
+        self._microscope.beam_shift_with_verification(bs)
+        return bs
 
     def save_log(self, img):
         plt.figure()

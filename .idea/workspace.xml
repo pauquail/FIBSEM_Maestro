@@ -4,8 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="dev progress">
+    <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="abstract and autoscript_control added">
+      <change afterPath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/mask_drift_correction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/FIBSEM_Maestro.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FIBSEM_Maestro.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/asv_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/asv_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction_control.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/masking.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/masking.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/sweeping.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/sweeping.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/template_matching.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/template_matching.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/tools/math_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/math_tools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/settings.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/settings.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,12 +47,12 @@
     &quot;assignee&quot;: &quot;pauquail&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/pauquail/FIBSEM_Maestro&quot;,
-    &quot;accountId&quot;: &quot;39cede25-570e-42c2-a6a3-d244f14781ed&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/pauquail/FIBSEM_Maestro.git",
+    "accountId": "b03ae5f4-a0f7-48b4-93a3-89d4a563489b"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -50,31 +64,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.asv_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.microscope_test.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/ceitec_data/MiMiMi/drift_correction.py&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "Python.microscope_test.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/home/pavelkrep/data/deepmib_test/main.py",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/src/fibsem_maestro" />
+      <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.asv_main">
-    <configuration name="asv_main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.microscope_test">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="FIBSEM_Maestro" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -83,12 +96,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/asv_main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -148,21 +161,7 @@
       <workItem from="1722858819706" duration="568000" />
       <workItem from="1722859393135" duration="3005000" />
       <workItem from="1722933779436" duration="77552000" />
-      <workItem from="1724502429354" duration="1670000" />
-      <workItem from="1724507631754" duration="554000" />
-      <workItem from="1724572129951" duration="3057000" />
-      <workItem from="1724747375427" duration="7256000" />
-      <workItem from="1724863958360" duration="2920000" />
-      <workItem from="1724935436367" duration="4717000" />
-      <workItem from="1725008740145" duration="7248000" />
-      <workItem from="1725037236303" duration="2349000" />
-      <workItem from="1725041666167" duration="1826000" />
-      <workItem from="1725213055657" duration="29000" />
-      <workItem from="1725213094965" duration="26877000" />
-      <workItem from="1725387693066" duration="197000" />
-      <workItem from="1725387976309" duration="2843000" />
-      <workItem from="1725390877454" duration="530000" />
-      <workItem from="1725816525838" duration="1431000" />
+      <workItem from="1725879567798" duration="12861000" />
     </task>
     <task id="LOCAL-00001" summary="init commit">
       <option name="closed" value="true" />
@@ -252,71 +251,15 @@
       <option name="project" value="LOCAL" />
       <updated>1723724557338</updated>
     </task>
-    <task id="LOCAL-00012" summary="dev progress">
+    <task id="LOCAL-00012" summary="abstract and autoscript_control added">
       <option name="closed" value="true" />
-      <created>1725011603155</created>
+      <created>1723824416697</created>
       <option name="number" value="00012" />
       <option name="presentableId" value="LOCAL-00012" />
       <option name="project" value="LOCAL" />
-      <updated>1725011603155</updated>
+      <updated>1723824416697</updated>
     </task>
-    <task id="LOCAL-00013" summary="dev progress">
-      <option name="closed" value="true" />
-      <created>1725219214380</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1725219214380</updated>
-    </task>
-    <task id="LOCAL-00014" summary="dev progress">
-      <option name="closed" value="true" />
-      <created>1725273147191</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1725273147191</updated>
-    </task>
-    <task id="LOCAL-00015" summary="dev progress">
-      <option name="closed" value="true" />
-      <created>1725305161463</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1725305161463</updated>
-    </task>
-    <task id="LOCAL-00016" summary="dev progress">
-      <option name="closed" value="true" />
-      <created>1725388028147</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1725388028147</updated>
-    </task>
-    <task id="LOCAL-00017" summary="dev progress">
-      <option name="closed" value="true" />
-      <created>1725390785958</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1725390785958</updated>
-    </task>
-    <task id="LOCAL-00018" summary="dev progress">
-      <option name="closed" value="true" />
-      <created>1725391402662</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1725391402662</updated>
-    </task>
-    <task id="LOCAL-00019" summary="dev progress">
-      <option name="closed" value="true" />
-      <created>1725824150703</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1725824150703</updated>
-    </task>
-    <option name="localTasksCounter" value="20" />
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -371,11 +314,17 @@
     <MESSAGE value="init commit" />
     <MESSAGE value="src folder added" />
     <MESSAGE value="dev progress" />
-    <option name="LAST_COMMIT_MESSAGE" value="dev progress" />
+    <MESSAGE value="abstract and autoscript_control added" />
+    <option name="LAST_COMMIT_MESSAGE" value="abstract and autoscript_control added" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/fibsem_maestro/microscope_control/autoscript_control.py</url>
+          <line>49</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$USER_HOME$/MiMiMi/focus_crit.py</url>
           <line>7</line>
@@ -385,8 +334,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/FIBSEM_Maestro$microscope_test.coverage" NAME="microscope_test Coverage Results" MODIFIED="1723623993512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/fibsem_maestro/microscope_control" />
-    <SUITE FILE_PATH="coverage/FIBSEM_Maestro$asv_main.coverage" NAME="asv_main Coverage Results" MODIFIED="1725391368576" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/FIBSEM_Maestro$main.coverage" NAME="main Coverage Results" MODIFIED="1722858838055" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/FIBSEM_Maestro$microscope_test.coverage" NAME="microscope_test Coverage Results" MODIFIED="1723623993512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/fibsem_maestro/microscope_control" />
   </component>
 </project>

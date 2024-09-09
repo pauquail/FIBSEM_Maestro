@@ -4,7 +4,6 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 
 from fibsem_maestro.FRC.frc import frc
-from fibsem_maestro.tools.math_tools import largest_rectangles_in_mask, crop_image
 
 
 def gauss_filter(x, px_size, detail):
@@ -31,16 +30,20 @@ class Criterion:
         self.final_regions_resolution = getattr(np,criterion_calculation_settings['final_regions_resolution'])
         self.lowest_detail = criterion_settings['detail'][0]
         self.highest_detail = criterion_settings['detail'][1]
-        self.mask = mask
         self.min_fraction = mask_settings['min_fraction']
-        self.pixel_size = -1
+        self.use_mask = criterion_settings['use_mask']
+        self.pixel_size = criterion_settings['pixel_size']
+        self.name = criterion_settings['criterion']
+        self.mask = mask if self.use_mask else None
 
-    def __call__(self, image):
+    def __call__(self, image, line_number=None):
+        # line_number - if set, the mask is selected based on the line number
+
         self.pixel_size = image.metadata.binary_result.pixel_size.x
         images = [image]
 
         if self.mask is not None:
-            images = self.mask_image(image)
+            images = self.mask.get_masked_images(image, line_number)
             if images is None:
                 logging.error('Not enough masked regions for resolution calculation - masking omitted!')
                 images = [image] # calculate resolution on entire image
@@ -86,6 +89,11 @@ class Criterion:
 
             final_res = self.final_resolution(np.array(res_arr))
             return final_res
+
+    @property
+    def mask_used(self):
+        return self.mask is not None
+
     def generate_image_fractions(self, img, overlap=0, return_coordinates=False):
         """
         Generate image fractions (tiles) with optional overlap.
@@ -191,12 +199,12 @@ class Criterion:
             freq2 = np.repeat(freq2[:, np.newaxis], freq1.shape[0], axis=1).T
             freq = np.sqrt(freq1 ** 2 + freq2 ** 2)  # make freq matrix
 
-            highf = 1 / self.highest_detail  # highest detail frequency
-            lowf = 1 / self.lowest_detail  # lowest detail frequency
+            high_frequency = 1 / self.highest_detail  # highest detail frequency
+            low_frequency = 1 / self.lowest_detail  # lowest detail frequency
 
             # make freq filter
-            freq[freq > highf] = 0
-            freq[freq < lowf] = 0
+            freq[freq > high_frequency] = 0
+            freq[freq < low_frequency] = 0
             freq[freq > 0] = 1
 
             fft_img *= freq  # filter freq
@@ -213,25 +221,8 @@ class Criterion:
     def frc_criterion(self, img):
         try:
             res = frc(img, self.pixel_size)
-        except:
-            logging.warning("FRC error on current tile")
+        except Exception as e:
+            logging.warning("FRC error on current tile. " + repr(e))
             return np.nan
+        return res
 
-    def mask_image(self, img):
-        """
-        :param img: The input image array.
-        :type img: numpy.ndarray
-
-        :return: The result of the criterion function applied on the masked image if the minimum fraction of masked pixels is satisfied, None otherwise.
-        :rtype: Any
-        """
-        mask_image = self.mask.get_mask_array()
-        if sum(mask_image)/len(img) < self.min_fraction:
-            logging.warning('Focus criterion: Not enough masked pixels')
-            return None
-        else:
-            masking_rectangles = largest_rectangles_in_mask(mask_image)
-            images = []
-            for r in masking_rectangles:
-                images.append(crop_image(r))
-            return images

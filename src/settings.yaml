@@ -1,9 +1,8 @@
 # Global acquisition setting
 acquisition:
   library: 'autoscript'  # Microscope control library. Possible values: 'AS'
-  slice_distance: 10.0e-9  # Slicing step
-  imaging_angle: 38  # Angle between sample plane and e-beam (degrees) (work for 38 and 90)
-  y_correction: 'y' # Drift correction strategy. Possible values 'y' for simple y correction
+  wd_correction: 7.88010753607   # For imaging angle 38deg: slice_distance * cos(38). For imaging angle 90: slice_distance
+  y_correction:  6.15661475326 # For imaging angle 38deg: slice_distance * sin(38). For imaging angle 90: 0
   additive_beam_shift: [0, 0] # Additive beam shift applied in every cycle
   settings_file: 'microscope_settings.yaml' # Actual microscope setting
   variables_to_save: ['electron_beam.working_distance','electron_beam.stigmator','electron_beam.lens_alignment',
@@ -22,7 +21,7 @@ microscope:
   stage_tolerance: 1e-7  # Maximal stage error that is considered as ok
   stage_trials: 3  # Number of trials to reach the goal position before raise error
   beam_shift_tolerance: 50.0e-9 # Maximal beam shift error that is considered as ok
-  beam_shift_to_stage_move: [-1, -1] # Axis transformation between beamshift and stage
+  beam_shift_to_stage_move: [-1, -1] # Axis transformation between beam shift and stage
 
 # Directories
 dirs:
@@ -53,6 +52,7 @@ autofunction:
       step_mode: False # Determines whether to perform step mode (it acquires only one image step by step)
       pixel_size: 10e-9
       field_of_view: [10.0e-6, 10.0e-6]
+      use_mask: True
 
 criterion_calculation:
   border: 0.1 # part of image that does not go to calculation
@@ -62,13 +62,18 @@ criterion_calculation:
 
   criterion: 'frc_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
   detail: [10.0e-9, 100.0e-9]
+  use_mask: True
 
 mask:
-  use_mask: True
   update_mask: True # grab image before focus in order to calculate mask. If False, last image is selected
   mask_image_li: 32 # line integration for mask acquisition
   min_fraction: 0.1 # minimal fraction of mask to proceed to calculation
-
+  model_path: '/home/pavelkrep/data/deepmib_test/seg_exported'
+  patch_size: [128, 128]
+  threshold: 0.5
+  min_area: 100 # use None for disable
+  fill_holes: True
+  iterative_training: False
 
 email:
   sender: 'pavel.emcf@gmail.com'
@@ -76,7 +81,7 @@ email:
   password_file: 'email_password.txt'
 
 drift_correction:
-  type: 'template_matching' # values: 'template_matching'
+  type: 'template_matching' # values: 'template_matching', 'mask
   min_confidence: 0
 
 backup:
@@ -95,3 +100,4 @@ backup:
   step_mode: False # Determines whether to perform step mode (it acquires only one image step by step)
   pixel_size: 10e-9
   field_of_view: [10.0e-6, 10.0e-6]
+  use_mask: True

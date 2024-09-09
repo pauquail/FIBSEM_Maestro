@@ -27,10 +27,17 @@ def create_microscope(control: str):
 
             """
             super().__init__(settings['ip_address'])
-            self.settings = settings
             self.beam = self.electron_beam  # default setting for actual beam
             self.vertical_field_width = None # vertical field of view. serves for resolution calculation
-            self.li = self.settings['images_line_integration']
+
+            self.set_pixel_size = settings['pixel_size']
+            self.field_of_view = settings['field_of_view']
+            self.li = settings['images_line_integration']
+            self.stage_tolerance = settings['stage_tolerance']
+            self.stage_trials = settings['stage_trials']
+            self.beam_shift_tolerance = settings['beam_shift_tolerance']
+            self.beam_shift_stage_move = settings['beam_shift_stage_move']
+
             self.data_dir = data_dir
 
         @property
@@ -57,7 +64,7 @@ def create_microscope(control: str):
             # after movement, verify whether the movement is within tolerance
             dist = distance.euclidean(position.to_xy(), new_stage_position.to_xy())
 
-            if dist > self.settings['stage_tolerance']:
+            if dist > self.stage_tolerance:
                 logging.warning(
                     f"Stage reached position {new_stage_position} is too far ({dist}) from defined position {new_stage_position} ")
                 self.stage_trial_counter -= 1
@@ -67,7 +74,7 @@ def create_microscope(control: str):
                     raise Exception("Stage movement failed after multiple trials")
             else:
                 # reset trials counter
-                self.stage_trial_counter = self.settings['stage_trials']
+                self.stage_trial_counter = self.stage_trials
 
         def beam_shift_with_verification(self, new_beam_shift: Point):
             """
@@ -77,13 +84,13 @@ def create_microscope(control: str):
             try:
                 self.beam.beam_shift = new_beam_shift  # set beam shift
                 dist = distance.euclidean(self.beam.beam_shift.to_xy(), new_beam_shift.to_xy())
-                if dist > float(self.settings['beam_shift_tolerance']):
+                if dist > float(self.beam_shift_tolerance):
                     raise Exception("Beam shift out of range")
             except Exception as e:  # if any problem with beam shift or out of range -> stage move
                 logging.warning("Beam shift is out of range. Stage position needs to be adjusted. " + repr(e))
                 # stage move = beam shift * axis reversion
-                new_stage_move = new_beam_shift * Point(self.settings['beam_shift_to_stage_move'][0],
-                                                        self.settings['beam_shift_to_stage_move'][1])
+                new_stage_move = new_beam_shift * Point(self.beam_shift_stage_move[0],
+                                                        self.beam_shift_stage_move[1])
                 self.relative_position = StagePosition(x=new_stage_move.x, y=new_stage_move.y)
                 self.beam.beam_shift = Point(0, 0)  # zero beam shift
 
@@ -129,9 +136,11 @@ def create_microscope(control: str):
 
         def acquire_image(self, slice_number=None):
             self.beam = self.electron_beam
-            self.beam.horizontal_field_width = self.settings['field_of_view'][0]
-            self.vertical_field_width = self.settings['field_of_view'][1]
-            self.pixel_size = float(self.settings['pixel_size'])  # set correct resolution
+            self.beam.horizontal_field_width = self.field_of_view[0]
+            self.vertical_field_width = self.field_of_view[1]
+
+            # call pixel size from Beam class, set correct resolution
+            self.pixel_size = float(self.set_pixel_size)
 
             for i in range(len(self.li)):
                 self.line_integration = self.li[i]

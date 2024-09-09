@@ -8,12 +8,19 @@ from fibsem_maestro.tools.support import Point
 
 
 class AutofunctionControl:
-    def __init__(self, microscope, settings, logging_enabled=False, log_dir=None):
-
+    def __init__(self, microscope, settings, logging_enabled=False, log_dir=None, mask=None):
+        # settings
         self.af_settings = settings['autofunction']
         self.email_settings = settings['email']
         self.mask_settings = settings['mask']
         self.criterion_settings = settings['criterion_calculation']
+
+        self.delta_x = self.af_settings['delta_x']
+        self.max_attempts = self.af_settings['max_attempts']
+        self.email_sender = self.email_settings['sender']
+        self.email_receiver = self.email_settings['receiver']
+        self.password_file = self.email_settings['password_file']
+
         self._microscope = microscope
         self._log_dir = log_dir
         self._logging = logging_enabled
@@ -21,25 +28,31 @@ class AutofunctionControl:
         self.autofunctions = [self.get_autofunction(x) for x in self.af_values]  # list of all autofunctions
         self.scheduler = []
         self.attempts = 0 # number of af attempts (early stopping)
+        self._mask = mask
 
-    def get_autofunction(self, af_value):
+    def get_autofunction(self, concrete_af_settings):
+        sweeping_strategy = concrete_af_settings['sweeping_strategy']
+        use_mask = concrete_af_settings['use_mask']
+        autofunction = concrete_af_settings['autofunction']
+
         # select and init sweeping class according to sweeping_strategy
         sweeping_module = importlib.import_module('fibsem_maestro.autofunctions.sweeping')
-        Sweeping = getattr(sweeping_module, af_value['sweeping_strategy'])
-        sweeping = Sweeping(self._microscope.electron_beam, af_value)
+        Sweeping = getattr(sweeping_module, sweeping_strategy)
+        sweeping = Sweeping(self._microscope.electron_beam, concrete_af_settings)
+        criterion_mask = self._mask if use_mask else None
         # select criterion based on criteria (settings.yaml)
-        criterion = Criterion(self.criterion_settings, self.mask_settings, self.criterion_settings, mask=None)
+        criterion = Criterion(self.criterion_settings, self.mask_settings, self.criterion_settings, mask=criterion_mask)
         # select autofunction based on autofunction (settings.yaml)
         autofunction_module = importlib.import_module('fibsem_maestro.autofunctions.autofunction')
-        Autofunction = getattr(autofunction_module, af_value['autofunction'])
-        return Autofunction(criterion, sweeping, self._microscope, af_settings={**self.af_settings, **af_value})  # pass merged settings (current af_value + autofunction settings)
+        Autofunction = getattr(autofunction_module, autofunction)
+        return Autofunction(criterion, sweeping, self._microscope, af_settings={**self.af_settings, **af_settings})  # pass merged settings (current af_value + autofunction settings)
 
     def move_stage_x(self, back=False):
         x = 1 if back else -1
         # Move to focusing area
-        if self.af_settings["delta_x"] != 0:
-            self._microscope.relative_position(Point(x=self.af_settings['delta_x']*x, y=0))
-            logging.info(f"Stage relative move for focusing. dx={self.af_settings['delta_x']*x}")
+        if self.delta_x != 0:
+            self._microscope.relative_position(Point(x=self.delta_x*x, y=0))
+            logging.info(f"Stage relative move for focusing. dx={self.delta_x*x}")
 
     def __call__(self, slice_number, image_res):
         # check firing conditions of all autofunctions
@@ -53,9 +66,9 @@ class AutofunctionControl:
                     logging.warning(f'Autofunction {af.name} already executed. It will not be added to the scheduler')
 
         # if too much number of attempts, send email
-        if self.attempts >= self.af_settings['max_attempts']:
+        if self.attempts >= self.max_attempts:
             try:
-                send_email(self.email_settings['sender'], self.email_settings['receiver'], "Maestro alert!",
+                send_email(self.email_sender, self.email_receiver, "Maestro alert!",
                            f"{self.attempts} attempts of AF failed. Acquisition stopped!")
             except Exception as e:
                 logging.error("Sending email error. " + repr(e))
@@ -64,11 +77,11 @@ class AutofunctionControl:
             print("Perform manual inspection and press enter")
             input()
             self.af_attempt = 0  # set the first focusing step
-            self.scheduler.clear() # clear schedule queue
+            self.scheduler.clear()  # clear schedule queue
 
         # any AF in scheduler in queue
         if len(self.scheduler) > 0:
-            self.attempts += 1 # attempts counter
+            self.attempts += 1  # attempts counter
             af = self.scheduler[0]
 
             # Focusing on different area
@@ -83,9 +96,9 @@ class AutofunctionControl:
             # remove from scheduler if needed
             if finished:
                 self.scheduler.pop(0)
-                logging.info(f'Autofunction {af_name} finished and removed from scheduler')
+                logging.info(f'Autofunction {af.name} finished and removed from scheduler')
             else:
-                logging.info(f'Autofunction {af_name} in progress')
+                logging.info(f'Autofunction {af.name} in progress')
 
             # logging
             if self._logging:

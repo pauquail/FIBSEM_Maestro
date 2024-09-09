@@ -11,22 +11,22 @@ class BasicSweeping:
     """
     def __init__(self, microscope, settings):
         self._microscope = microscope
-        self._sweeping_var = settings['variable']
-        self._range = settings['sweeping_range']
-        self._max_limits = settings['sweeping_max_limits']
-        self._steps = int(settings['sweeping_steps'])
-        self._total_cycles = int(settings['sweeping_total_cycles'])
+        self.sweeping_var = settings['variable']
+        self.range = settings['sweeping_range']
+        self.max_limits = settings['sweeping_max_limits']
+        self.steps = int(settings['sweeping_steps'])
+        self.total_cycles = int(settings['sweeping_total_cycles'])
 
         self._base = None # initial sweeping variable
         self.set_sweep()
 
     @property
     def value(self):
-        return getattr(self._microscope, self._sweeping_var)
+        return getattr(self._microscope, self.sweeping_var)
 
     @value.setter
     def value(self, value):
-        setattr(self._microscope, self._sweeping_var, value)
+        setattr(self._microscope, self.sweeping_var, value)
 
     def set_sweep(self):
         self._base = self.value
@@ -35,14 +35,14 @@ class BasicSweeping:
         """ Basic sweeping"""
         # ensure zig zag manner
         if repetition % 2 == 0:
-            sweep_space = np.linspace(self._base - self._range[0], self._base + self._range[1], self._steps)
+            sweep_space = np.linspace(self._base - self.range[0], self._base + self.range[1], self.steps)
         else:
-            sweep_space = np.linspace(self._base + self._range[1], self._base - self._range[0], self._steps)
+            sweep_space = np.linspace(self._base + self.range[1], self._base - self.range[0], self.steps)
         for s in sweep_space:
-            if self._max_limits[0] < s < self._max_limits[1]:
+            if self.max_limits[0] < s < self.max_limits[1]:
                 yield s
             else:
-                logging.warning(f'Sweep of {self._sweeping_var} if out of range ({s}')
+                logging.warning(f'Sweep of {self.sweeping_var} if out of range ({s}')
 
     def sweep(self):
         """
@@ -51,7 +51,7 @@ class BasicSweeping:
         :return: A generator object that yields values within the specified limits.
         :rtype: generator object
         """
-        for repetition in range(self._total_cycles):
+        for repetition in range(self.total_cycles):
             for s in self.sweep_inner(repetition):
                 yield s
 
@@ -66,24 +66,24 @@ class BasicSweeping:
 class SpiralSweeping(BasicSweeping):
     def __init__(self, microscope, settings):
         super().__init__(microscope, settings)
-        self._step_per_cycle = int(settings['sweeping_steps'])
-        self._cycles = int(settings['sweeping_spiral_cycles'])
+        self.step_per_cycle = int(settings['sweeping_steps'])
+        self.cycles = int(settings['sweeping_spiral_cycles'])
 
     def sweep_inner(self, repetition):
         """ Basic sweeping"""
         if repetition % 2 == 0:
-            sweep_space = np.arange(self._steps)
+            sweep_space = np.arange(self.steps)
         else:
-            sweep_space = np.arange(self._steps)[::-1]
+            sweep_space = np.arange(self.steps)[::-1]
 
         for s in sweep_space:
-            cycle_no = s // self._step_per_cycle  # cycle number
-            step_no = s % self._step_per_cycle  # step number in the cycle
-            radius = (self._range / self._cycles) * (cycle_no + 1)  # avoid zero radius
-            angle = (2 * np.pi / self._step_per_cycle) * step_no
+            cycle_no = s // self.step_per_cycle  # cycle number
+            step_no = s % self.step_per_cycle  # step number in the cycle
+            radius = (self.range / self.cycles) * (cycle_no + 1)  # avoid zero radius
+            angle = (2 * np.pi / self.step_per_cycle) * step_no
 
             if cycle_no % 2 == 1:  # add angle shift for better covering
-                angle += (2 * np.pi / self._step_per_cycle) / 2
+                angle += (2 * np.pi / self.step_per_cycle) / 2
 
             x = np.cos(angle) * radius
             y = np.sin(angle) * radius
@@ -91,10 +91,10 @@ class SpiralSweeping(BasicSweeping):
             value = self._base + Point(x, y)
             value_r = math.sqrt(value.x ** 2 + value.y ** 2)  # distance from zero (radius)
 
-            if value_r < self._max_limits:
+            if value_r < self.max_limits:
                 yield value
             else:
-                logging.warning(f'Sweep of {self._sweeping_var} if out of range ({s}')
+                logging.warning(f'Sweep of {self.sweeping_var} if out of range ({s}')
 
 
     def sweep(self):
@@ -103,6 +103,6 @@ class SpiralSweeping(BasicSweeping):
 
         :return: A generator that yields the points of the sweeping motion.
         """
-        for repetition in range(self._total_cycles):
+        for repetition in range(self.total_cycles):
             for r in self.sweep_inner(repetition):
                 yield r
