@@ -76,9 +76,10 @@ autofunction:
 
 mask:
   - name: 'mask'
-    update_mask: True # grab image before focus in order to calculate mask. If False, last image is selected
+    update_mask: True # grab image before in order to calculate mask. If False, last image is selected
     mask_image_li: 32 # line integration for mask acquisition
     min_fraction: 0.1 # minimal fraction of mask to proceed to calculation
+    downsampling_factor: 4
     model_path: '/home/pavelkrep/data/deepmib_test/seg_exported'
     patch_size: [128, 128]
     threshold: 0.5

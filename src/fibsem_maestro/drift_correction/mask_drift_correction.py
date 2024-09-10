@@ -20,3 +20,7 @@ class MaskDriftCorrection:
             self.logging_dict[f"shift_y"] = shift_y
         else:
             logging.warning('The position in mask drift correction is not defined!')
+
+    @property
+    def mask(self):
+        return self._mask

@@ -57,11 +57,11 @@ class AutofunctionControl:
                                                                                 **concrete_af_settings},
                             image_settings=actual_image_settings)
 
-    def __call__(self, slice_number, image_res):
+    def __call__(self, slice_number, image_resolution, image_for_mask=None):
         # check firing conditions of all autofunctions
         for af in self.autofunctions:
             # Add af to scheduler if condition passed
-            if af.check_firing(slice_number, image_res):
+            if af._check_firing(slice_number, image_resolution):
                 if af not in self.scheduler:
                     self.scheduler.append(af)
                     logging.info(f'{af.name} autofunction added to scheduler')
@@ -91,7 +91,7 @@ class AutofunctionControl:
             af.move_stage_x()
             logging.info(f'Executed autofunction: {af.name}. Attempt no {self.attempts}.')
             # run af
-            finished = af()  # run af
+            finished = af(image_for_mask)  # run af
 
             # Moving back from focusing area
             af.move_stage_x(back=True)
@@ -105,12 +105,15 @@ class AutofunctionControl:
 
             # logging
             if self._logging:
+                # Sweeping var vs criterion plot
                 if af.af_curve_plot is not None:
                     plot_filename = os.path.join(self._log_dir, f'{slice_number:05}/{af.name}_curve.png')
                     af.af_curve_plot.savefig(plot_filename)
-                if af
-                    mask_filename = os.path.join(self._log_dir, f'{slice_number:05}/mask.png')
-                    af.mask_plot.savefig(mask_filename)
+                # Mask image
+                if af.mask is not None:
+                    mask_filename = os.path.join(self._log_dir, f'{slice_number:05}/{af.name}')
+                    af.mask.save_log_files(mask_filename)
+                # Relevant for line focusing. Plot of focus on each line
                 if af.af_line_plot is not None:
                     line_filename = os.path.join(self._log_dir, f'{slice_number:05}/{af.name}_line.png')
                     af.af_line_plot.savefig(line_filename)

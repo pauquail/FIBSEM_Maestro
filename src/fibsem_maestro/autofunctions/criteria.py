@@ -229,3 +229,10 @@ class Criterion:
             return np.nan
         return res
 
+    @property
+    def mask(self):
+        if self.mask_used:
+            return self._mask
+        else:
+            return None
+

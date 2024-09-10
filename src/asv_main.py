@@ -5,13 +5,12 @@ import time
 from fibsem_maestro.serial_control import SerialControl
 
 #  remove line 22: serial_control.imaging(1) # !!!
-#  plots - mask, dc
+# private public
 #  bordel v beam (az bude milling)
 #  mask for acb
-#  mask online training
 #  refactor
 
-# test: multiple masking, spiral af, email
+# test: multiple masking, spiral af, email, mask online training
 
 
 settings_path = 'settings.yaml'

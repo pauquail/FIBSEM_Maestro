@@ -143,7 +143,8 @@ class SerialControl:
         self.calculate_resolution()
         self.log_params['resolution'] = self.image_resolution
         del self.image
-        self.save_log_dict(slice_number)
+        self.save_log(slice_number) # save log dict
+        self.save_criterion_log_images(slice_number) # save resolution log images
 
     def calculate_resolution(self):
         try:
@@ -162,10 +163,20 @@ class SerialControl:
         self.log_params['stage_x'] = position.x
         self.log_params['stage_y'] = position.y
 
-    def save_log_dict(self, slice_number):
+    def save_log(self, slice_number):
         with open(os.path.join(self.dirs_log, f'{slice_number}/log_dict.yaml'), 'w') as f:
             yaml.dump(self.log_params, f, default_flow_style=False)
         self.log_params.clear()
+
+    def save_criterion_log_images(self, slice_number):
+        if self.log_enabled and self._criterion_resolution.mask is not None:
+            mask_filename = os.path.join(self.dirs_log, f'{slice_number:05}/resolution')
+            self._criterion_resolution.mask.save_log_images(mask_filename)
+
+    def save_mask_drift_correction_log_images(self, slice_number):
+        if self.log_enabled:
+            mask_filename = os.path.join(self.dirs_log, f'{slice_number:05}/drift_correction')
+            self.drift_correction.mask.save_log_images(mask_filename)
 
     def imaging(self, slice_number):
 
@@ -239,6 +250,10 @@ class SerialControl:
         if self.drift_correction is not None:
             try:
                 delta = self.drift_correction(self.image, slice_number)
+                # it is drift correction based on masking
+                if hasattr(self.drift_correction, 'mask'):
+                    self.save_mask_drift_correction_log_images(slice_number)
+
                 print(Fore.GREEN + 'Drift correction applied. ' + str(delta.to_dict()))
             except Exception as e:
                 logging.error('Drift correction error. ' + repr(e))
