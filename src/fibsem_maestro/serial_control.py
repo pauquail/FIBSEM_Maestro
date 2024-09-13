@@ -169,7 +169,8 @@ class SerialControl:
         # criterion of resolution calculation of final image - it uses parameters from criterion_calculation settings
         try:
             mask = find_in_objects(self.actual_criterion['mask_name'], self._masks)
-            criterion_resolution = Criterion(self.actual_criterion, mask=mask)
+            criterion_resolution = Criterion(self.actual_criterion, mask=mask, logging_enabled=self.logger.log_enabled,
+                                             log_dir=self.logger.dirs_log)
             print(f'Image resolution criterion: {criterion_resolution.name}')
         except Exception as e:
             logging.error("Initialization of resolution criteria failed! " + repr(e))

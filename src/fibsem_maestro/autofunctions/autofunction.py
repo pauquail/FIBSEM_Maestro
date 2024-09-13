@@ -21,6 +21,7 @@ class AutoFunction:
         # init criterion dict (array of focusing crit for each variable value)
         self._criterion_values = {}
         self._initialize_criteria_dict()
+        self.af_curve_plot = None
 
     def _initialize_settings(self, auto_function_settings):
         self.name = auto_function_settings['name']
@@ -43,9 +44,6 @@ class AutoFunction:
         if self._criterion.mask_used:
             self._criterion.mask.update_img(image_for_mask)
         self._microscope.apply_beam_settings(self._image_settings)  # apply resolution, li...
-        # reset plots
-        self.af_curve_plot = None
-        self.line_focus_plot = None
 
     def _get_image(self, value):
         """
@@ -161,7 +159,7 @@ class LineAutoFunction(AutoFunction):
         self.pre_imaging_delay = auto_function_settings['pre_imaging_delay']
         self.keep_time = auto_function_settings['keep_time']
         self.forbidden_sections = auto_function_settings['forbidden_sections']
-
+        self.line_focus_plot = None
         self._line_focuses = []
 
     def _estimate_line_time(self):

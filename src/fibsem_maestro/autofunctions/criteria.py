@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+from matplotlib import pyplot as plt, patches
 from scipy.ndimage import gaussian_filter
 
 from fibsem_maestro.FRC.frc import frc
@@ -22,7 +23,7 @@ def gauss_filter(x, px_size, detail):
 
 
 class Criterion:
-    def __init__(self, criterion_settings, mask=None):
+    def __init__(self, criterion_settings, mask=None, logging_enabled=False, log_dir=None):
         self.name = criterion_settings['name']
         self.border = criterion_settings['border']
         self.tile_size = criterion_settings['tile_size']
@@ -31,9 +32,15 @@ class Criterion:
         self.criterion_func = getattr(self, criterion_settings['criterion'])
         self.lowest_detail = criterion_settings['detail'][0]
         self.highest_detail = criterion_settings['detail'][1]
+        self.logging_enabled = logging_enabled
+        self.log_dir = log_dir
         self._mask = mask
 
-        self.pixel_size = None
+        self.pixel_size = None  # pixel size is measured from image
+        self.tile_width_px = None  # tile width calculated from image size
+        self.border_x = None  # border width in pixels
+        self.border_y = None  # border height in pixels
+        self.img_with_border = None  # Image without border
 
     def _tiles_resolution(self, img):
 
@@ -43,19 +50,19 @@ class Criterion:
 
         logging.info("Tiles resolution calculation...")
         # Apply resolution border to the acquired image
-        img_with_border = self._crop_image_with_border(img.data)
+        self.img_with_border = self._crop_image_with_border(img.data)
 
-        tile_width_px = int(self.tile_size / self.pixel_size)
-        tile_width_px -= tile_width_px % 4  # must be divisible by 4
+        self.tile_width_px = int(self.tile_size / self.pixel_size)
+        self.tile_width_px -= self.tile_width_px % 4  # must be divisible by 4
 
         # Get resolution of each tile and calculate final resolution
         res_arr = []
 
         # if tile size = 0, not apply tilling
         if self.tile_size == 0:
-            tiles = [img_with_border]
+            tiles = [self.img_with_border]
         else:
-            tiles = self._generate_image_fractions(img_with_border, tile_width_px)
+            tiles = self._generate_image_fractions(self.img_with_border, self.tile_width_px)
 
         for tile_img in tiles:
             try:
@@ -113,14 +120,14 @@ class Criterion:
             numpy.ndarray: The cropped image.
             list: [x_start, y_start, cropped_width, cropped_height] if return_coordinates is True.
         """
-        border_x = int(img.shape[0] * self.border)
-        border_y = int(img.shape[1] * self.border)
+        self.border_x = int(img.shape[0] * self.border)
+        self.border_y = int(img.shape[1] * self.border)
 
         if return_coordinates:
-            return [border_x, border_y, img.shape[0] - 2 * border_x, img.shape[1] - 2 * border_y]
+            return [self.border_x, self.border_y, img.shape[0] - 2 * self.border_x, img.shape[1] - 2 * self.border_y]
         else:
-            cropped_img = img[border_x: border_x + img.shape[0] - 2 * border_x,
-                          border_y: border_y + img.shape[1] - 2 * border_y]
+            cropped_img = img[self.border_x: self.border_x + img.shape[0] - 2 * self.border_x,
+                          self.border_y: self.border_y + img.shape[1] - 2 * self.border_y]
             return cropped_img
 
     def bandpass_criterion(self, img) -> float:
@@ -219,7 +226,24 @@ class Criterion:
         else:
             return None
 
-    def __call__(self, image, line_number=None):
+    def tile_log_image(self, img):
+        # Create figure and axes
+        fig, ax = plt.subplots()
+        # Display the image
+        ax.imshow(img, cmap='gray')
+        # if tile size = 0, not apply tilling
+        if self.tile_size > 0:
+            tiles = self._generate_image_fractions(self.img_with_border, self.tile_width_px, return_coordinates=True)
+            # Create a Rectangle patch for each tile and add it to the axes
+            for tile in tiles:
+                rect = patches.Rectangle((tile[0]+self.border_x, tile[1]+self.border_y), tile[2], tile[3],
+                                         linewidth=1, edgecolor='r',
+                                         facecolor='none')
+                ax.add_patch(rect)
+            plt.tight_layout()
+        return ax
+
+    def __call__(self, image, line_number=None, slice_number = None):
         """
         It measures selected resolution criterion on image.
         It uses masking, tiling, border exclusion.
@@ -238,8 +262,12 @@ class Criterion:
 
         # resolution from different masked regions
         region_resolutions = []
-        for image in images:
+        for i, image in enumerate(images):
             # region resolution
             region_resolutions.append(self._tiles_resolution(image))
+            # logging
+            if self.logging_enabled:
+                fig = self.tile_log_image(image)
+                fig.savefig(f'{self.log_dir}/{slice_number}/criterion_subimage_{i}.png')
 
         return self.final_regions_resolution(region_resolutions)

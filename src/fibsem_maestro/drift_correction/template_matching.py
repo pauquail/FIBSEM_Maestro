@@ -119,9 +119,8 @@ class TemplateMatchingDriftCorrection:
 
     def _log(self, slice_number, shift_x, shift_y):
         if self.logging:
-            plt.axis('off')
-            plt.tight_layout()
-            plt.savefig(os.path.join(self.log_dir, f"{slice_number:05}/template_matching.png"))
+            fig = self.log_img()
+            fig.savefig(os.path.join(self.log_dir, f"{slice_number:05}/template_matching.png"))
 
         # log final shift
         self.logging_dict['shift_x'] = shift_x
@@ -136,6 +135,8 @@ class TemplateMatchingDriftCorrection:
             rect = Rectangle((a[0], a[1]), a[2], a[3], linewidth=1, edgecolor='r', facecolor='none')
             # Add the patch to the Axes
             ax.add_patch(rect)
+        plt.tight_layout()
+        plt.axis('off')
         return ax
 
     def __call__(self, img, slice_number):

@@ -5,23 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="dev progress">
-      <change beforePath="$PROJECT_DIR$/src/asv_adapter.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/asv_adapter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/asv_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/asv_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction_control.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/masking.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/masking.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/sweeping.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/sweeping.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/mask_drift_correction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/mask_drift_correction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/template_matching.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/template_matching.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/autoscript_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/autoscript_control.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/tools/dirs_management.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/dirs_management.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/tools/math_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/math_tools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/tools/support.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/support.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/settings.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/settings.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,12 +38,12 @@
     &quot;assignee&quot;: &quot;pauquail&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/pauquail/FIBSEM_Maestro.git&quot;,
-    &quot;accountId&quot;: &quot;b03ae5f4-a0f7-48b4-93a3-89d4a563489b&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/pauquail/FIBSEM_Maestro.git",
+    "accountId": "da31eabe-8958-4cf9-9ffb-304e6dedfbfd"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -164,6 +153,7 @@
       <workItem from="1722859393135" duration="3005000" />
       <workItem from="1722933779436" duration="77552000" />
       <workItem from="1725879567798" duration="12861000" />
+      <workItem from="1726215169853" duration="4052000" />
     </task>
     <task id="LOCAL-00001" summary="init commit">
       <option name="closed" value="true" />
@@ -285,7 +275,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726065877684</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="dev progress">
+      <option name="closed" value="true" />
+      <created>1726215404518</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1726215404518</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -358,12 +356,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/fibsem_maestro/drift_correction/template_matching.py</url>
-          <line>11</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/fibsem_maestro/drift_correction/template_matching.py</url>
-          <line>150</line>
+          <line>151</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>

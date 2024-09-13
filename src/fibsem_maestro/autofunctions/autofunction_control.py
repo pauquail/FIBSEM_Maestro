@@ -55,7 +55,8 @@ class AutofunctionControl:
         sweeping = Sweeping(self._microscope.electron_beam, concrete_af_settings)
 
         # select criterion based on criteria (settings.yaml)
-        criterion = Criterion(actual_criterion_settings, mask=actual_criterion_mask)
+        criterion = Criterion(actual_criterion_settings, mask=actual_criterion_mask, logging_enabled=self._logging,
+                              log_dir=self._log_dir)
         # select autofunction based on autofunction setting (settings.yaml)
         autofunction_module = importlib.import_module('fibsem_maestro.autofunctions.autofunction')
         Autofunction = getattr(autofunction_module, autofunction)
@@ -113,3 +114,11 @@ class AutofunctionControl:
             logging.info(f'Executed autofunction: {af.name}. Attempt no {self.attempts}.')
             # run af
             af(image_for_mask)  # run af
+
+            # logging plots
+            if self._logging:
+                fig = af.af_curve_plot()
+                fig.savefig(self._log_dir + f'/{slice_number}/{af.name}_af_curve.png')
+                if hasattr(af, 'line_focus_plot'):
+                    fig = af.line_focus_plot()
+                    fig.savefig(self._log_dir + f'/{slice_number}/{af.name}_line_focus.png')
