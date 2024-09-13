@@ -28,7 +28,7 @@ def create_microscope(control: str):
             """
             super().__init__(settings['ip_address'])
             self.beam = self.electron_beam  # default setting for actual beam
-            self.vertical_field_width = None # vertical field of view. serves for resolution calculation
+            self.vertical_field_width = None  # vertical field of view. serves for resolution calculation
 
             self.set_pixel_size = settings['pixel_size']
             self.field_of_view = settings['field_of_view']
@@ -40,13 +40,18 @@ def create_microscope(control: str):
 
             self.data_dir = data_dir
 
+            self._detector_contrast_backup = None
+            self._detector_brightness_backup = None
+            self.stage_trial_counter = self.stage_trials
+
         @property
         def pixel_size(self):
-            return super().pixel_size
+            return self.beam.pixel_size
+
         @pixel_size.setter
         def pixel_size(self, pixel):
             """ pixel size is not possible to set directly to microscope, but it is needed for resolution calculation"""
-            extended_res_i_x = int(self.horizontal_field_width / pixel)
+            extended_res_i_x = int(self.beam.horizontal_field_width / pixel)
             extended_res_i_y = int(self.vertical_field_width / pixel)
             extended_res = f"{extended_res_i_x}x{extended_res_i_y}"
             logging.info(f'Extended resolution set to: {extended_res}')
@@ -66,7 +71,8 @@ def create_microscope(control: str):
 
             if dist > self.stage_tolerance:
                 logging.warning(
-                    f"Stage reached position {new_stage_position} is too far ({dist}) from defined position {new_stage_position} ")
+                    f"Stage reached position {new_stage_position} is too far ({dist}) from defined "
+                    f"position {new_stage_position} ")
                 self.stage_trial_counter -= 1
                 self.stage_move_with_verification(new_stage_position)  # move again
                 if self.stage_trial_counter == 0:
@@ -139,6 +145,15 @@ def create_microscope(control: str):
                 setattr(self.beam, s, settings[s])
 
         def acquire_image(self, slice_number=None):
+            """
+            Acquires an images using the microscope's electron beam.
+            The resolution is set based on the FoV and pixe_size.
+            It can acquire multiple images if the li (setting images_line_integration) is array.
+            It saves image (data_dir used)
+
+            :param slice_number: Optional slice number for the image. Defaults to None.
+            :return: The acquired image.
+            """
             self.beam = self.electron_beam
             self.beam.horizontal_field_width = self.field_of_view[0]
             self.vertical_field_width = self.field_of_view[1]
@@ -147,7 +162,7 @@ def create_microscope(control: str):
             self.pixel_size = float(self.set_pixel_size)
 
             for i in range(len(self.li)):
-                self.line_integration = self.li[i]
+                self.beam.line_integration = self.li[i]
 
                 if slice_number is not None:
                     img_name = f"slice_{slice_number:05}_({i}).tif"
@@ -163,4 +178,3 @@ def create_microscope(control: str):
                 return image
 
     return Microscope  # factory
-

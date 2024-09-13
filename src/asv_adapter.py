@@ -21,6 +21,7 @@ if len(sys.argv) > 1:
         slice_number = 1
 else:
     print('Argument for json file localization not passed!')
+    slice_number = 1
 
 # send slice_number to app
 string_to_send = str(slice_number)

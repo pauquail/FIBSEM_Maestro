@@ -1,21 +1,23 @@
 import logging
-import math
 import tempfile
 
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl, StagePosition, BeamControl
-from fibsem_maestro.tools.support import Point, ScanningArea
+from fibsem_maestro.tools.support import Point
 
 try:
     from autoscript_sdb_microscope_client import SdbMicroscopeClient
-    from autoscript_sdb_microscope_client.structures import Point as PointAS, GrabFrameSettings, AdornedImage
+    from autoscript_sdb_microscope_client.structures import (Point as PointAS, GrabFrameSettings, AdornedImage,
+                                                             ImageFileFormat)
     from autoscript_sdb_microscope_client.enumerations import ImagingDevice
+
     virtual_mode = False
     logging.info("AS library imported.")
-except:
+except ImportError:
     from fibsem_maestro.microscope_control.virtual_control import VirtualMicroscope
     from fibsem_maestro.microscope_control.virtual_control import StagePosition as StagePositionAS, ImagingDevice
 
     from fibsem_maestro.tools.support import Point as PointAS
+
     virtual_mode = True
     logging.warning("AS library could not be imported. Virtual mode used.")
 
@@ -34,8 +36,6 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
 
         self._electron_beam = Beam(self._microscope, 'eb')
         self._ion_beam = Beam(self._microscope, 'ib')
-
-
 
     @property
     def position(self):
@@ -80,7 +80,7 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
 
 class Beam(BeamControl):
     """ Implementation of Microscope Beam. The class is universal for electrons and ions"""
-    
+
     def __init__(self, microscope, modality):
         """
         Constructor for the Beam class.
@@ -284,7 +284,7 @@ class Beam(BeamControl):
     @property
     def detector_contrast(self):
         """Get the contrast of the detector."""
-        self.select_modality() # activate right quad
+        self.select_modality()  # activate right quad
         value = self._microscope.detector.contrast.value
         logging.debug(f"Getting detector contrast ({self._modality}): {value}")
         return value
@@ -339,8 +339,9 @@ class Beam(BeamControl):
 
     def select_modality(self):
         """
-        This method is used to switch the microscope's modality between the Electron Beam (eb) mode and the Ion Beam (ib) mode.
-        The selection of the modality will have an impact on starting and stopping the acquisition, grab and get image, and on the selected detector.
+        This method is used to switch the microscope's modality between the Electron Beam (eb) mode and the Ion Beam
+        (ib) mode. The selection of the modality will have an impact on starting and stopping the acquisition,
+        grab and get image, and on the selected detector.
 
         The Electron Beam mode is always in Quad 1, while the Ion Beam mode is always in Quad 2.
 
@@ -375,8 +376,8 @@ class Beam(BeamControl):
             grabbed_image = self._microscope.imaging.grab_frame(img_settings)
             logging.info(f"Image grabbed.")
             return grabbed_image
-        except:
-            logging.warning('Image grab failed. It must be grabbed to disk')
+        except Exception as e:
+            logging.warning('Image grab failed. It must be grabbed to disk. ' + repr(e))
             img_name = tempfile.NamedTemporaryFile(delete=True)
             self._microscope.imaging.grab_frame_to_disk(img_name, ImageFileFormat.TIFF, img_settings)
             return AdornedImage.load(img_name)
@@ -390,7 +391,7 @@ class Beam(BeamControl):
         """
         self.select_modality()  # activate right quad
         logging.debug(f"Getting image ({self._modality}).")
-        return self._microscope.imaging._get_image().data
+        return self._microscope.imaging.get_image().data
 
     @property
     def line_integration(self):
@@ -398,7 +399,7 @@ class Beam(BeamControl):
         return self._line_integration
 
     @line_integration.setter
-    def line_integration(self, li:int):
+    def line_integration(self, li: int):
         """
         Set line integration for grab_frame
         Args:
@@ -480,14 +481,12 @@ class Beam(BeamControl):
         """
         value = f'{resolution[0]}x{resolution[1]}'
         for r in self._standard_resolutions:
-            if resolution[0]==r[0] and resolution[1]==r[1]:
+            if resolution[0] == r[0] and resolution[1] == r[1]:
                 logging.debug(f"Setting standard resolution to ({self._modality}): {value}.")
                 self._beam.scanning.resolution.value = value
                 return
         logging.debug(f"Setting extended resolution to ({self._modality}): {value}.")
         self._extended_resolution = resolution
-
-
 
     @property
     def horizontal_field_width(self):
@@ -520,7 +519,7 @@ class Beam(BeamControl):
         Returns:
             tuple: The size of the pixel
         """
-        ps = self.hfw / self.resolution[0]  # x resolution
+        ps = self._beam.horizontal_field_width / self.resolution[0]  # x resolution
         logging.debug(f"Getting pixel size ({self._modality}): {ps}.")
         return ps
 

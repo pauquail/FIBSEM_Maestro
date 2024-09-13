@@ -7,10 +7,10 @@ from fibsem_maestro.serial_control import SerialControl
 #  remove line 22: serial_control.imaging(1) # !!!
 # private public
 #  bordel v beam (az bude milling)
-#  mask for acb
+#  _mask for acb
 #  refactor
 
-# test: multiple masking, spiral af, email, mask online training
+# test: multiple masking, spiral af, email, _mask online training
 
 
 settings_path = 'settings.yaml'
@@ -23,13 +23,16 @@ print('The microscope control FIBSEM Maestro now')
 
 serial_control = SerialControl(settings_path)
 
-print('The microscope successfully initalized')
+print('The microscope successfully initialized')
 
 serial_control.imaging(1) # !!!
 
 # run FIBSEM control
+
+
 def run(slice_number):
     serial_control.imaging(slice_number)
+
 
 print('Waiting for imaging call...')
 while True:
@@ -44,5 +47,3 @@ while True:
     conn.sendall(b'close')
 
 conn.close()
-
-

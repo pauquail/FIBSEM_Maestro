@@ -1,6 +1,5 @@
 import logging
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 import time
 
@@ -39,8 +38,8 @@ class AutoFunction:
         self._criterion_values = {i: [] for i in range(len(list(self._sweeping.sweep())))}
 
     def _prepare(self, image_for_mask=None):
-        """ Update mask if needed, set the microscope and reset plots """
-        # grab the image for masking if mask enabled
+        """ Update _mask if needed, set the microscope and reset plots """
+        # grab the image for masking if _mask enabled
         if self._criterion.mask_used:
             self._criterion.mask.update_img(image_for_mask)
         self._microscope.apply_beam_settings(self._image_settings)  # apply resolution, li...
@@ -95,7 +94,7 @@ class AutoFunction:
         plt.tight_layout()
         return fig
 
-    def _check_firing(self, slice_number, image_resolution):
+    def check_firing(self, slice_number, image_resolution):
         """ Check if the firing condition is passed"""
         execute = self.execute
         # if execute (settings) is int - firing according to slice number
@@ -112,12 +111,13 @@ class AutoFunction:
         :param image_for_mask: The image to be used for masking. Defaults to None.
         :return: True if the af process is finished, False if the process is not yet finished in step image mode.
 
-        The __call__ method is used to execute the functionality of the class. It updates the mask image if needed and sets the microscope.
+        The __call__ method is used to execute the functionality of the class. It updates the _mask image if needed and
+        sets the microscope.
         If the step_mode is set to False, it performs a sweeping process and evaluates the result.
-        If the step_mode is set to True, it performs a step by step process.
+        If the step_mode is set to True, it performs a step-by-step process.
         In both cases, it returns True if the process is finished and False if the process is not yet finished.
         """
-        self._prepare(image_for_mask)  # update mask image if needed and set microscope
+        self._prepare(image_for_mask)  # update _mask image if needed and set microscope
         # non-step image mode
         if not self.step_mode:
             for s in self._sweeping.sweep():
@@ -147,11 +147,12 @@ class AutoFunction:
 
     @property
     def mask(self):
-        """ Get mask object if used """
+        """ Get _mask object if used """
         if self._criterion.mask_used:
             return self._criterion.mask
         else:
             return None
+
 
 class LineAutoFunction(AutoFunction):
     def __init__(self, criterion, sweeping: BasicSweeping, microscope,
@@ -168,6 +169,12 @@ class LineAutoFunction(AutoFunction):
                 * self._microscope.beam.resolution[0])
 
     def _variable_sweeping(self, line_time):
+        """
+        Performs line variable sweeping during scan for a given line time.
+
+        :param line_time: the time it takes to acquire a single line of data
+        :return: None
+        """
         for step, s in enumerate(self._sweeping.sweep()):
             if step == 0:
                 self._microscope.beam.start_acquisition()
@@ -181,22 +188,18 @@ class LineAutoFunction(AutoFunction):
             time.sleep(self.keep_time * line_time)
         self._microscope.beam.stop_acquisition()
 
-    def _line_focus(self):
-        # line time estimation
-        line_time = self._estimate_line_time()
+    def _process_image(self, img):
+        """
+        It fills self._criterion_values based on given image with sweep value
 
-        self._microscope.beam.blank_screen()
-
-        # variable sweeping
-        self._variable_sweeping(line_time)
-
-        img = self._microscope.beam.get_image().data
-
-        # image processing
+        :param img: The image to be processed.
+        :type img: numpy.ndarray
+        :return: None
+        """
         # identify the blank spaces
         xproj = np.sum(img, axis=1)  # identify blank line by min function
         zero_pos = np.where(xproj < 10)[0]  # position of all blank lines
-        focus_steps = self._sweeping.items_number()
+        focus_steps = len(self._sweeping)
         # go through the sections
         image_section_index = 0  # actual image section
         for i in range(len(zero_pos) - 1):  # iterate all blank lines - find the image section
@@ -219,17 +222,37 @@ class LineAutoFunction(AutoFunction):
                             else:
                                 logging.warning('Criterion omitted')
                 image_section_index += 1
+
+    def _line_focus(self):
+        """
+        Executes line focus operation.
+        It starts scan with variable sweeping and evaluates results
+        :return: None
+        """
+        # line time estimation
+        line_time = self._estimate_line_time()
+        self._microscope.beam.blank_screen()
+        # variable sweeping
+        self._variable_sweeping(line_time)
+        # get image
+        img = self._microscope.beam.get_image().data
+        # calculate self._criterion_values
+        self._process_image(img)
         # set focus plot
         self.line_focus_plot = self.show_line_focus(img)
         self._evaluate()
 
     def __call__(self, image_for_mask=None):
-        self._prepare(image_for_mask)
+        """
+        :param image_for_mask: The input image for creating a _mask if needed.
+        :return: True if the operation is successfully finished.
 
+        """
+        self._prepare(image_for_mask)
         if self.step_mode:
             raise NotImplementedError("Not implemented yet")
-        self.line_focus()
-        return True # af finished
+        self._line_focus()
+        return True  # af finished
 
     def show_line_focus(self, img):
         """

@@ -17,18 +17,21 @@ class BasicSweeping:
         self.steps = int(settings['sweeping_steps'])
         self.total_cycles = int(settings['sweeping_total_cycles'])
 
-        self._base = None # initial sweeping variable
+        self._base = None  # initial sweeping variable
         self.set_sweep()
 
     @property
     def value(self):
+        """ Get sweeping variable """
         return getattr(self._microscope, self.sweeping_var)
 
     @value.setter
     def value(self, value):
+        """ Set sweeping variable """
         setattr(self._microscope, self.sweeping_var, value)
 
     def set_sweep(self):
+        """ Set sweeping start point """
         self._base = self.value
 
     def sweep_inner(self, repetition):
@@ -55,13 +58,13 @@ class BasicSweeping:
             for s in self.sweep_inner(repetition):
                 yield s
 
-
-    def items_number(self):
+    def __len__(self):
         """ Returns the number of items in the sweeping variable. """
         i = 0
         for _ in self.sweep():
             i += 1
         return i
+
 
 class SpiralSweeping(BasicSweeping):
     def __init__(self, microscope, settings):
@@ -95,7 +98,6 @@ class SpiralSweeping(BasicSweeping):
                 yield value
             else:
                 logging.warning(f'Sweep of {self.sweeping_var} if out of range ({s}')
-
 
     def sweep(self):
         """

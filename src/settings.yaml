@@ -75,10 +75,10 @@ autofunction:
       delta_x: 0
 
 mask:
-  - name: 'mask'
-    update_mask: True # grab image before in order to calculate mask. If False, last image is selected
-    mask_image_li: 32 # line integration for mask acquisition
-    min_fraction: 0.1 # minimal fraction of mask to proceed to calculation
+  - name: '_mask'
+    update_mask: True # grab image before in order to calculate _mask. If False, last image is selected
+    mask_image_li: 32 # line integration for _mask acquisition
+    min_fraction: 0.1 # minimal fraction of _mask to proceed to calculation
     downsampling_factor: 4
     model_path: '/home/pavelkrep/data/deepmib_test/seg_exported'
     patch_size: [128, 128]
@@ -93,5 +93,5 @@ email:
   password_file: 'email_password.txt'
 
 drift_correction:
-  type: 'template_matching' # values: 'template_matching', 'mask'
+  type: 'template_matching' # values: 'template_matching', '_mask'
   min_confidence: 0

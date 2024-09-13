@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 import ast
 
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl
@@ -11,16 +10,15 @@ def save_settings(microscope: MicroscopeControl, settings: list, path):
     for setting in settings:
         try:
             if '.' in setting:
-                # inner attribute
+                # inner attribute -> beam setting
                 [beam, setting_attribute] = setting.split('.')
                 value = getattr(getattr(microscope, beam), setting_attribute)
             else:
                 # simple attribute
                 value = getattr(microscope, setting)
-        except:
-
-
+        except Exception as e:
             logging.error(f'The value {setting} cannot be read from microscope. Setting to None.')
+            logging.error(repr(e))
             value = None
 
         settings_dict[setting] = value
@@ -38,5 +36,6 @@ def load_settings(microscope: MicroscopeControl, path):
     for setting, value in settings_dict.items():
         try:
             setattr(microscope, setting, value)
-        except:
+        except Exception as e:
             logging.error(f'The value {setting} cannot be set to {value} in microscope')
+            logging.error(repr(e))

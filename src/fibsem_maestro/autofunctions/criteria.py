@@ -31,29 +31,11 @@ class Criterion:
         self.criterion_func = getattr(self, criterion_settings['criterion'])
         self.lowest_detail = criterion_settings['detail'][0]
         self.highest_detail = criterion_settings['detail'][1]
-        self.mask = mask
+        self._mask = mask
 
-    def __call__(self, image, line_number=None):
-        # line_number - if set, the mask is selected based on the line number
+        self.pixel_size = None
 
-        self.pixel_size = image.metadata.binary_result.pixel_size.x
-        images = [image]
-
-        if self.mask is not None:
-            images = self.mask.get_masked_images(image, line_number)
-            if images is None:
-                logging.error('Not enough masked regions for resolution calculation - masking omitted!')
-                images = [image] # calculate resolution on entire image
-
-        # resolution from different masked regions
-        region_resolutions = []
-        for image in images:
-            # region resolution
-            region_resolutions.append(self.tiles_resolution(image))
-
-        return self.final_regions_resolution(region_resolutions)
-
-    def tiles_resolution(self, img):
+    def _tiles_resolution(self, img):
 
         if min(img.shape) == 1:  # line
             logging.info('Line image does not support tiling')
@@ -61,7 +43,7 @@ class Criterion:
 
         logging.info("Tiles resolution calculation...")
         # Apply resolution border to the acquired image
-        img_with_border = self.crop_image_with_border(img.data)
+        img_with_border = self._crop_image_with_border(img.data)
 
         tile_width_px = int(self.tile_size / self.pixel_size)
         tile_width_px -= tile_width_px % 4  # must be divisible by 4
@@ -73,13 +55,13 @@ class Criterion:
         if self.tile_size == 0:
             tiles = [img_with_border]
         else:
-            tiles = self.generate_image_fractions(img_with_border, tile_width_px)
+            tiles = self._generate_image_fractions(img_with_border, tile_width_px)
 
         for tile_img in tiles:
             try:
                 res = self.criterion_func(tile_img)
-            except:
-                logging.warning("FRC error on current tile")
+            except Exception as e:
+                logging.warning("FRC error on current tile. " + repr(e))
                 continue
             res_arr.append(res)
 
@@ -97,13 +79,12 @@ class Criterion:
     def mask_used(self):
         return self.mask is not None
 
-    def generate_image_fractions(self, img, overlap=0, return_coordinates=False):
+    def _generate_image_fractions(self, img, overlap=0, return_coordinates=False):
         """
         Generate image fractions (tiles) with optional overlap.
 
         Parameters:
             img (numpy.ndarray): The input image.
-            tile_size: Tile size.
             overlap (float): Proportion of overlap between tiles (0 - no overlap, 1 - complete overlap).
             return_coordinates (bool): Whether to return tile coordinates.
 
@@ -120,7 +101,7 @@ class Criterion:
                 else:
                     yield img[xi: xi + self.tile_size, yi: yi + self.tile_size]
 
-    def crop_image_with_border(self, img, return_coordinates=False):
+    def _crop_image_with_border(self, img, return_coordinates=False):
         """
         Crop an image based on a specified border size.
 
@@ -168,15 +149,17 @@ class Criterion:
         result = np.var(img_high - img_low)
         return result
 
-
     def fft_criterion(self, img):
         """
-        :param img: The image data. It can be either a 1-dimensional array representing an image line or a 2-dimensional array representing the entire image.
+        :param img: The image data. It can be either a 1-dimensional array representing an image line
+        or a 2-dimensional array representing the entire image.
 
         :return: The sum of the amplitudes of the filtered frequencies.
 
-        This method calculates the FFT (Fast Fourier Transform) of the given image data. It removes frequencies within the specified range and returns the sum of the amplitudes of the remaining frequencies.
+        This method calculates the FFT (Fast Fourier Transform) of the given image data. It removes frequencies within
+        the specified range and returns the sum of the amplitudes of the remaining frequencies.
         """
+
         def fft_criterion1d():
             img0 = img - np.mean(img)  # remove 0 frequency
             fft_line = np.fft.fft(img0)  # fft
@@ -195,8 +178,8 @@ class Criterion:
             img0 = img - np.mean(img)  # remove 0 frequency
             fft_img = np.fft.fft2(img0)  # fft
 
-            freq1 = np.fft.fftfreq(fft_img.shape[0], self.pixel_size) # get x freq axis
-            freq2 = np.fft.fftfreq(fft_img.shape[1], self.pixel_size) # get y freq axis
+            freq1 = np.fft.fftfreq(fft_img.shape[0], self.pixel_size)  # get x freq axis
+            freq2 = np.fft.fftfreq(fft_img.shape[1], self.pixel_size)  # get y freq axis
 
             freq1 = np.repeat(freq1[:, np.newaxis], freq2.shape[0], axis=1)
             freq2 = np.repeat(freq2[:, np.newaxis], freq1.shape[0], axis=1).T
@@ -236,3 +219,27 @@ class Criterion:
         else:
             return None
 
+    def __call__(self, image, line_number=None):
+        """
+        It measures selected resolution criterion on image.
+        It uses masking, tiling, border exclusion.
+
+        line_number - if set, only one line is selected from mask image
+        """
+
+        self.pixel_size = image.metadata.binary_result.pixel_size.x
+        images = [image]
+
+        if self.mask is not None:
+            images = self.mask.get_masked_images(image, line_number)
+            if images is None:
+                logging.error('Not enough masked regions for resolution calculation - masking omitted!')
+                images = [image]  # calculate resolution on entire image
+
+        # resolution from different masked regions
+        region_resolutions = []
+        for image in images:
+            # region resolution
+            region_resolutions.append(self._tiles_resolution(image))
+
+        return self.final_regions_resolution(region_resolutions)

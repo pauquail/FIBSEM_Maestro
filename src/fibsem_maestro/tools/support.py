@@ -1,5 +1,4 @@
 import math
-from enum import Enum
 
 
 class Point:
@@ -29,7 +28,7 @@ class Point:
         return Point(x=point_as.x, y=point_as.y)
 
     def to_xy(self):
-        return (self.x, self.y)
+        return self.x, self.y
 
     def to_dict(self):
         return vars(self)
@@ -47,6 +46,7 @@ class Point:
             return Point(self.x + other.x, self.y + other.y)
         else:
             raise TypeError("Unsupported operand type")
+
 
 class StagePosition:
     """
@@ -82,7 +82,8 @@ class StagePosition:
         return vars(self)
 
     def to_xy(self):
-        return (self.x, self.y)
+        return self.x, self.y
+
 
 class ScanningArea:
     def __init__(self, center: Point, width: float, height: float):
@@ -107,18 +108,21 @@ class ScanningArea:
         center_pix = self.center * img_shape
         height_pix = img_shape[0] * self.height
         width_pix = img_shape[1] * self.width
-        left_top = [center_pix[0] - height_pix // 2,
-                    center_pix[1] - width_pix // 2]
+        left_top = [center_pix.x - height_pix // 2,
+                    center_pix.y - width_pix // 2]
         return left_top, [height_pix, width_pix]
 
 
 def find_in_dict(name, list_of_dicts):
+    """ find the item in a dict based on name value """
     if name == 'none':
         return None
     else:
         return [dic for dic in list_of_dicts if dic['name'] == name]
 
+
 def find_in_objects(name, list_of_objects):
+    """ find the item in objects list based on name value """
     if name == 'none':
         return None
     else:

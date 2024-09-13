@@ -1,42 +1,50 @@
 import importlib
 import logging
-import os
 
 from fibsem_maestro.autofunctions.criteria import Criterion
 from fibsem_maestro.tools.email_attention import send_email
-from fibsem_maestro.tools.support import Point, find_in_dict, find_in_objects
+from fibsem_maestro.tools.support import find_in_dict, find_in_objects
 
 
 class AutofunctionControl:
     def __init__(self, microscope, settings, logging_enabled=False, log_dir=None, masks=None):
         # settings
-        self.af_settings = settings['autofunction']
-
+        self.autofunction_settings = settings['autofunction']
         self.email_settings = settings['email']
         self.criterion_settings = settings['criterion_calculation']
         self.imaging_settings = settings['imaging']
 
-        self.max_attempts = self.af_settings['max_attempts']
+        self.max_attempts = self.autofunction_settings['max_attempts']
         self.email_sender = self.email_settings['sender']
         self.email_receiver = self.email_settings['receiver']
         self.password_file = self.email_settings['password_file']
-        self.image_name = self.af_settings['image_name']
+        self.image_name = self.autofunction_settings['image_name']
 
         self._microscope = microscope
         self._log_dir = log_dir
         self._logging = logging_enabled
         self._masks = masks
-        self.af_values = self.af_settings['af_values']
-        self.autofunctions = [self.get_autofunction(x) for x in self.af_values]  # list of all autofunctions
-        self.scheduler = []
-        self.attempts = 0 # number of af attempts (early stopping)
+        self.af_values = self.autofunction_settings['af_values']
+        # list of all autofunctions objects
+        self.autofunctions = [self._get_autofunction(x) for x in self.af_values]
+        self.scheduler = []  # queue of autofunctions waiting to execute
+        self.attempts = 0  # number of af attempts (early stopping)
 
-    def get_autofunction(self, concrete_af_settings):
+    def _get_autofunction(self, concrete_af_settings):
+        """
+        :param concrete_af_settings: Dictionary containing the settings for the given autofunction.
+        :return: An instance of the chosen Autofunction class.
+
+        This method retrieves the necessary settings from the provided `concrete_af_settings` dictionary and uses them
+        to select and initialize the appropriate sweeping strategy and autofunction classes.
+        It returns an instance of the chosen Autofunction class.
+        """
         sweeping_strategy = concrete_af_settings['sweeping_strategy']
         mask_name = concrete_af_settings['mask_name']
         image_name = concrete_af_settings['image_name']
         criterion_name = concrete_af_settings['criterion_name']
         autofunction = concrete_af_settings['autofunction']
+
         actual_image_settings = find_in_dict(image_name, self.imaging_settings)
         actual_criterion_settings = find_in_dict(criterion_name, self.criterion_settings)
         actual_criterion_mask = find_in_objects(mask_name, self._masks)
@@ -51,17 +59,30 @@ class AutofunctionControl:
         # select autofunction based on autofunction setting (settings.yaml)
         autofunction_module = importlib.import_module('fibsem_maestro.autofunctions.autofunction')
         Autofunction = getattr(autofunction_module, autofunction)
-        # pass merged settings (current af_value + autofunction settings)
 
-        return Autofunction(criterion, sweeping, self._microscope, af_settings={**self.af_settings,
-                                                                                **concrete_af_settings},
-                            image_settings=actual_image_settings)
+        # pass merged settings (current af_value + autofunction settings)
+        merged_settings = {
+            **self.autofunction_settings,
+            **concrete_af_settings
+        }
+        return Autofunction(
+            criterion, sweeping,
+            self._microscope,
+            af_settings=merged_settings,
+            image_settings=actual_image_settings)
 
     def __call__(self, slice_number, image_resolution, image_for_mask=None):
+        """
+        Autofunctions handling.
+        :param slice_number: the number of the current image slice
+        :param image_resolution: the resolution of the image
+        :param image_for_mask: an optional image used for masking
+        :return: None
+        """
         # check firing conditions of all autofunctions
         for af in self.autofunctions:
             # Add af to scheduler if condition passed
-            if af._check_firing(slice_number, image_resolution):
+            if af.check_firing(slice_number, image_resolution):
                 if af not in self.scheduler:
                     self.scheduler.append(af)
                     logging.info(f'{af.name} autofunction added to scheduler')
@@ -91,31 +112,4 @@ class AutofunctionControl:
             af.move_stage_x()
             logging.info(f'Executed autofunction: {af.name}. Attempt no {self.attempts}.')
             # run af
-            finished = af(image_for_mask)  # run af
-
-            # Moving back from focusing area
-            af.move_stage_x(back=True)
-
-            # remove from scheduler if needed
-            if finished:
-                self.scheduler.pop(0)
-                logging.info(f'Autofunction {af.name} finished and removed from scheduler')
-            else:
-                logging.info(f'Autofunction {af.name} in progress')
-
-            # logging
-            if self._logging:
-                # Sweeping var vs criterion plot
-                if af.af_curve_plot is not None:
-                    plot_filename = os.path.join(self._log_dir, f'{slice_number:05}/{af.name}_curve.png')
-                    af.af_curve_plot.savefig(plot_filename)
-                # Mask image
-                if af.mask is not None:
-                    mask_filename = os.path.join(self._log_dir, f'{slice_number:05}/{af.name}')
-                    af.mask.save_log_files(mask_filename)
-                # Relevant for line focusing. Plot of focus on each line
-                if af.af_line_plot is not None:
-                    line_filename = os.path.join(self._log_dir, f'{slice_number:05}/{af.name}_line.png')
-                    af.af_line_plot.savefig(line_filename)
-        else:
-            self.attempts = 0 # zero attempts
+            af(image_for_mask)  # run af

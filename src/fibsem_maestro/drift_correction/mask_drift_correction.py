@@ -2,6 +2,7 @@ import logging
 
 
 class MaskDriftCorrection:
+    """ Drift correction keep the center of masked blob in the center of FoV"""
     def __init__(self, mask, microscope, logging_dict):
         assert mask is not None, 'Mask not found. Drift correction failed.'
 
@@ -9,8 +10,10 @@ class MaskDriftCorrection:
         self._microscope = microscope
         self.logging_dict = logging_dict
 
-    def __call__(self, slice_number):
-        self.current_position = self._mask._get_center()
+    def __call__(self):
+        # get center of blob
+        self.current_position = self._mask.get_center()
+        # get center of mask image
         center = self._mask.image_ceter
         pixel_size = self._mask.image_pixel_size
         if self.current_position is not None:
@@ -19,7 +22,7 @@ class MaskDriftCorrection:
             self.logging_dict[f"shift_x"] = shift_x
             self.logging_dict[f"shift_y"] = shift_y
         else:
-            logging.warning('The position in mask drift correction is not defined!')
+            logging.warning('The position in _mask drift correction is not defined!')
 
     @property
     def mask(self):
