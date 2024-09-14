@@ -2,15 +2,16 @@ import os
 import sys
 import socket
 import time
+import version
 from fibsem_maestro.serial_control import SerialControl
 
 #  remove line 22: serial_control.imaging(1) # !!!
-# private public
+#  email enabled
+#  virtual mode
 #  bordel v beam (az bude milling)
-#  _mask for acb
-#  refactor
+#  mask for acb
 
-# test: multiple masking, spiral af, email, _mask online training
+# test: grab big data, multiple masking, spiral af, email, mask online training, reduced scanning, template matching
 
 
 settings_path = 'settings.yaml'
@@ -19,11 +20,11 @@ settings_path = 'settings.yaml'
 sock = socket.socket()
 sock.bind(("localhost", 6287))
 
-print('The microscope control FIBSEM Maestro now')
+print(f'The microscope is under control FIBSEM_Maestro v {version.VERSION}!')
 
 serial_control = SerialControl(settings_path)
 
-print('The microscope successfully initialized')
+print('Initialization finished!')
 
 serial_control.imaging(1) # !!!
 

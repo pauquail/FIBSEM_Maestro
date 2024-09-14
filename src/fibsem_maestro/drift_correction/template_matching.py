@@ -18,12 +18,7 @@ class TemplateMatchingDriftCorrection:
         self.logging = logging_enabled
         self.template_matching_dir = template_matching_dir
         self.logging_dict = logging_dict
-        self.log_img = None
-        try:
-            self.areas = self._microscope.template_matching_areas
-        except Exception as e:
-            self.areas = None
-            logging.error('Template matching enabled but no areas not found. ' + repr(e))
+        self.areas = None
 
     def _prepare_image(self, img):
         pixel_size = img.metadata.binary_result.pixel_size.x
@@ -137,7 +132,7 @@ class TemplateMatchingDriftCorrection:
             ax.add_patch(rect)
         plt.tight_layout()
         plt.axis('off')
-        return ax
+        return fig
 
     def __call__(self, img, slice_number):
         """

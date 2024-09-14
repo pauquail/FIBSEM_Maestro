@@ -12,17 +12,18 @@ class AutofunctionControl:
         self.autofunction_settings = settings['autofunction']
         self.email_settings = settings['email']
         self.criterion_settings = settings['criterion_calculation']
-        self.imaging_settings = settings['imaging']
+        self.imaging_settings = settings['image']
 
         self.max_attempts = self.autofunction_settings['max_attempts']
         self.email_sender = self.email_settings['sender']
         self.email_receiver = self.email_settings['receiver']
         self.password_file = self.email_settings['password_file']
-        self.image_name = self.autofunction_settings['image_name']
 
         self._microscope = microscope
         self._log_dir = log_dir
         self._logging = logging_enabled
+
+
         self._masks = masks
         self.af_values = self.autofunction_settings['af_values']
         # list of all autofunctions objects
@@ -69,7 +70,7 @@ class AutofunctionControl:
         return Autofunction(
             criterion, sweeping,
             self._microscope,
-            af_settings=merged_settings,
+            auto_function_settings=merged_settings,
             image_settings=actual_image_settings)
 
     def __call__(self, slice_number, image_resolution, image_for_mask=None):

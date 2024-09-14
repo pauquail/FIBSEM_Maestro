@@ -78,9 +78,9 @@ class MaskPostProcessor:
         if self.min_area is not None:
             # Calculate the area of each blob
             blob_areas = np.bincount(labeled_mask.ravel())
-            # Create a _mask for blobs that have area greater than the defined min_area
+            # Create a mask for blobs that have area greater than the defined min_area
             mask = np.isin(labeled_mask, np.where(blob_areas > self.min_area)[0])
-            # Apply the _mask to the image,
+            # Apply the mask to the image,
             # This will set pixels in blobs with area <= min_area to 0
             filtered_image = mask_image * mask
             labeled_mask, num_features = label(filtered_image, structure)
@@ -91,7 +91,7 @@ class MaskPostProcessor:
         """ Get center of masked blob """
         labeled_mask, num_features = self._get_labeled_mask(mask_image)
         if num_features > 1:
-            logging.warning(f"Too much features ({num_features}) found in _mask. Drift correction skipped.")
+            logging.warning(f"Too much features ({num_features}) found in mask. Drift correction skipped.")
             return None
 
         properties = regionprops(labeled_mask)
@@ -107,7 +107,7 @@ class MaskPostProcessor:
         # Iterate over each found feature
         for feature in range(1, num_features + 1):
 
-            # Create a binary _mask for the current feature
+            # Create a binary mask for the current feature
             feature_mask = (labeled_mask == feature).astype(int)
 
             # Initialize the DP table and variables to hold the max area and
@@ -139,7 +139,7 @@ class MaskPostProcessor:
 class Masking:
     def __init__(self, settings):
         # settings
-        self.name = settings['mame']
+        self.name = settings['name']
         self.update_mask = settings['update_mask']
         self.mask_image_li = settings['mask_image_li']
         self.min_fraction = settings['min_fraction']
@@ -197,7 +197,7 @@ class Masking:
         """ Predict mask from image """
         # convert image to the form suitable for prediction
         input_image = self.image_preparator.prepare_image_for_prediction(self._image)
-        # predict _mask
+        # predict mask
         predicted = self._model(input_image).numpy()[..., 1]
         # unpack mask to image format
         mask = self.image_preparator.get_mask_image_from_prediction(predicted)
@@ -215,14 +215,14 @@ class Masking:
         """ Based on update_mask setting, it grabs new image, or it takes last image passes as argument."""
         if self.update_mask:
             self._grab_img(beam)
-            logging.debug('Image for the new _mask grabbed')
+            logging.debug('Image for the new mask grabbed')
         else:
             if image_for_mask is None:
                 logging.warning("Image for masking is not available! Grabbing new image")
                 self._grab_img(beam)
             else:
                 self._set_img(image_for_mask)
-                logging.debug('Image for the new _mask updated')
+                logging.debug('Image for the new mask updated')
 
     def _set_img(self, img):
         self._image = np.array(img)

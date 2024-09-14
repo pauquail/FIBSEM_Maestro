@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 from matplotlib import pyplot as plt, patches
@@ -29,12 +30,13 @@ class Criterion:
         self.tile_size = criterion_settings['tile_size']
         self.final_resolution = getattr(np, criterion_settings['final_resolution'])
         self.final_regions_resolution = getattr(np, criterion_settings['final_regions_resolution'])
+        self.criterion_name = criterion_settings['criterion']
         self.criterion_func = getattr(self, criterion_settings['criterion'])
         self.lowest_detail = criterion_settings['detail'][0]
         self.highest_detail = criterion_settings['detail'][1]
         self.logging_enabled = logging_enabled
         self.log_dir = log_dir
-        self._mask = mask
+        self.mask = mask
 
         self.pixel_size = None  # pixel size is measured from image
         self.tile_width_px = None  # tile width calculated from image size
@@ -50,10 +52,10 @@ class Criterion:
 
         logging.info("Tiles resolution calculation...")
         # Apply resolution border to the acquired image
-        self.img_with_border = self._crop_image_with_border(img.data)
+        self.img_with_border = self._crop_image_with_border(img)
 
-        self.tile_width_px = int(self.tile_size / self.pixel_size)
-        self.tile_width_px -= self.tile_width_px % 4  # must be divisible by 4
+        self.tile_size_px = int(self.tile_size / self.pixel_size)
+        self.tile_size_px -= self.tile_size_px % 4  # must be divisible by 4
 
         # Get resolution of each tile and calculate final resolution
         res_arr = []
@@ -62,7 +64,7 @@ class Criterion:
         if self.tile_size == 0:
             tiles = [self.img_with_border]
         else:
-            tiles = self._generate_image_fractions(self.img_with_border, self.tile_width_px)
+            tiles = self._generate_image_fractions(self.img_with_border)
 
         for tile_img in tiles:
             try:
@@ -99,14 +101,14 @@ class Criterion:
             numpy.ndarray: A generated tile from the image.
             list: [x_start, y_start, tile_width, tile_height] if return_coordinates is True.
         """
-        for x in np.arange(0, img.shape[0] - self.tile_size + 1, int(self.tile_size * (1 - overlap))):
-            for y in np.arange(0, img.shape[1] - self.tile_size + 1, int(self.tile_size * (1 - overlap))):
+        for x in np.arange(0, img.shape[0] - self.tile_size_px + 1, int(self.tile_size_px * (1 - overlap))):
+            for y in np.arange(0, img.shape[1] - self.tile_size_px + 1, int(self.tile_size_px * (1 - overlap))):
                 xi = int(x)
                 yi = int(y)
                 if return_coordinates:
-                    yield [xi, yi, self.tile_size, self.tile_size]
+                    yield [xi, yi, self.tile_size_px, self.tile_size_px]
                 else:
-                    yield img[xi: xi + self.tile_size, yi: yi + self.tile_size]
+                    yield img[xi: xi + self.tile_size_px, yi: yi + self.tile_size_px]
 
     def _crop_image_with_border(self, img, return_coordinates=False):
         """
@@ -219,13 +221,6 @@ class Criterion:
             return np.nan
         return res
 
-    @property
-    def mask(self):
-        if self.mask_used:
-            return self._mask
-        else:
-            return None
-
     def tile_log_image(self, img):
         # Create figure and axes
         fig, ax = plt.subplots()
@@ -233,7 +228,7 @@ class Criterion:
         ax.imshow(img, cmap='gray')
         # if tile size = 0, not apply tilling
         if self.tile_size > 0:
-            tiles = self._generate_image_fractions(self.img_with_border, self.tile_width_px, return_coordinates=True)
+            tiles = self._generate_image_fractions(self.img_with_border, return_coordinates=True)
             # Create a Rectangle patch for each tile and add it to the axes
             for tile in tiles:
                 rect = patches.Rectangle((tile[0]+self.border_x, tile[1]+self.border_y), tile[2], tile[3],
@@ -241,7 +236,7 @@ class Criterion:
                                          facecolor='none')
                 ax.add_patch(rect)
             plt.tight_layout()
-        return ax
+        return fig
 
     def __call__(self, image, line_number=None, slice_number = None):
         """
@@ -252,10 +247,10 @@ class Criterion:
         """
 
         self.pixel_size = image.metadata.binary_result.pixel_size.x
-        images = [image]
+        images = [image.data] #  only one image if o maskinf
 
         if self.mask is not None:
-            images = self.mask.get_masked_images(image, line_number)
+            images = self.mask.get_masked_images(image.data, line_number)
             if images is None:
                 logging.error('Not enough masked regions for resolution calculation - masking omitted!')
                 images = [image]  # calculate resolution on entire image
@@ -265,9 +260,18 @@ class Criterion:
         for i, image in enumerate(images):
             # region resolution
             region_resolutions.append(self._tiles_resolution(image))
-            # logging
-            if self.logging_enabled:
-                fig = self.tile_log_image(image)
-                fig.savefig(f'{self.log_dir}/{slice_number}/criterion_subimage_{i}.png')
+            self._save_log_subimage(image, slice_number, i)
 
+        self._save_log_images(image, slice_number)
         return self.final_regions_resolution(region_resolutions)
+
+    def _save_log_subimage(self, image, slice_number, index):
+        if self.logging_enabled:
+            fig = self.tile_log_image(image)
+            fig.savefig(f'{self.log_dir}/{slice_number:05}/criterion_subimage_{index}.png')
+
+    def _save_log_images(self, image, slice_number):
+        # save log mask
+            if self.logging_enabled and self.mask is not None:
+                mask_filename = os.path.join(self.log_dir, f'{slice_number:05}/resolution')
+                self.mask.save_log_images(mask_filename)

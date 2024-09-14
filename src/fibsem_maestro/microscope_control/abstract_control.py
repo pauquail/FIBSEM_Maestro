@@ -158,7 +158,7 @@ class BeamControl(ABC):
         pass
 
     @abstractmethod
-    def grab_frame(self):
+    def grab_frame(self, file_name):
         pass
 
     @abstractmethod

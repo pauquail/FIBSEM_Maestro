@@ -30,13 +30,13 @@ class SerialControlLogger:
         fmt = '%(module)s - %(levelname)s - %(message)s'
         self.logger_formatter = logging.Formatter(fmt)
         self.logging_file_handler = None
-        self.set_log_file('init')
+        self.set_log_file(0)
 
     def set_log_file(self, slice_number):
         if self.log_enabled:
             # make dir (log/slice_number
-            os.makedirs(os.path.join(self.dirs_log, f'{slice_number}'), exist_ok=True)
-            log_filename = os.path.join(self.dirs_log, f'{slice_number}/app.log')
+            os.makedirs(os.path.join(self.dirs_log, f'{slice_number:05}'), exist_ok=True)
+            log_filename = os.path.join(self.dirs_log, f'{slice_number:05}/app.log')
 
             # remove last logging file handler
             if self.logging_file_handler is not None:
@@ -60,19 +60,9 @@ class SerialControlLogger:
         self.log_params['stage_y'] = position.y
 
     def save_log(self, slice_number):
-        with open(os.path.join(self.dirs_log, f'{slice_number}/log_dict.yaml'), 'w') as f:
+        with open(os.path.join(self.dirs_log, f'{slice_number:05}/log_dict.yaml'), 'w') as f:
             yaml.dump(self.log_params, f, default_flow_style=False)
         self.log_params.clear()
-
-    def save_criterion_log_images(self, slice_number, criterion_resolution):
-        if self.log_enabled and criterion_resolution.mask is not None:
-            mask_filename = os.path.join(self.dirs_log, f'{slice_number:05}/resolution')
-            criterion_resolution.mask.save_log_images(mask_filename)
-
-    def save_mask_drift_correction_log_images(self, slice_number, drift_correction):
-        if self.log_enabled:
-            mask_filename = os.path.join(self.dirs_log, f'{slice_number:05}/drift_correction')
-            drift_correction.mask.save_log_images(mask_filename)
 
 
 class SerialControl:
@@ -92,7 +82,7 @@ class SerialControl:
         self.image_settings = settings['image']
         self.criterion_calculation_settings = settings['criterion_calculation']
         self.autofunction_settings = settings['autofunction']
-        self.mask_settings = settings['_mask']
+        self.mask_settings = settings['mask']
         self.email_settings = settings['email']
         self.dc_settings = settings['drift_correction']
 
@@ -171,7 +161,7 @@ class SerialControl:
             mask = find_in_objects(self.actual_criterion['mask_name'], self._masks)
             criterion_resolution = Criterion(self.actual_criterion, mask=mask, logging_enabled=self.logger.log_enabled,
                                              log_dir=self.logger.dirs_log)
-            print(f'Image resolution criterion: {criterion_resolution.name}')
+            print(f'Image resolution criterion: {criterion_resolution.criterion_name}')
         except Exception as e:
             logging.error("Initialization of resolution criteria failed! " + repr(e))
             raise RuntimeError("Initialization of resolution criteria failed!") from e
@@ -196,17 +186,16 @@ class SerialControl:
 
     def separate_thread(self, slice_number):
         """ Thread on the end of imaging (parallel with milling)"""
-        self.calculate_resolution()
+        self.calculate_resolution(slice_number)
         self.logger.log_params['resolution'] = self.image_resolution
         del self.image
         self.logger.save_log(slice_number)  # save log dict
-        self.logger.save_criterion_log_images(slice_number, self._criterion_resolution)  # save resolution log images
 
-    def calculate_resolution(self):
+    def calculate_resolution(self, slice_number):
         """ Calculate resolution """
         try:
-            self.image_resolution = self._criterion_resolution(self.image)
-            print(Fore.GREEN + f'Resolution calculated: {self.image_resolution}')
+            self.image_resolution = self._criterion_resolution(self.image, slice_number=slice_number)
+            print(Fore.GREEN + f'Calculated resolution: {self.image_resolution}')
         except Exception as e:
             logging.error('Image resolution calculation error. Setting resolution to 0.'+repr(e))
             print(Fore.RED + 'Resolution measurement failed')
@@ -251,7 +240,6 @@ class SerialControl:
     def acquire(self, slice_number):
         """ Acquire and save image """
         try:
-            self._microscope.apply_beam_settings(self.actual_image_settings)  # apply resolution, li...
             self.image = self._microscope.acquire_image(slice_number)
             print(Fore.GREEN + 'Image acquired')
         except Exception as e:
@@ -264,10 +252,8 @@ class SerialControl:
             try:
                 delta = self._drift_correction(self.image, slice_number)
                 # it is drift correction based on masking
-                if hasattr(self._drift_correction, '_mask'):
-                    self.logger.save_mask_drift_correction_log_images(slice_number, self._drift_correction)
-
-                print(Fore.GREEN + 'Drift correction applied. ' + str(delta.to_dict()))
+                if delta is not None:
+                    print(Fore.GREEN + 'Drift correction applied. ' + str(delta.to_dict()))
             except Exception as e:
                 logging.error('Drift correction error. ' + repr(e))
                 print(Fore.RED + 'Application of drift correction failed!')

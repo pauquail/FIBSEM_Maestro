@@ -1,14 +1,12 @@
 import logging
-import tempfile
 
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl, StagePosition, BeamControl
 from fibsem_maestro.tools.support import Point
 
 try:
     from autoscript_sdb_microscope_client import SdbMicroscopeClient
-    from autoscript_sdb_microscope_client.structures import (Point as PointAS, GrabFrameSettings, AdornedImage,
-                                                             ImageFileFormat)
-    from autoscript_sdb_microscope_client.enumerations import ImagingDevice
+    from autoscript_sdb_microscope_client.structures import (Point as PointAS, GrabFrameSettings, AdornedImage)
+    from autoscript_sdb_microscope_client.enumerations import ImagingDevice, ImageFileFormat
 
     virtual_mode = False
     logging.info("AS library imported.")
@@ -40,6 +38,7 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
     @property
     def position(self):
         """Get stage position"""
+        self._microscope.specimen.stage.unlink()
         p = StagePosition.from_stage_position_as(self._microscope.specimen.stage.current_position)
         logging.debug(f"Getting stage position: {p.to_dict()}...")
         return p  # Convert AS stage pos to standard stage pos
@@ -355,9 +354,11 @@ class Beam(BeamControl):
         else:
             raise ValueError("Invalid modality. Please choose either 'eb' for Electron Beam or 'ib' for Ion Beam.")
 
-    def grab_frame(self):
+    def grab_frame(self, file_name=None):
         """
         Scans and retrieves an image.
+
+        If file_name is provided, the image will be saved to file_name.
 
         Returns:
             Frame data
@@ -365,7 +366,8 @@ class Beam(BeamControl):
         self.select_modality()  # activate right quad
         logging.debug(f"Grabbing frame ({self._modality}).")
 
-        img_settings = GrabFrameSettings(line_integration=self._line_integration)
+        img_settings = GrabFrameSettings(line_integration=self._line_integration,
+                                         bit_depth=self.bit_depth)
         if self._extended_resolution is not None:
             img_settings.resolution = f'{self._extended_resolution[0]}x{self._extended_resolution[1]}'
         if self._scanning_area is not None:
@@ -375,12 +377,17 @@ class Beam(BeamControl):
         try:
             grabbed_image = self._microscope.imaging.grab_frame(img_settings)
             logging.info(f"Image grabbed.")
+            if file_name is not None:
+                grabbed_image.save(file_name)
             return grabbed_image
         except Exception as e:
-            logging.warning('Image grab failed. It must be grabbed to disk. ' + repr(e))
-            img_name = tempfile.NamedTemporaryFile(delete=True)
-            self._microscope.imaging.grab_frame_to_disk(img_name, ImageFileFormat.TIFF, img_settings)
-            return AdornedImage.load(img_name)
+            logging.info('Grabbing frame to disk. ' + repr(e))
+            if file_name is not None:
+                self._microscope.imaging.grab_frame_to_disk(file_name, ImageFileFormat.TIFF, img_settings)
+                logging.info(f"Image grabbed to disk.")
+                return AdornedImage.load(file_name)
+            else:
+                raise Exception('Unable to grab the image. File name must be provided')
 
     def get_image(self):
         """

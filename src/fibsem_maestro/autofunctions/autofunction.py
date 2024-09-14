@@ -39,8 +39,8 @@ class AutoFunction:
         self._criterion_values = {i: [] for i in range(len(list(self._sweeping.sweep())))}
 
     def _prepare(self, image_for_mask=None):
-        """ Update _mask if needed, set the microscope and reset plots """
-        # grab the image for masking if _mask enabled
+        """ Update mask if needed, set the microscope and reset plots """
+        # grab the image for masking if mask enabled
         if self._criterion.mask_used:
             self._criterion.mask.update_img(image_for_mask)
         self._microscope.apply_beam_settings(self._image_settings)  # apply resolution, li...
@@ -100,7 +100,7 @@ class AutoFunction:
         fire = (type(execute) is int and slice_number % execute == 0) or (type(
             execute) is float and image_resolution > execute)
         # do not fire on 0. slice
-        if type(execute) is int and slice_number == 0:
+        if type(execute) is int and slice_number == 1:
             fire = False
         return fire
 
@@ -109,13 +109,13 @@ class AutoFunction:
         :param image_for_mask: The image to be used for masking. Defaults to None.
         :return: True if the af process is finished, False if the process is not yet finished in step image mode.
 
-        The __call__ method is used to execute the functionality of the class. It updates the _mask image if needed and
+        The __call__ method is used to execute the functionality of the class. It updates the mask image if needed and
         sets the microscope.
         If the step_mode is set to False, it performs a sweeping process and evaluates the result.
         If the step_mode is set to True, it performs a step-by-step process.
         In both cases, it returns True if the process is finished and False if the process is not yet finished.
         """
-        self._prepare(image_for_mask)  # update _mask image if needed and set microscope
+        self._prepare(image_for_mask)  # update mask image if needed and set microscope
         # non-step image mode
         if not self.step_mode:
             for s in self._sweeping.sweep():
@@ -145,7 +145,7 @@ class AutoFunction:
 
     @property
     def mask(self):
-        """ Get _mask object if used """
+        """ Get mask object if used """
         if self._criterion.mask_used:
             return self._criterion.mask
         else:
@@ -242,7 +242,7 @@ class LineAutoFunction(AutoFunction):
 
     def __call__(self, image_for_mask=None):
         """
-        :param image_for_mask: The input image for creating a _mask if needed.
+        :param image_for_mask: The input image for creating a mask if needed.
         :return: True if the operation is successfully finished.
 
         """

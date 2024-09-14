@@ -1,5 +1,5 @@
 import math
-
+import re
 
 class Point:
     def __init__(self, x=0, y=0):
@@ -47,6 +47,15 @@ class Point:
         else:
             raise TypeError("Unsupported operand type")
 
+    def __str__(self):
+        return f"Point({self.x}, {self.y})"
+
+    @classmethod
+    def from_str(cls, point_string):
+        # Extract the coordinates from the string
+        x, y = map(float, point_string[6:-1].split(', '))
+        return cls(x, y)
+
 
 class StagePosition:
     """
@@ -76,13 +85,22 @@ class StagePosition:
         stage_dict['t'] = math.radians(stage_dict['tilt'])
         del stage_dict['rotation']
         del stage_dict['tilt']
-        return StagePositionAS(**stage_dict, coordinate_system="raw")
+        return StagePositionAS(**stage_dict, coordinate_system="Raw")
 
     def to_dict(self):
         return vars(self)
 
     def to_xy(self):
         return self.x, self.y
+
+    def __str__(self):
+        return f"StagePosition({self.x}, {self.y}, {self.z}, {self.rotation}, {self.tilt})"
+
+    @classmethod
+    def from_str(cls, point_string):
+        # Extract the coordinates from the string
+        x, y, z, r ,t = map(float, point_string[14:-1].split(', '))
+        return cls(x, y, z, r, t)
 
 
 class ScanningArea:
@@ -112,13 +130,23 @@ class ScanningArea:
                     center_pix.y - width_pix // 2]
         return left_top, [height_pix, width_pix]
 
+    def __str__(self):
+        return f"ScanningArea({self.center.x}, {self.center.y}, {self.width}, {self.height})"
+
+    @classmethod
+    def from_str(cls, point_string):
+        # Extract the coordinates from the string
+        x, y, w, h = map(float, point_string[13:-1].split(', '))
+        return cls(Point(x, y), w, h)
+
+
 
 def find_in_dict(name, list_of_dicts):
     """ find the item in a dict based on name value """
     if name == 'none':
         return None
     else:
-        return [dic for dic in list_of_dicts if dic['name'] == name]
+        return [dic for dic in list_of_dicts if dic['name'] == name][0]
 
 
 def find_in_objects(name, list_of_objects):
@@ -126,4 +154,4 @@ def find_in_objects(name, list_of_objects):
     if name == 'none':
         return None
     else:
-        return [dic for dic in list_of_objects if dic.name == name]
+        return [dic for dic in list_of_objects if dic.name == name][0]
