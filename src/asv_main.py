@@ -6,7 +6,8 @@ import version
 from fibsem_maestro.serial_control import SerialControl
 
 #  remove line 22: serial_control.imaging(1) # !!!
-#  email enabled
+# rotation deg rad?
+#  email if problem (freq)
 #  virtual mode
 #  bordel v beam (az bude milling)
 #  mask for acb
