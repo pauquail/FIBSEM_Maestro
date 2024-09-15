@@ -272,9 +272,13 @@ class SerialControl:
 
     def save_settings(self):
         """ Save microscope settings from file from microscope """
+        settings_to_save = self.variables_to_save
+        # add drift correction areas if needed
+        if self._drift_correction.areas is not None:
+            settings_to_save['dc_areas'] = self._drift_correction.areas
         try:
             save_settings(self._microscope,
-                          settings=self.variables_to_save,
+                          settings=settings_to_save,
                           path=self.settings_file)
             print(Fore.GREEN + 'Microscope settings saved')
         except Exception as e:

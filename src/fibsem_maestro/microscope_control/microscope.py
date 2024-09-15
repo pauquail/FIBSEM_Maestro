@@ -37,7 +37,7 @@ def create_microscope(control: str):
             self.stage_tolerance = settings['stage_tolerance']
             self.stage_trials = settings['stage_trials']
             self.beam_shift_tolerance = settings['beam_shift_tolerance']
-            self.beam_shift_stage_move = settings['beam_shift_to_stage_move']
+            self.relative_beam_shift_to_stage = settings['relative_beam_shift_to_stage']
 
             self.data_dir = data_dir
 
@@ -95,9 +95,10 @@ def create_microscope(control: str):
                     raise Exception("Beam shift out of range")
             except Exception as e:  # if any problem with beam shift or out of range -> stage move
                 logging.warning("Beam shift is out of range. Stage position needs to be adjusted. " + repr(e))
-                # stage move = beam shift * axis reversion
-                new_stage_move = new_beam_shift * Point(self.beam_shift_stage_move[0],
-                                                        self.beam_shift_stage_move[1])
+                # stage move = beam shift * shift conversion
+                new_stage_move = new_beam_shift * Point(self.relative_beam_shift_to_stage[0],
+                                                        self.relative_beam_shift_to_stage[1])
+                new_stage_move *= self.beam.beam_shift_to_stage_move  # Direction conversion
                 self.relative_position = StagePosition(x=new_stage_move.x, y=new_stage_move.y)
                 self.beam.beam_shift = Point(0, 0)  # zero beam shift
 

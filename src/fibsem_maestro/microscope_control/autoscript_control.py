@@ -32,8 +32,8 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
             self._microscope = SdbMicroscopeClient()
             self._microscope.connect(ip_address)
 
-        self._electron_beam = Beam(self._microscope, 'eb')
-        self._ion_beam = Beam(self._microscope, 'ib')
+        self._electron_beam = ElectronBeam(self._microscope)
+        self._ion_beam = IonBeam(self._microscope)
 
     @property
     def position(self):
@@ -77,10 +77,10 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
         return self._ion_beam
 
 
-class Beam(BeamControl):
+class ElectronBeam(BeamControl):
     """ Implementation of Microscope Beam. The class is universal for electrons and ions"""
 
-    def __init__(self, microscope, modality):
+    def __init__(self, microscope):
         """
         Constructor for the Beam class.
 
@@ -89,14 +89,8 @@ class Beam(BeamControl):
         """
         self._scanning_area = None  # reduced area. If none, reduced area is not applied
         self._microscope = microscope
-        self._modality = modality
-
-        if modality == 'eb':
-            self._beam = self._microscope.beams.electron_beam
-        elif modality == 'ib':
-            self._beam = self._microscope.beams.ion_beam
-        else:
-            raise ValueError(f"Modality {modality} not supported")
+        self._beam = self._microscope.beams.electron_beam
+        self._modality = 'eb'
 
         # default values
         self._line_integration = 1
@@ -123,10 +117,7 @@ class Beam(BeamControl):
         This method is used to set the working distance of the beam in the microscope.        
         """
         logging.debug(f"Setting working distance ({self._modality}): {wd}")
-        if self._modality == 'eb':
-            self._beam.working_distance.set_value_no_degauss(wd)
-        if self._modality == 'ib':
-            self._beam.working_distance.value = wd
+        self._beam.working_distance.set_value_no_degauss(wd)
 
     @property
     def stigmator_x(self):
@@ -345,14 +336,8 @@ class Beam(BeamControl):
         The Electron Beam mode is always in Quad 1, while the Ion Beam mode is always in Quad 2.
 
         """
-        if self._modality.lower() == 'eb':
-            self._microscope.imaging.set_active_view(1)
-            self._microscope.imaging.set_active_device(ImagingDevice.ELECTRON_BEAM)
-        elif self._modality.lower() == 'ib':
-            self._microscope.imaging.set_active_view(2)
-            self._microscope.imaging.set_active_device(ImagingDevice.ION_BEAM)
-        else:
-            raise ValueError("Invalid modality. Please choose either 'eb' for Electron Beam or 'ib' for Ion Beam.")
+        self._microscope.imaging.set_active_view(1)
+        self._microscope.imaging.set_active_device(ImagingDevice.ELECTRON_BEAM)
 
     def grab_frame(self, file_name=None):
         """
@@ -542,3 +527,64 @@ class Beam(BeamControl):
         else:
             logging.debug(f"Setting scanning area to ({self._modality}): {value}.")
         self._scanning_area = value
+
+    @ property
+    def beam_shift_to_stage_move(self):
+        """ Direction of beam shift vs stage move"""
+        return Point(-1, -1)
+
+
+    @property
+    def image_to_beam_shift(self):
+        """ Direction in image vs beam shift"""
+        return Point(1, -1)
+
+
+class IonBeam(ElectronBeam):
+    def __init__(self,microscope):
+        super().__init__(microscope)
+        self._beam = self._microscope.beams.ion_beam
+        self._modality = 'ib'
+
+    @property
+    def working_distance(self):
+        """
+        Returns the beam working distance of the microscope.
+
+        :return: The beam working distance.
+        """
+        wd = self._beam.working_distance.value
+        logging.debug(f"Getting working distance ({self._modality}): {wd}")
+        return wd
+
+    @working_distance.setter
+    def working_distance(self, wd):
+        """
+        :param wd: The working distance value to be set.
+
+        This method is used to set the working distance of the beam in the microscope.
+        """
+        logging.debug(f"Setting working distance ({self._modality}): {wd}")
+        self._beam.working_distance.value = wd
+
+    def select_modality(self):
+        """
+        This method is used to switch the microscope's modality between the Electron Beam (eb) mode and the Ion Beam
+        (ib) mode. The selection of the modality will have an impact on starting and stopping the acquisition,
+        grab and get image, and on the selected detector.
+
+        The Electron Beam mode is always in Quad 1, while the Ion Beam mode is always in Quad 2.
+
+        """
+        self._microscope.imaging.set_active_view(2)
+        self._microscope.imaging.set_active_device(ImagingDevice.ION_BEAM)
+
+    @ property
+    def beam_shift_to_stage_move(self):
+        """ Direction of beam shift vs stage move"""
+        return None
+
+    @property
+    def image_to_beam_shift(self):
+        """ Direction in image vs beam shift"""
+        return None

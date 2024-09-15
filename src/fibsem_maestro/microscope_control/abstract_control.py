@@ -230,6 +230,15 @@ class BeamControl(ABC):
     def scanning_area(self, value: ScanningArea):
         pass
 
+    @property
+    @abstractmethod
+    def beam_shift_to_stage_move(self):
+        pass
+
+    @property
+    @abstractmethod
+    def image_to_beam_shift(self):
+        pass
 
 class MicroscopeControl(ABC):
     """

@@ -40,8 +40,12 @@ def load_settings(microscope: MicroscopeControl, path):
                 # beam settings
                 substrings = setting.split('.')
                 beam = getattr(microscope, substrings[0])
+                if not hasattr(beam, substrings[1]):
+                    logging.warning(f'The setting {setting} is not microscope property, saving as stand alone property')
                 setattr(beam, substrings[1], value)
             else:
+                if not hasattr(microscope, setting):
+                    logging.warning(f'The setting {setting} is not microscope property, saving as stand alone property')
                 # direct microscope settings
                 setattr(microscope, setting, value)
         except Exception as e:

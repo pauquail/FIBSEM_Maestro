@@ -109,7 +109,8 @@ class TemplateMatchingDriftCorrection:
         for a in new_areas:
             a[0] += int(-shift_x // pixel_size)
             a[1] += int(-shift_y // pixel_size)
-        shift_x = -shift_x  # beam shift X axis is reversed to image axis
+        shift_x *= self._microscope.beam.image_to_beam_shift.x  # beam shift X axis is reversed to image axis
+        shift_y *= self._microscope.beam.image_to_beam_shift.y
         return shift_x, shift_y, new_areas
 
     def _log(self, slice_number, shift_x, shift_y):
@@ -122,7 +123,7 @@ class TemplateMatchingDriftCorrection:
         self.logging_dict['shift_y'] = shift_y
 
     def _log_plot(self, img):
-        plt.figure()
+        fig = plt.figure()
         plt.imshow(img, cmap='gray')
         ax = plt.gca()
         for a in self.areas:
@@ -140,6 +141,10 @@ class TemplateMatchingDriftCorrection:
         :param slice_number: The number of the image slice.
         :return: The point object representing the calculated beam shift.
         """
+        # if areas were loaded from microscope settings
+        if hasattr(self._microscope, 'dc_areas'):
+            self.areas = self._microscope.dc_areas
+
         if self.areas is None:
             logging.error('Template matching enabled but no areas not found. Drift correction disabled')
             return
