@@ -122,7 +122,7 @@ class SerialControl:
         """ microscope init"""
         try:
             # return the right class and call initializer
-            microscope = create_microscope(self.library)({**self.microscope_settings, **self.actual_image_settings},
+            microscope = create_microscope(self.library)(self.actual_image_settings, self.microscope_settings,
                                                          self.dirs_output_images)
 
             print('Microscope initialized')
@@ -148,7 +148,7 @@ class SerialControl:
                                                 logging_enabled=self.logger.log_enabled,
                                                 log_dir=self.logger.dirs_log,
                                                 masks=self._masks)
-            print(f'{len(autofunctions.af_values)} autofunctions found')
+            print(f'Autofunctions found: {[x.name for x in autofunctions.autofunctions]}')
         except Exception as e:
             logging.error("Autofunction initialization failed! "+repr(e))
             raise RuntimeError('"Autofunction initialization failed!') from e
@@ -294,6 +294,7 @@ class SerialControl:
 
         self.logger.set_log_file(slice_number)  # set logging file (logging output)
         self.logger.reset_log(slice_number)   # set log of important parameters (dict to yaml)
+        self._microscope.beam = self._microscope.electron_beam  # switch to electrons
 
         self.load_settings()  # load settings and set microscope
         self.correction()  # wd and y correction

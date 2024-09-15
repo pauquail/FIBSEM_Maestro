@@ -32,8 +32,9 @@ class Criterion:
         self.final_regions_resolution = getattr(np, criterion_settings['final_regions_resolution'])
         self.criterion_name = criterion_settings['criterion']
         self.criterion_func = getattr(self, criterion_settings['criterion'])
-        self.lowest_detail = criterion_settings['detail'][0]
-        self.highest_detail = criterion_settings['detail'][1]
+        if 'detail' in criterion_settings:
+            self.lowest_detail = criterion_settings['detail'][0]
+            self.highest_detail = criterion_settings['detail'][1]
         self.logging_enabled = logging_enabled
         self.log_dir = log_dir
         self.mask = mask

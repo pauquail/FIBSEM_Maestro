@@ -11,6 +11,7 @@ from fibsem_maestro.serial_control import SerialControl
 #  virtual mode
 #  bordel v beam (az bude milling)
 #  mask for acb
+# sweeping max limits to autoscript
 
 # test: grab big data, multiple masking, spiral af, email, mask online training, reduced scanning, template matching
 
@@ -27,7 +28,7 @@ serial_control = SerialControl(settings_path)
 
 print('Initialization finished!')
 
-serial_control.imaging(1) # !!!
+serial_control.imaging(2) # !!!
 
 # run FIBSEM control
 

@@ -217,7 +217,22 @@ class BeamControl(ABC):
 
     @property
     @abstractmethod
+    def vertical_field_width(self):
+        pass
+
+    @vertical_field_width.setter
+    @abstractmethod
+    def vertical_field_width(self, value):
+        pass
+
+    @property
+    @abstractmethod
     def pixel_size(self):
+        pass
+
+    @pixel_size.setter
+    @abstractmethod
+    def pixel_size(self, pixel):
         pass
 
     @property

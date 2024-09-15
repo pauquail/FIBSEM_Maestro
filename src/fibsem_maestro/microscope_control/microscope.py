@@ -21,42 +21,26 @@ def create_microscope(control: str):
         raise ValueError(f"Invalid microscope control type: {control}")
 
     class Microscope(microscope_base):
-        def __init__(self, settings, data_dir):
+        def __init__(self, image_settings, microscope_settings, data_dir):
             """
             Initializes a new instance of the class.
 
             """
-            super().__init__(settings['ip_address'])
+            super().__init__(microscope_settings['ip_address'])
             self.beam = self.electron_beam  # default setting for actual beam
-            self.vertical_field_width = None  # vertical field of view. serves for resolution calculation
 
-            self.set_pixel_size = settings['pixel_size']
-            self.field_of_view = settings['field_of_view']
-            self.li = settings['images_line_integration']
-            self.bit_depth = settings['bit_depth']
-            self.stage_tolerance = settings['stage_tolerance']
-            self.stage_trials = settings['stage_trials']
-            self.beam_shift_tolerance = settings['beam_shift_tolerance']
-            self.relative_beam_shift_to_stage = settings['relative_beam_shift_to_stage']
+            self.image_settings = image_settings
+            self.li = image_settings['images_line_integration']
+            self.stage_tolerance = microscope_settings['stage_tolerance']
+            self.stage_trials = microscope_settings['stage_trials']
+            self.beam_shift_tolerance = microscope_settings['beam_shift_tolerance']
+            self.relative_beam_shift_to_stage = microscope_settings['relative_beam_shift_to_stage']
 
             self.data_dir = data_dir
 
             self._detector_contrast_backup = None
             self._detector_brightness_backup = None
             self.stage_trial_counter = self.stage_trials
-
-        @property
-        def pixel_size(self):
-            return self.beam.pixel_size
-
-        @pixel_size.setter
-        def pixel_size(self, pixel):
-            """ pixel size is not possible to set directly to microscope, but it is needed for resolution calculation"""
-            extended_res_i_x = int(self.beam.horizontal_field_width / pixel)
-            extended_res_i_y = int(self.vertical_field_width / pixel)
-            extended_res = f"{extended_res_i_x}x{extended_res_i_y}"
-            logging.info(f'Extended resolution set to: {extended_res}')
-            self.beam.resolution = [extended_res_i_x, extended_res_i_y]
 
         def stage_move_with_verification(self, new_stage_position: StagePosition):
             """
@@ -142,6 +126,22 @@ def create_microscope(control: str):
             img_cropped = img[left_top[0]:left_top[0] + size[0], left_top[1]:left_top[1] + size[1]]
             return img_cropped
 
+        def apply_beam_settings(self, image_settings, line_integration_index=0):
+            if 'bit_depth' in image_settings:
+                self.beam.bit_depth = image_settings['bit_depth']
+            if 'field_of_view' in image_settings:
+                self.beam.horizontal_field_width = image_settings['field_of_view'][0]
+                self.beam.vertical_field_width = image_settings['field_of_view'][1]
+            if 'resolution' in image_settings:
+                self.beam.resolution = image_settings['resolution']
+            # call pixel size from Beam class, set correct resolution
+            if 'pixel_size' in image_settings:
+                self.beam.pixel_size = float(image_settings['pixel_size'])
+            if 'images_line_integration' in image_settings:
+                self.beam.line_integration = image_settings['images_line_integration'][line_integration_index]
+            if 'dwell' in image_settings:
+                self.beam.dwell = image_settings['dwell']
+
         def acquire_image(self, slice_number=None):
             """
             Acquires an images using the microscope's electron beam.
@@ -152,16 +152,9 @@ def create_microscope(control: str):
             :param slice_number: Optional slice number for the image. Defaults to None.
             :return: The acquired image.
             """
-            self.beam = self.electron_beam
-            self.beam.bit_depth = self.bit_depth
-            self.beam.horizontal_field_width = self.field_of_view[0]
-            self.vertical_field_width = self.field_of_view[1]
-
-            # call pixel size from Beam class, set correct resolution
-            self.pixel_size = float(self.set_pixel_size)
             image = None
             for i in range(len(self.li)):
-                self.beam.line_integration = self.li[i]
+                self.apply_beam_settings(self.image_settings, i)
 
                 if slice_number is not None:
                     img_name = f"slice_{slice_number:05}_({i}).tif"

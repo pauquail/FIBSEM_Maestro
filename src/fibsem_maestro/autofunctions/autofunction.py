@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
+from autoscript_sdb_microscope_client_tests.test_helper import AutoFunction
+
 from fibsem_maestro.autofunctions.criteria import Criterion
 from fibsem_maestro.autofunctions.sweeping import BasicSweeping
 from fibsem_maestro.tools.support import Point
@@ -17,7 +19,6 @@ class AutoFunction:
         self._sweeping = sweeping  # sweeping class
         self._microscope = microscope  # microscope control class
         self._criterion = criterion  # focusing criterion class
-        self._step_number = 0  # used in step mode
         # init criterion dict (array of focusing crit for each variable value)
         self._criterion_values = {}
         self._initialize_criteria_dict()
@@ -26,7 +27,6 @@ class AutoFunction:
     def _initialize_settings(self, auto_function_settings):
         self.name = auto_function_settings['name']
         self.variable = auto_function_settings['variable']
-        self.step_mode = auto_function_settings['step_mode']
         self.execute = auto_function_settings['execute']
         self.delta_x = auto_function_settings['delta_x']
 
@@ -111,29 +111,14 @@ class AutoFunction:
 
         The __call__ method is used to execute the functionality of the class. It updates the mask image if needed and
         sets the microscope.
-        If the step_mode is set to False, it performs a sweeping process and evaluates the result.
-        If the step_mode is set to True, it performs a step-by-step process.
+        It performs a sweeping process and evaluates the result.
         In both cases, it returns True if the process is finished and False if the process is not yet finished.
         """
         self._prepare(image_for_mask)  # update mask image if needed and set microscope
-        # non-step image mode
-        if not self.step_mode:
-            for s in self._sweeping.sweep():
-                self._get_image(s)
-            self._evaluate()
-            return True  # af finished
-        else:
-            # step image mode
-            sweep_list = list(self._sweeping.sweep())
-            value = sweep_list[self._step_number]  # select sweeping variable based on current step
-            self._get_image(value)
-            self._step_number += 1
-            if self._step_number >= len(sweep_list):
-                self._evaluate()
-                self._step_number = 0  # restart steps
-                return True  # af finished
-            else:
-                return False  # not finished yet
+        for s in self._sweeping.sweep():
+            self._get_image(s)
+        self._evaluate()
+        return True  # af finished
 
     def move_stage_x(self, back=False):
         """ Focusing on near area"""
@@ -174,6 +159,7 @@ class LineAutoFunction(AutoFunction):
         :return: None
         """
         for step, s in enumerate(self._sweeping.sweep()):
+            logging.debug(f'Sweep cycle {step}')
             if step == 0:
                 self._microscope.beam.start_acquisition()
             # blank and wait
@@ -229,7 +215,7 @@ class LineAutoFunction(AutoFunction):
         """
         # line time estimation
         line_time = self._estimate_line_time()
-        self._microscope.beam.blank_screen()
+        self._microscope.blank_screen()
         # variable sweeping
         self._variable_sweeping(line_time)
         # get image
@@ -246,9 +232,9 @@ class LineAutoFunction(AutoFunction):
         :return: True if the operation is successfully finished.
 
         """
+        assert not self._microscope.beam.extended_resolution, "Line focus cannot work with extended resolution"
+
         self._prepare(image_for_mask)
-        if self.step_mode:
-            raise NotImplementedError("Not implemented yet")
         self._line_focus()
         return True  # af finished
 
@@ -272,3 +258,36 @@ class LineAutoFunction(AutoFunction):
         plt.plot(values_y * scale, values_x, c='r.')
         plt.tight_layout()
         return fig
+
+
+class StepAutoFunction(AutoFunction):
+    def __init__(self, criterion: Criterion, sweeping: BasicSweeping, microscope,
+                 auto_function_settings, image_settings):
+        super().__init__(criterion, sweeping, microscope, auto_function_settings, image_settings)
+        self._step_number = 0  # actual step
+
+    def __call__(self, image_for_mask=None):
+        """
+        :param image_for_mask: The image to be used for masking. Defaults to None.
+        :return: True if the af process is finished, False if the process is not yet finished in step image mode.
+
+        The __call__ method is used to execute the functionality of the class. It updates the mask image if needed and
+        sets the microscope.
+        It performs a step-by-step process.
+        In both cases, it returns True if the process is finished and False if the process is not yet finished.
+        """
+        self._prepare(image_for_mask)  # update mask image if needed and set microscope
+
+        # step image mode
+        sweep_list = list(self._sweeping.sweep())
+        value = sweep_list[self._step_number]  # select sweeping variable based on current step
+        logging.info(f'Performing autofocus step no. {self._step_number}')
+        self._get_image(value)
+        self._step_number += 1
+        if self._step_number >= len(sweep_list):
+            logging.info(f'Step-by-step autofocus finished. Result: {self._criterion_value}')
+            self._evaluate()
+            self._step_number = 0  # restart steps
+            return True  # af finished
+        else:
+            return False  # not finished yet

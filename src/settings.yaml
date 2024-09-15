@@ -32,11 +32,13 @@ image:
     field_of_view: [30.0e-6, 30.0e-6]
     images_line_integration: [1] # li of images acquisition. it is array for multiple acquisition
     bit_depth: 16
+    dwell: 25.0e-9
   - name: 'autofunction'
-    pixel_size: 10.0e-9
-    field_of_view: [10.0e-6, 10.0e-6]
-    images_line_integration: 64
+    resolution: [6144, 4096] # must be in standard res
+    field_of_view: [61440.0e-9, 40960.0e-9]
+    images_line_integration: [64]
     bit_depth: 8
+    dwell: 5.0e-6
 
 criterion_calculation:
   - name: 'image_acquisition'
@@ -45,7 +47,6 @@ criterion_calculation:
     final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
     final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
     criterion: 'frc_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
-    detail: [10.0e-9, 100.0e-9]
     mask_name: 'none'
   - name: 'autofunction'
     border: 0 # part of image that does not go to calculation
@@ -53,7 +54,7 @@ criterion_calculation:
     final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
     final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
     criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
-    detail: [ 10.0e-9, 100.0e-9 ]
+    detail: [ 20.0e-9, 150.0e-9 ]
     mask_name: 'none'
 
 autofunction:
@@ -62,18 +63,20 @@ autofunction:
   af_values:
     - name: 'working_distance - line'
       variable: 'working_distance'
-      autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
+      autofunction: 'LineAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
       sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
-      sweeping_range: [-10.0e-3, 10.0e-3] # The range of the sweeping variable.
-      sweeping_max_limits: [-1, 1] # Limits of sweeping_var
-      sweeping_steps: 10 # sweeping steps (in spiral, it is number of steps per cycle)
-      sweeping_total_cycles: 1 # sweeping cycles
+      sweeping_range: [-10.0e-6, 10.0e-6] # The range of the sweeping variable.
+      sweeping_max_limits: [500.0e-6, 70.0e-3] # Limits of sweeping_var
+      sweeping_steps: 20 # sweeping steps (in spiral, it is number of steps per cycle)
+      sweeping_total_cycles: 10 # sweeping cycles
       execute: 1 # execute condition - if int = number of slices, if float = image resolution
-      step_mode: False # Determines whether to perform step mode (it acquires only one image step by step)
       image_name: 'autofunction'
       criterion_name: 'autofunction'
       mask_name: 'none'
       delta_x: 0
+      pre_imaging_delay: 1
+      keep_time: 10
+      forbidden_sections: [0]
 
 mask:
   - name: 'mask'

@@ -94,6 +94,7 @@ class ElectronBeam(BeamControl):
 
         # default values
         self._line_integration = 1
+        self._vertical_field_width = None  # dummy var for resolution calculation
         self._extended_resolution = None  # extended resolution is set only if the required resolution is not standard
         self._standard_resolutions = ([1024, 884], [1536, 1024], [2048, 1768], [3072, 2048], [4096, 3536], [512, 442],
                                       [6144, 4096], [768, 512])  # available resolutions supported in standard mode
@@ -456,7 +457,7 @@ class ElectronBeam(BeamControl):
             tuple: The resolution of the image
         """
         r = str(self._beam.scanning.resolution.value)
-        if self._extended_resolution is not None:
+        if self._extended_resolution is None:
             logging.debug(f"Getting standard resolution ({self._modality}): {r}.")
             return r.split('x')
         else:
@@ -481,6 +482,10 @@ class ElectronBeam(BeamControl):
         self._extended_resolution = resolution
 
     @property
+    def extended_resolution(self):
+        return self._extended_resolution
+
+    @property
     def horizontal_field_width(self):
         """
         Gets the horizontal field value of the image from the microscope.
@@ -495,13 +500,36 @@ class ElectronBeam(BeamControl):
     @horizontal_field_width.setter
     def horizontal_field_width(self, value):
         """
-        Sets the horizontal pixel values.
+        Sets the horizontal field value.
 
         Args:
             value (float): The new horizontal field value
         """
         logging.debug(f"Setting hfw to ({self._modality}): {value}.")
         self._beam.horizontal_field_width.value = value
+
+    @property
+    def vertical_field_width(self):
+        """
+        Gets the vertical field value (dummy var).
+
+        Returns:
+            float: The vertical pixel values
+        """
+        value = self._vertical_field_width
+        logging.debug(f"Getting dummy vfw ({self._modality}): {value}.")
+        return value
+
+    @vertical_field_width.setter
+    def vertical_field_width(self, value):
+        """
+        Sets the vertical field value (dummy var).
+
+        Args:
+            value (float): The new vertical field value
+        """
+        logging.debug(f"Setting dummy vfw to ({self._modality}): {value}.")
+        self._vertical_field_width = value
 
     @property
     def pixel_size(self):
@@ -514,6 +542,15 @@ class ElectronBeam(BeamControl):
         ps = self._beam.horizontal_field_width / self.resolution[0]  # x resolution
         logging.debug(f"Getting pixel size ({self._modality}): {ps}.")
         return ps
+
+    @pixel_size.setter
+    def pixel_size(self, pixel):
+        """ pixel size is not possible to set directly to microscope, but it is needed for resolution calculation"""
+        extended_res_i_x = int(self.horizontal_field_width / pixel)
+        extended_res_i_y = int(self.vertical_field_width / pixel)
+        extended_res = f"{extended_res_i_x}x{extended_res_i_y}"
+        logging.info(f'Extended resolution set to: {extended_res}')
+        self.resolution = [extended_res_i_x, extended_res_i_y]
 
     @property
     def scanning_area(self):
