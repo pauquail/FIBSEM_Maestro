@@ -1,6 +1,9 @@
 import math
 import re
 
+import numpy as np
+
+
 class Point:
     def __init__(self, x=0, y=0):
         self._x = x
@@ -138,7 +141,6 @@ class ScanningArea:
         # Extract the coordinates from the string
         x, y, w, h = map(float, point_string[13:-1].split(', '))
         return cls(Point(x, y), w, h)
-
 
 
 def find_in_dict(name, list_of_dicts):

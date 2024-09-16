@@ -2,12 +2,12 @@ import logging
 import os
 import threading
 
-from colorama import Fore, Style, init as colorama_init
+from colorama import Fore, init as colorama_init
 import yaml
 
 from fibsem_maestro.autofunctions.autofunction_control import AutofunctionControl
 from fibsem_maestro.autofunctions.criteria import Criterion
-from fibsem_maestro.autofunctions.masking import Masking
+from fibsem_maestro.mask.masking import Masking
 from fibsem_maestro.drift_correction.template_matching import TemplateMatchingDriftCorrection
 from fibsem_maestro.microscope_control.microscope import create_microscope
 from fibsem_maestro.microscope_control.settings import load_settings, save_settings

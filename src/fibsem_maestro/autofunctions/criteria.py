@@ -7,7 +7,6 @@ from scipy.ndimage import gaussian_filter
 
 from fibsem_maestro.FRC.frc import frc
 
-
 def gauss_filter(x, px_size, detail):
     """
     Applies a Gaussian filter to the input array.
@@ -248,10 +247,11 @@ class Criterion:
         """
 
         self.pixel_size = image.metadata.binary_result.pixel_size.x
-        images = [image.data] #  only one image if o maskinf
+        images = [image.data] #  only one image if o masking
 
         if self.mask is not None:
             images = self.mask.get_masked_images(image.data, line_number)
+
             if images is None:
                 logging.error('Not enough masked regions for resolution calculation - masking omitted!')
                 images = [image]  # calculate resolution on entire image
