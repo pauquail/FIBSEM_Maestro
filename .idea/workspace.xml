@@ -5,14 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="dev progress">
-      <change afterPath="$PROJECT_DIR$/src/fibsem_maestro/mask/mask_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/image_tools.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/criteria.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/masking.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/mask/masking.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/tools/math_tools.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/tools/support.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/support.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction_control.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/tools/image_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/tools/image_tools.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,7 +159,6 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.6" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../FIBSEM_routines" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -187,7 +182,6 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.6" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../FIBSEM_routines" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -474,7 +468,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py</url>
-          <line>116</line>
+          <line>123</line>
           <option name="timeStamp" value="64" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

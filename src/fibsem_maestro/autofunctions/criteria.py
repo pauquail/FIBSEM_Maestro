@@ -267,6 +267,7 @@ class Criterion:
         return self.final_regions_resolution(region_resolutions)
 
     def _save_log_subimage(self, image, slice_number, index):
+        """ Input image with drew tiles """
         if self.logging_enabled:
             fig = self.tile_log_image(image)
             fig.savefig(f'{self.log_dir}/{slice_number:05}/criterion_subimage_{index}.png')

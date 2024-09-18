@@ -136,7 +136,25 @@ def largest_rectangles_in_blobs(self, labeled_image):
         rectangles.append(max_rect)
     return rectangles
 
+
 def crop_image(image, rectangle):
     y1, x1, y2, x2 = rectangle
     cropped_image = image[y1:y2, x1:x2]
     return cropped_image
+
+
+def get_stripes(img, separate_value=10, minimal_stripe_height=5):
+    """ Get stripes of image separated by black lines (<separate_value)"""
+    # identify the blank spaces
+    x_proj = np.sum(img, axis=1)  # identify blank line by min function
+    zero_pos = np.where(x_proj < separate_value)[0]  # position of all blank lines
+    # go through the sections
+    image_section_index = 0  # actual image section
+    for i in range(len(zero_pos) - 1):  # iterate all blank lines - find the image section
+        x0 = zero_pos[i]
+        x1 = zero_pos[i + 1]  # 2 blank lines
+        # if these 2 blank lines are far from each other (it makes the image section)
+        if x1 - x0 >= minimal_stripe_height:
+            bin = np.arange(x0 + 1, x1)  # list of stripe indices
+            yield image_section_index, bin
+            image_section_index += 1

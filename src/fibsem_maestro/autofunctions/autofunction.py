@@ -8,11 +8,18 @@ from autoscript_sdb_microscope_client_tests.test_helper import AutoFunction
 from fibsem_maestro.autofunctions.criteria import Criterion
 from fibsem_maestro.autofunctions.sweeping import BasicSweeping
 from fibsem_maestro.tools.support import Point
-
+from fibsem_maestro.tools.image_tools import get_stripes
 
 class AutoFunction:
     def __init__(self, criterion: Criterion, sweeping: BasicSweeping, microscope,
                  auto_function_settings, image_settings):
+        """
+        :param criterion: The focusing criterion instance.
+        :param sweeping: The sweeping instance for controlling the sweep process.
+        :param microscope: The microscope control instance.
+        :param auto_function_settings: The settings for auto function. (af_values setting)
+        :param image_settings: The settings for the image. (image setting)
+        """
         # settings
         self._initialize_settings(auto_function_settings)
         self._image_settings = image_settings
@@ -39,7 +46,7 @@ class AutoFunction:
         self._criterion_values = {i: [] for i in range(len(list(self._sweeping.sweep())))}
 
     def _prepare(self, image_for_mask=None):
-        """ Update mask if needed, set the microscope and reset plots """
+        """ Update mask if needed and set the microscope """
         # grab the image for masking if mask enabled
         if self._criterion.mask_used:
             self._criterion.mask.update_img(image_for_mask)
@@ -180,32 +187,21 @@ class LineAutoFunction(AutoFunction):
         :type img: numpy.ndarray
         :return: None
         """
-        # identify the blank spaces
-        xproj = np.sum(img, axis=1)  # identify blank line by min function
-        zero_pos = np.where(xproj < 10)[0]  # position of all blank lines
         focus_steps = len(self._sweeping)
-        # go through the sections
-        image_section_index = 0  # actual image section
-        for i in range(len(zero_pos) - 1):  # iterate all blank lines - find the image section
-            x0 = zero_pos[i]
-            x1 = zero_pos[i + 1]  # 2 blank lines
-            # if these 2 blank lines are far from each other (it makes the image section)
-            if x1 - x0 >= focus_steps:
-                if image_section_index not in self.forbidden_sections:
-                    bin = np.arange(x0 + 1, x1)  # list of bin indices
-                    bin = np.array_split(bin, focus_steps)  # split bins to equal focus_steps parts
+        for image_section_index, bin in get_stripes(img):
+            if image_section_index not in self.forbidden_sections:
+                    bin = np.array_split(bin, focus_steps)  # split bins to equal parts the equal to focus_steps parts
                     # go over all variable values
-                    for bin_index, focus_criterion in enumerate(self._sweeping.sweep_inner(image_section_index)):
+                    for bin_index, variable in enumerate(self._sweeping.sweep_inner(image_section_index)):
                         # each line
                         for line_index in bin[bin_index]:
                             f = self._criterion(img[line_index], line_index)
 
                             if f is not None:
-                                self._criterion_values[focus_criterion].append(f)
+                                self._criterion_values[variable].append(f)
                                 self._line_focuses[line_index] = f
                             else:
                                 logging.warning('Criterion omitted')
-                image_section_index += 1
 
     def _line_focus(self):
         """

@@ -7,6 +7,7 @@ from fibsem_maestro.tools.support import find_in_dict, find_in_objects
 
 
 class AutofunctionControl:
+    """ Initialize all autofunctions, it keep af queue and send emails """
     def __init__(self, microscope, settings, logging_enabled=False, log_dir=None, masks=None):
         # settings
         self.autofunction_settings = settings['autofunction']
@@ -22,7 +23,6 @@ class AutofunctionControl:
         self._microscope = microscope
         self._log_dir = log_dir
         self._logging = logging_enabled
-
 
         self._masks = masks
         self.af_values = self.autofunction_settings['af_values']
@@ -46,16 +46,17 @@ class AutofunctionControl:
         criterion_name = concrete_af_settings['criterion_name']
         autofunction = concrete_af_settings['autofunction']
 
+        # load correct image, criterion and mask settings
         actual_image_settings = find_in_dict(image_name, self.imaging_settings)
         actual_criterion_settings = find_in_dict(criterion_name, self.criterion_settings)
         actual_criterion_mask = find_in_objects(mask_name, self._masks)
 
-        # select and init sweeping class according to sweeping_strategy
+        # init sweeping class
         sweeping_module = importlib.import_module('fibsem_maestro.autofunctions.sweeping')
         Sweeping = getattr(sweeping_module, sweeping_strategy)
         sweeping = Sweeping(self._microscope.electron_beam, concrete_af_settings)
 
-        # select criterion based on criteria (settings.yaml)
+        # init criterion class
         criterion = Criterion(actual_criterion_settings, mask=actual_criterion_mask, logging_enabled=self._logging,
                               log_dir=self._log_dir)
         # select autofunction based on autofunction setting (settings.yaml)
@@ -72,6 +73,25 @@ class AutofunctionControl:
             self._microscope,
             auto_function_settings=merged_settings,
             image_settings=actual_image_settings)
+
+    def _email_attention(self):
+        try:
+            send_email(self.email_sender, self.email_receiver, "Maestro alert!",
+                       f"{self.attempts} attempts of AF failed. Acquisition stopped!")
+        except Exception as e:
+            logging.error("Sending email error. " + repr(e))
+        print(f"Number of focusing attempts exceeds allowed level ({self.attempts}).")
+        print("Perform manual inspection and press enter")
+        input()
+
+    def save_log_files(self, filename_prefix):
+        # logging plots
+        if self._logging:
+            fig = af.af_curve_plot()
+            fig.savefig(filename_prefix+'_af_curve.png')
+            if hasattr(af, 'line_focus_plot'):
+                fig = af.line_focus_plot()
+                fig.savefig(filename_prefix+'_line_focus.png')
 
     def __call__(self, slice_number, image_resolution, image_for_mask=None):
         """
@@ -93,16 +113,8 @@ class AutofunctionControl:
 
         # if too much number of attempts, send email
         if self.attempts >= self.max_attempts:
-            try:
-                send_email(self.email_sender, self.email_receiver, "Maestro alert!",
-                           f"{self.attempts} attempts of AF failed. Acquisition stopped!")
-            except Exception as e:
-                logging.error("Sending email error. " + repr(e))
-
-            print(f"Number of focusing attempts exceeds allowed level ({self.attempts}).")
-            print("Perform manual inspection and press enter")
-            input()
-            self.af_attempt = 0  # set the first focusing step
+            self._email_attention()
+            self.af_attempt = 0  # zero attempts
             self.scheduler.clear()  # clear schedule queue
 
         # any AF in scheduler in queue
@@ -114,12 +126,8 @@ class AutofunctionControl:
             af.move_stage_x()
             logging.info(f'Executed autofunction: {af.name}. Attempt no {self.attempts}.')
             # run af
-            af(image_for_mask)  # run af
+            if af(image_for_mask):  # run af
+                # if finished
+                self.scheduler.pop(0)  # remove the finished af
 
-            # logging plots
-            if self._logging:
-                fig = af.af_curve_plot()
-                fig.savefig(self._log_dir + f'/{slice_number}/{af.name}_af_curve.png')
-                if hasattr(af, 'line_focus_plot'):
-                    fig = af.line_focus_plot()
-                    fig.savefig(self._log_dir + f'/{slice_number}/{af.name}_line_focus.png')
+            self.save_log_files(self._log_dir + f'/{slice_number:05}/{af.name}')
