@@ -158,3 +158,30 @@ def get_stripes(img, separate_value=10, minimal_stripe_height=5):
             bin = np.arange(x0 + 1, x1)  # list of stripe indices
             yield image_section_index, bin
             image_section_index += 1
+
+
+def image_saturation_info(image):
+    max_value = 2 ** image.bit_depth - 1
+    total_px = len(image.data)  # total number of pixels
+    saturated_px = np.sum(image.data == max_value)
+    zeroed_px = np.sum(image.data == 0)
+    saturated_frac = saturated_px / total_px
+    zeroed_frac = zeroed_px / total_px
+    return saturated_frac, zeroed_frac
+
+
+def image_bit_dept_band(image, band_min_value_frac=0.01, histogram_total_width=256):
+    # band_min_value_frac - minimal number of pixels (fraction of total pixel count) considered as used band
+    # histogram_total_width - histogram bins
+
+    max_value = 2 ** image.bit_depth - 1
+    band_min_value = len(image.data) * band_min_value_frac  # minimal number of pixels, that will be considered as used band
+    histogram, bin_edges = np.histogram(image.data, bins=histogram_total_width, range=[0, max_value])
+
+    # Find the minimum and maximum non-zero bins
+    min_bin = next((i for i, count in enumerate(histogram) if count > band_min_value), None)
+    max_bin = len(histogram) - 1 - next((i for i, count in enumerate(reversed(histogram)) if count > band_min_value), None)
+
+    # The "width" of the histogram would be:
+    histogram_width = max_bin - min_bin + 1
+    return histogram_width / histogram_total_width  # return the fraction band of used gray levels

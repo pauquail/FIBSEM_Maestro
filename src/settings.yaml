@@ -78,6 +78,15 @@ autofunction:
       keep_time: 10
       forbidden_sections: [0]
 
+contrast_brightness:
+  function: 'none' # none, acb
+  mask_name: 'mask'
+  allowed_saturation: 0.01  # allowed portion of pixels in saturated or zeroed pixels
+  allowed_minimal_band: 0.5  # allowed minimal band of the whole bit depth
+  p_contrast: 10  # p-constant for contrast. New_contrast -= p_contrast * (portion_of_saturated_px + portion_of_zeored_px)
+  p_brightness: 10   # p-constant for brightness. New_bright -= p_brighness * portion_of_saturated_px (saturated or zeroed)
+
+
 mask:
   - name: 'mask'
     update_mask: True # grab image before in order to calculate mask. If False, last image is selected
