@@ -30,7 +30,12 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
             self._microscope = VirtualMicroscope()
         else:
             self._microscope = SdbMicroscopeClient()
-            self._microscope.connect(ip_address)
+            if ':' in ip_address:
+                ip_address, port = ip_address.split(':')
+                port = int(port)
+                self._microscope.connect(ip_address, port)
+            else:
+                self._microscope.connect(ip_address)
 
         self._electron_beam = ElectronBeam(self._microscope)
         self._ion_beam = IonBeam(self._microscope)

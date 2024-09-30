@@ -7,7 +7,7 @@ import yaml
 
 from fibsem_maestro.autofunctions.autofunction_control import AutofunctionControl
 from fibsem_maestro.autofunctions.criteria import Criterion
-from fibsem_maestro.mask.masking import Masking
+from fibsem_maestro.mask.masking import MaskingModel
 from fibsem_maestro.drift_correction.template_matching import TemplateMatchingDriftCorrection
 from fibsem_maestro.microscope_control.microscope import create_microscope
 from fibsem_maestro.microscope_control.settings import load_settings, save_settings
@@ -135,7 +135,7 @@ class SerialControl:
         """ Masking init """
         try:
             # init all masks
-            masks = [Masking(m) for m in self.mask_settings]
+            masks = [MaskingModel(m) for m in self.mask_settings]
         except Exception as e:
             logging.error("Mask loading failed! Masks will be omitted. " + repr(e))
             masks = None

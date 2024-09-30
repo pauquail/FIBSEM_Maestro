@@ -18,7 +18,7 @@ dirs:
   template_matching: 'templates'
 
 microscope:
-  ip_address: 'localhost'  # ASV server address
+  ip_address: '147.251.159.93:7521'  # ASV server address
   stage_tolerance: 1e-7  # Maximal stage error that is considered as ok
   stage_trials: 3  # Number of trials to reach the goal position before raise error
   beam_shift_tolerance: 50.0e-9 # Maximal beam shift error that is considered as ok
@@ -83,7 +83,8 @@ contrast_brightness:
   mask_name: 'mask'
   allowed_saturation: 0.01  # allowed portion of pixels in saturated or zeroed pixels
   allowed_minimal_band: 0.5  # allowed minimal band of the whole bit depth
-  p_contrast: 10  # p-constant for contrast. New_contrast -= p_contrast * (portion_of_saturated_px + portion_of_zeored_px)
+  p_decrease_contrast: 10  # p-constant for decrease contrast. New_contrast -= p_decrease_contrast * max(portion_of_saturated_px, portion_of_zeored_px)
+  p_increase_contrast: 10  # p-constant for increase contrast. New_contrast += p_increase_contrast * (1 - image_band)
   p_brightness: 10   # p-constant for brightness. New_bright -= p_brighness * portion_of_saturated_px (saturated or zeroed)
 
 
