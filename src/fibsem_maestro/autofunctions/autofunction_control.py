@@ -1,7 +1,7 @@
 import importlib
 import logging
 
-from fibsem_maestro.autofunctions.criteria import Criterion
+from fibsem_maestro.image_criteria.criteria import Criterion
 from fibsem_maestro.tools.email_attention import send_email
 from fibsem_maestro.tools.support import find_in_dict, find_in_objects
 

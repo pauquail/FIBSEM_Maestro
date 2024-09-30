@@ -3,9 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-from autoscript_sdb_microscope_client_tests.test_helper import AutoFunction
-
-from fibsem_maestro.autofunctions.criteria import Criterion
+from fibsem_maestro.image_criteria.criteria import Criterion
 from fibsem_maestro.autofunctions.sweeping import BasicSweeping
 from fibsem_maestro.tools.support import Point
 from fibsem_maestro.tools.image_tools import get_stripes
