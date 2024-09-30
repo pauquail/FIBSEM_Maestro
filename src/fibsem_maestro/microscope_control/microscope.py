@@ -94,13 +94,17 @@ def create_microscope(control: str):
             contrast_backup = self.beam.detector_contrast
             brightness_backup = self.beam.detector_brightness
             dwell_backup = self.beam.dwell_time
+            li_backup = self.beam.line_integration
             self.beam.detector_contrast = 0
             self.beam.detector_brightness = 0
             self.beam.blank()
+            self.beam.line_integration = 1
+            self.beam.dwell_time = self.beam.minimal_dwell
             self.beam.grab_frame()
             self.beam.dwell_time = dwell_backup
             self.beam.contrast = contrast_backup
             self.beam.brightness = brightness_backup
+            self.beam.line_integration = li_backup
 
         def total_blank(self):
             """

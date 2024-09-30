@@ -255,6 +255,11 @@ class BeamControl(ABC):
     def image_to_beam_shift(self):
         pass
 
+    @property
+    @abstractmethod
+    def minimal_dwell(self):
+        pass
+
 class MicroscopeControl(ABC):
     """
     This is an abstract base class designated for controlling a microscope.

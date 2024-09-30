@@ -464,7 +464,7 @@ class ElectronBeam(BeamControl):
         r = str(self._beam.scanning.resolution.value)
         if self._extended_resolution is None:
             logging.debug(f"Getting standard resolution ({self._modality}): {r}.")
-            return r.split('x')
+            return [int(x) for x in r.split('x')]
         else:
             logging.debug(f"Getting extended resolution ({self._modality}): {self._extended_resolution}.")
             return self._extended_resolution
@@ -581,6 +581,10 @@ class ElectronBeam(BeamControl):
         """ Direction in image vs beam shift"""
         return Point(1, -1)
 
+    @property
+    def minimal_dwell(self):
+        return 25e-9
+
 
 class IonBeam(ElectronBeam):
     def __init__(self,microscope):
@@ -630,3 +634,7 @@ class IonBeam(ElectronBeam):
     def image_to_beam_shift(self):
         """ Direction in image vs beam shift"""
         return None
+
+    @property
+    def minimal_dwell(self):
+        return 25e-9

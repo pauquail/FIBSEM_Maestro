@@ -18,7 +18,7 @@ dirs:
   template_matching: 'templates'
 
 microscope:
-  ip_address: '147.251.159.93:7521'  # ASV server address
+  ip_address: '10.56.91.11'  # ASV server address (hydra: 147.251.159.93:7520)
   stage_tolerance: 1e-7  # Maximal stage error that is considered as ok
   stage_trials: 3  # Number of trials to reach the goal position before raise error
   beam_shift_tolerance: 50.0e-9 # Maximal beam shift error that is considered as ok
