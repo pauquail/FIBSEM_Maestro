@@ -38,14 +38,16 @@ class BasicSweeping:
         """ Basic sweeping"""
         # ensure zig zag manner
         if repetition % 2 == 0:
-            sweep_space = np.linspace(self._base - self.range[0], self._base + self.range[1], self.steps)
+            sweep_space = np.linspace(self._base + self.range[0], self._base + self.range[1], self.steps)  # self.range[0] is negative
         else:
-            sweep_space = np.linspace(self._base + self.range[1], self._base - self.range[0], self.steps)
+            sweep_space = np.linspace(self._base + self.range[1], self._base + self.range[0], self.steps)
         for s in sweep_space:
             if self.max_limits[0] < s < self.max_limits[1]:
                 yield s
             else:
                 logging.warning(f'Sweep of {self.sweeping_var} if out of range ({s}')
+                # return limit value
+                yield self.max_limits[0] if s < self.max_limits[0] else self.max_limits[1]
 
     def sweep(self):
         """
@@ -55,16 +57,9 @@ class BasicSweeping:
         :rtype: generator object
         """
         for repetition in range(self.total_cycles):
+            logging.info(f'Sweep cycle {repetition} of {self.total_cycles}')
             for s in self.sweep_inner(repetition):
-                yield s
-
-    def __len__(self):
-        """ Returns the number of items in the sweeping variable. """
-        i = 0
-        for _ in self.sweep():
-            i += 1
-        return i
-
+                yield repetition, s
 
 class SpiralSweeping(BasicSweeping):
     def __init__(self, microscope, settings):

@@ -1,6 +1,7 @@
 import math
 import re
 
+import numpy
 import numpy as np
 
 
@@ -141,6 +142,19 @@ class ScanningArea:
         # Extract the coordinates from the string
         x, y, w, h = map(float, point_string[13:-1].split(', '))
         return cls(Point(x, y), w, h)
+
+
+class Image(np.ndarray):
+    def __new__(cls, image, pixel_size):
+        obj = np.asarray(image.data).view(cls)
+        obj.pixel_size = pixel_size
+        return obj
+
+    @staticmethod
+    def from_as(adorned_image):
+        pixel_size = adorned_image.metadata.binary_result.pixel_size.x
+        image = np.array(adorned_image.data)
+        return Image(image, pixel_size)
 
 
 def find_in_dict(name, list_of_dicts):

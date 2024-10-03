@@ -18,7 +18,7 @@ dirs:
   template_matching: 'templates'
 
 microscope:
-  ip_address: '10.56.91.11'  # ASV server address (hydra: 147.251.159.93:7520)
+  ip_address: 'localhost'  # ASV server address (hydra: 147.251.159.93:7520, hydra2: 147.251.159.93:7521)
   stage_tolerance: 1e-7  # Maximal stage error that is considered as ok
   stage_trials: 3  # Number of trials to reach the goal position before raise error
   beam_shift_tolerance: 50.0e-9 # Maximal beam shift error that is considered as ok
@@ -35,10 +35,10 @@ image:
     dwell: 25.0e-9
   - name: 'autofunction'
     resolution: [6144, 4096] # must be in standard res
-    field_of_view: [61440.0e-9, 40960.0e-9]
-    images_line_integration: [64]
+    field_of_view: [31.9e-6, 21.2666666667e-6]
+    images_line_integration: [1]
     bit_depth: 8
-    dwell: 5.0e-6
+    dwell: 1.0e-6
 
 criterion_calculation:
   - name: 'image_acquisition'
@@ -67,8 +67,8 @@ autofunction:
       sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
       sweeping_range: [-10.0e-6, 10.0e-6] # The range of the sweeping variable.
       sweeping_max_limits: [500.0e-6, 70.0e-3] # Limits of sweeping_var
-      sweeping_steps: 20 # sweeping steps (in spiral, it is number of steps per cycle)
-      sweeping_total_cycles: 10 # sweeping cycles
+      sweeping_steps: 20 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
+      sweeping_total_cycles: 6 # sweeping cycles
       execute: 1 # execute condition - if int = number of slices, if float = image resolution
       image_name: 'autofunction'
       criterion_name: 'autofunction'

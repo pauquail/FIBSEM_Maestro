@@ -13,13 +13,11 @@ class Criterion:
         self.final_resolution = getattr(np, criterion_settings['final_resolution'])
         self.final_regions_resolution = getattr(np, criterion_settings['final_regions_resolution'])
         self.criterion_name = criterion_settings['criterion']
+        self.criterion_settings = criterion_settings
 
         criteria_module = importlib.import_module('fibsem_maestro.image_criteria.criteria_math')
         self.criterion_func = getattr(criteria_module, criterion_settings['criterion'])
 
-        if 'detail' in criterion_settings:
-            self.lowest_detail = criterion_settings['detail'][0]
-            self.highest_detail = criterion_settings['detail'][1]
         self.logging_enabled = logging_enabled
         self.log_dir = log_dir
         self.mask = mask
@@ -32,9 +30,9 @@ class Criterion:
 
     def _tiles_resolution(self, img):
 
-        if min(img.shape) == 1:  # line
+        if min(img.shape) == 1 or len(img.shape) == 1:  # line
             logging.info('Line image does not support tiling')
-            return self.criterion_func(img)
+            return self.criterion_func(img, self.criterion_settings)
 
         logging.info("Tiles resolution calculation...")
         # Apply resolution border to the acquired image
@@ -54,20 +52,19 @@ class Criterion:
 
         for tile_img in tiles:
             try:
-                res = self.criterion_func(tile_img)
+                res = self.criterion_func(tile_img, self.criterion_settings)
             except Exception as e:
-                logging.warning("FRC error on current tile. " + repr(e))
+                logging.warning("Resolution calculation error on current tile. " + repr(e))
                 continue
             res_arr.append(res)
 
         logging.debug(f'Image sectioned to {len(res_arr)} sections')
 
         if len(res_arr) == 0:
-            logging.error("FRC nor computed")
+            logging.error("Resolution not computed")
             return 0
         else:
-
-            final_res = self.final_resolution(np.array(res_arr))
+            final_res = self.final_resolution(np.array(res_arr))  # apply final function (like min)
             return final_res
 
     @property
@@ -143,11 +140,15 @@ class Criterion:
         line_number - if set, only one line is selected from mask image
         """
 
-        self.pixel_size = image.metadata.binary_result.pixel_size.x
-        images = [image.data] #  only one image if o masking
+        self.pixel_size = image.pixel_size
+
+        if line_number is not None:
+            image = image[line_number]
+
+        images = [image]  # only one image if not masking
 
         if self.mask is not None:
-            images = self.mask.get_masked_images(image.data, line_number)
+            images = self.mask.get_masked_images(image, line_number)
 
             if images is None:
                 logging.error('Not enough masked regions for resolution calculation - masking omitted!')

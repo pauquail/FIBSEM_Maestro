@@ -28,8 +28,8 @@ def bandpass_criterion(img, settings) -> float:
     :param img: The input image.
     :return: Criterion.
     """
-    img_low = gauss_filter(img, settings['pixel_size'], settings['lowest_detail'])
-    img_high = gauss_filter(img, settings['pixel_size'], settings['highest_detail'])
+    img_low = gauss_filter(img, img.pixel_size, settings['detail'][0])
+    img_high = gauss_filter(img, img.pixel_size, settings['detail'][1])
 
     result = np.mean(abs(img_high - img_low))  # mean of absolute images
     return result
@@ -42,8 +42,8 @@ def bandpass_var_criterion(img, settings) -> float:
     :param img: The input image.
     :return: Criterion.
     """
-    img_low = gauss_filter(img, settings['pixel_size'], settings['lowest_detail'])
-    img_high = gauss_filter(img, settings['pixel_size'], settings['highest_detail'])
+    img_low = gauss_filter(img, img.pixel_size, settings['detail'][0])
+    img_high = gauss_filter(img, img.pixel_size, settings['detail'][1])
 
     result = np.var(img_high - img_low)
     return result
@@ -64,12 +64,12 @@ def fft_criterion(img, settings):
         img0 = img - np.mean(img)  # remove 0 frequency
         fft_line = np.fft.fft(img0)  # fft
 
-        freq = np.fft.fftfreq(len(img), settings['pixel_size'])  # get freq axis
+        freq = np.fft.fftfreq(len(img), img.pixel_size)  # get freq axis
         fft_line = fft_line[freq > 0]  # remove negative frequencies
         freq = freq[freq > 0]  # remove negative frequencies from freq axis
 
         # filter frequencies
-        band_i = np.where((freq < 1 / settings['highest_detail']) & (freq > 1 / settings['lowest_detail']))[0]
+        band_i = np.where((freq < 1 / settings['detail'][1]) & (freq > 1 / settings['detail'][0]))[0]
         # sum of amplitudes of all filtered frequencies
         result = np.sum(abs(fft_line[band_i]))
         return result
@@ -78,15 +78,15 @@ def fft_criterion(img, settings):
         img0 = img - np.mean(img)  # remove 0 frequency
         fft_img = np.fft.fft2(img0)  # fft
 
-        freq1 = np.fft.fftfreq(fft_img.shape[0], settings['pixel_size'])  # get x freq axis
-        freq2 = np.fft.fftfreq(fft_img.shape[1], settings['pixel_size'])  # get y freq axis
+        freq1 = np.fft.fftfreq(fft_img.shape[0], img.pixel_size)  # get x freq axis
+        freq2 = np.fft.fftfreq(fft_img.shape[1], img.pixel_size)  # get y freq axis
 
         freq1 = np.repeat(freq1[:, np.newaxis], freq2.shape[0], axis=1)
         freq2 = np.repeat(freq2[:, np.newaxis], freq1.shape[0], axis=1).T
         freq = np.sqrt(freq1 ** 2 + freq2 ** 2)  # make freq matrix
 
-        high_frequency = 1 / settings['highest_detail']  # highest detail frequency
-        low_frequency = 1 / settings['lowest_detail']  # lowest detail frequency
+        high_frequency = 1 / settings['detail'][1]  # highest detail frequency
+        low_frequency = 1 / settings['detail'][0] # lowest detail frequency
 
         # make freq filter
         freq[freq > high_frequency] = 0
@@ -107,7 +107,7 @@ def fft_criterion(img, settings):
 
 def frc_criterion(img, settings):
     try:
-        res = frc(img, settings['pixel_size'])
+        res = frc(img, img.pixel_size)
     except Exception as e:
         logging.warning("FRC error on current tile. " + repr(e))
         return np.nan

@@ -1,7 +1,8 @@
 import logging
 
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl, StagePosition, BeamControl
-from fibsem_maestro.tools.support import Point
+from fibsem_maestro.tools.support import Point, Image
+
 
 try:
     from autoscript_sdb_microscope_client import SdbMicroscopeClient
@@ -13,8 +14,6 @@ try:
 except ImportError:
     from fibsem_maestro.microscope_control.virtual_control import VirtualMicroscope
     from fibsem_maestro.microscope_control.virtual_control import StagePosition as StagePositionAS, ImagingDevice
-
-    from fibsem_maestro.tools.support import Point as PointAS
 
     virtual_mode = True
     logging.warning("AS library could not be imported. Virtual mode used.")
@@ -376,7 +375,8 @@ class ElectronBeam(BeamControl):
             if file_name is not None:
                 self._microscope.imaging.grab_frame_to_disk(file_name, ImageFileFormat.TIFF, img_settings)
                 logging.info(f"Image grabbed to disk.")
-                return AdornedImage.load(file_name)
+                img = AdornedImage.load(file_name)
+                return Image.from_as(img)
             else:
                 raise Exception('Unable to grab the image. File name must be provided')
 
@@ -389,7 +389,8 @@ class ElectronBeam(BeamControl):
         """
         self.select_modality()  # activate right quad
         logging.debug(f"Getting image ({self._modality}).")
-        return self._microscope.imaging.get_image().data
+        img = self._microscope.imaging.get_image()
+        return Image.from_as(img)
 
     @property
     def line_integration(self):

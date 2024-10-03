@@ -5,7 +5,7 @@ import time
 
 from fibsem_maestro.image_criteria.criteria import Criterion
 from fibsem_maestro.autofunctions.sweeping import BasicSweeping
-from fibsem_maestro.tools.support import Point
+from fibsem_maestro.tools.support import Point, Image
 from fibsem_maestro.tools.image_tools import get_stripes
 
 class AutoFunction:
@@ -163,18 +163,25 @@ class LineAutoFunction(AutoFunction):
         :param line_time: the time it takes to acquire a single line of data
         :return: None
         """
-        for step, s in enumerate(self._sweeping.sweep()):
-            logging.debug(f'Sweep cycle {step}')
-            if step == 0:
+        actual_repetition = -1
+        for step, (repetition, s) in enumerate(self._sweeping.sweep()):
+            self._sweeping.value = s  # set value
+            if repetition == 0:
                 self._microscope.beam.start_acquisition()
-            # blank and wait
-            self._microscope.total_blank()
-            if step == 0:
-                time.sleep(self.pre_imaging_delay)
+
+            if not repetition == actual_repetition:
+                logging.debug(f'Autofunction sweep cycle {repetition}')
+                actual_repetition = repetition
+                # blank and wait
+                self._microscope.total_blank()
+                if step == 0:
+                    time.sleep(self.pre_imaging_delay)
+                time.sleep(self.keep_time * line_time)
+                # unblank and wait
+                self._microscope.total_unblank()
+
             time.sleep(self.keep_time * line_time)
-            # unblank and wait
-            self._microscope.total_unblank()
-            time.sleep(self.keep_time * line_time)
+
         self._microscope.beam.stop_acquisition()
 
     def _process_image(self, img):
@@ -185,15 +192,15 @@ class LineAutoFunction(AutoFunction):
         :type img: numpy.ndarray
         :return: None
         """
-        focus_steps = len(self._sweeping)
+        sweeping_steps = self._sweeping.steps
         for image_section_index, bin in get_stripes(img):
             if image_section_index not in self.forbidden_sections:
-                    bin = np.array_split(bin, focus_steps)  # split bins to equal parts the equal to focus_steps parts
+                    bin = np.array_split(bin, sweeping_steps)  # split bins to equal parts the equal to focus_steps parts
                     # go over all variable values
                     for bin_index, variable in enumerate(self._sweeping.sweep_inner(image_section_index)):
                         # each line
                         for line_index in bin[bin_index]:
-                            f = self._criterion(img[line_index], line_index)
+                            f = self._criterion(img, line_index)
 
                             if f is not None:
                                 self._criterion_values[variable].append(f)
@@ -213,7 +220,7 @@ class LineAutoFunction(AutoFunction):
         # variable sweeping
         self._variable_sweeping(line_time)
         # get image
-        img = self._microscope.beam.get_image().data
+        img = self._microscope.beam.get_image()
         # calculate self._criterion_values
         self._process_image(img)
         # set focus plot

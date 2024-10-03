@@ -102,8 +102,8 @@ def create_microscope(control: str):
             self.beam.dwell_time = self.beam.minimal_dwell
             self.beam.grab_frame()
             self.beam.dwell_time = dwell_backup
-            self.beam.contrast = contrast_backup
-            self.beam.brightness = brightness_backup
+            self.beam.detector_contrast = contrast_backup
+            self.beam.detector_brightness = brightness_backup
             self.beam.line_integration = li_backup
 
         def total_blank(self):
@@ -111,15 +111,19 @@ def create_microscope(control: str):
             Blank with zero contrast and brightness
             :return:
             """
-            self._detector_contrast_backup = self.beam.detector_contrast
-            self._detector_brightness_backup = self.beam.detector_brightness
+            if not self.beam.detector_contrast == 0:
+                self._detector_contrast_backup = self.beam.detector_contrast
+            if not self.beam.detector_brightness == 0:
+                self._detector_brightness_backup = self.beam.detector_brightness
             self.beam.detector_contrast = 0
             self.beam.detector_brightness = 0
             self.beam.blank()
 
         def total_unblank(self):
-            self.beam.detector_contrast = self._detector_contrast_backup
-            self.beam.detector_brightness = self._detector_brightness_backup
+            if self._detector_contrast_backup is not None and not self._detector_contrast_backup == 0:
+                self.beam.detector_contrast = self._detector_contrast_backup
+            if self._detector_brightness_backup is not None and not self._detector_brightness_backup == 0:
+                self.beam.detector_brightness = self._detector_brightness_backup
             self.beam.unblank()
 
         def area_scanning(self):
@@ -144,7 +148,7 @@ def create_microscope(control: str):
             if 'images_line_integration' in image_settings:
                 self.beam.line_integration = image_settings['images_line_integration'][line_integration_index]
             if 'dwell' in image_settings:
-                self.beam.dwell = image_settings['dwell']
+                self.beam.dwell_time = image_settings['dwell']
 
         def acquire_image(self, slice_number=None):
             """

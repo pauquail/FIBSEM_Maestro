@@ -5,16 +5,17 @@ import time
 import version
 from fibsem_maestro.serial_control import SerialControl
 
-#  remove line 22: serial_control.imaging(1) # !!!
-# rotation deg rad?
+#  !!! remove line 33: serial_control.imaging(1) # !!!
+#  rotation deg rad?
 #  email if problem (freq)
 #  virtual mode
-#  bordel v beam (az bude milling)
 #  mask for acb
-# sweeping max limits to autoscript
+#  sweeping max limits to autoscript
+#  z score for template matching
 
-# test: grab big data, multiple masking, spiral af, email, mask online training, reduced scanning, template matching
+# test: multiple masking, spiral af, email, mask online training, reduced scanning, template matching
 
+# PIXEL SIZE not present
 
 settings_path = 'settings.yaml'
 
