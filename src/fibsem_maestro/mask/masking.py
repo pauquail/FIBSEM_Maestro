@@ -109,6 +109,7 @@ class MaskingModel(TfModel):
                 ax.add_patch(rect)
             fig.tight_layout()
             return fig
+
         def plot_mask():
             # Create figure and axes
             fig, ax = plt.subplots(1)
@@ -119,10 +120,14 @@ class MaskingModel(TfModel):
 
         # Mask image
         mask_filename = filename_prefix + '_mask.png'
-        plot_mask().savefig(mask_filename)
+        fig = plot_mask()
+        fig.savefig(mask_filename)
+        plt.close(fig)
         # Image with rectangles for criterion calculation
         mask_filename = filename_prefix + '_rectangles_mask.png'
-        plot_image_rectangles().savefig(mask_filename)
+        fig = plot_image_rectangles()
+        fig.savefig(mask_filename)
+        plt.close(fig)
 
     @property
     def image_pixel_size(self):  # used for drift correction

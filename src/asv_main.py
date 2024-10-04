@@ -12,10 +12,10 @@ from fibsem_maestro.serial_control import SerialControl
 #  mask for acb
 #  sweeping max limits to autoscript
 #  z score for template matching
-
+# AF multi thread
 # test: multiple masking, spiral af, email, mask online training, reduced scanning, template matching
 
-# PIXEL SIZE not present
+
 
 settings_path = 'settings.yaml'
 

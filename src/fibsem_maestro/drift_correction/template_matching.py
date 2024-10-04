@@ -116,7 +116,8 @@ class TemplateMatchingDriftCorrection:
     def _log(self, slice_number, shift_x, shift_y):
         if self.logging:
             fig = self.log_img()
-            fig.savefig(os.path.join(self.log_dir, f"{slice_number:05}/template_matching.png"))
+            fig.savefig(fold_filename(self.log_dir, slice_number, 'template_matching.png'))
+            plt.close(fig)
 
         # log final shift
         self.logging_dict['shift_x'] = shift_x

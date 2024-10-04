@@ -50,6 +50,7 @@ class AutoscriptMicroscopeControl(MicroscopeControl):
     @position.setter
     def position(self, goal: StagePosition):
         """Set stage position"""
+        self._microscope.specimen.stage.unlink()
         self._microscope.specimen.stage.absolute_move(goal.to_stage_position_as())
         logging.debug(f"Moving stage to {goal.to_dict()}...")
 
@@ -369,7 +370,7 @@ class ElectronBeam(BeamControl):
             logging.info(f"Image grabbed.")
             if file_name is not None:
                 grabbed_image.save(file_name)
-            return grabbed_image
+            return Image.from_as(grabbed_image)
         except Exception as e:
             logging.info('Grabbing frame to disk. ' + repr(e))
             if file_name is not None:

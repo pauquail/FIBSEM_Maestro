@@ -89,7 +89,7 @@ class StagePosition:
         stage_dict['t'] = math.radians(stage_dict['tilt'])
         del stage_dict['rotation']
         del stage_dict['tilt']
-        return StagePositionAS(**stage_dict, coordinate_system="Raw")
+        return StagePositionAS(**stage_dict, coordinate_system="Specimen")
 
     def to_dict(self):
         return vars(self)
@@ -156,6 +156,17 @@ class Image(np.ndarray):
         image = np.array(adorned_image.data)
         return Image(image, pixel_size)
 
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        self.pixel_size = getattr(obj, 'pixel_size', None)
+
+    def __getitem__(self, index):
+        result = super(Image, self).__getitem__(index)
+        if type(result) is Image:
+            return result
+        else:
+            return Image(result, self.pixel_size)
+
 
 def find_in_dict(name, list_of_dicts):
     """ find the item in a dict based on name value """
@@ -171,3 +182,10 @@ def find_in_objects(name, list_of_objects):
         return None
     else:
         return [dic for dic in list_of_objects if dic.name == name][0]
+
+
+def fold_filename(log_dir, slice_number, postfix=""):
+    if slice_number is None:
+        slice_number = -1
+    filename = log_dir + f'/{slice_number:05}/{postfix}'
+    return filename

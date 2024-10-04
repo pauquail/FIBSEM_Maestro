@@ -72,7 +72,9 @@ class AutofunctionControl:
             criterion, sweeping,
             self._microscope,
             auto_function_settings=merged_settings,
-            image_settings=actual_image_settings)
+            image_settings=actual_image_settings,
+            logging_enabled=self._logging,
+            log_dir=self._log_dir)
 
     def _email_attention(self):
         try:
@@ -83,15 +85,6 @@ class AutofunctionControl:
         print(f"Number of focusing attempts exceeds allowed level ({self.attempts}).")
         print("Perform manual inspection and press enter")
         input()
-
-    def save_log_files(self, filename_prefix):
-        # logging plots
-        if self._logging:
-            fig = af.af_curve_plot()
-            fig.savefig(filename_prefix+'_af_curve.png')
-            if hasattr(af, 'line_focus_plot'):
-                fig = af.line_focus_plot()
-                fig.savefig(filename_prefix+'_line_focus.png')
 
     def __call__(self, slice_number, image_resolution, image_for_mask=None):
         """
@@ -122,12 +115,8 @@ class AutofunctionControl:
             self.attempts += 1  # attempts counter
             af = self.scheduler[0]
 
-            # Focusing on different area
-            af.move_stage_x()
             logging.info(f'Executed autofunction: {af.name}. Attempt no {self.attempts}.')
             # run af
-            if af(image_for_mask):  # run af
+            if af(image_for_mask, slice_number=slice_number):  # run af
                 # if finished
                 self.scheduler.pop(0)  # remove the finished af
-
-            self.save_log_files(self._log_dir + f'/{slice_number:05}/{af.name}')

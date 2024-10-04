@@ -5,7 +5,11 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt, patches
 
+from fibsem_maestro.tools.support import fold_filename
+
+
 class Criterion:
+    image_index = 1  # index that is incremented in each figure save (prevention of file rewrite)
     def __init__(self, criterion_settings, mask=None, logging_enabled=False, log_dir=None):
         self.name = criterion_settings['name']
         self.border = criterion_settings['border']
@@ -31,7 +35,7 @@ class Criterion:
     def _tiles_resolution(self, img):
 
         if min(img.shape) == 1 or len(img.shape) == 1:  # line
-            logging.info('Line image does not support tiling')
+            logging.debug('Line image does not support tiling')
             return self.criterion_func(img, self.criterion_settings)
 
         logging.info("Tiles resolution calculation...")
@@ -116,6 +120,7 @@ class Criterion:
             return cropped_img
 
     def tile_log_image(self, img):
+        """ Create image with inpaint rectanges that represent tiling"""
         # Create figure and axes
         fig, ax = plt.subplots()
         # Display the image
@@ -129,10 +134,11 @@ class Criterion:
                                          linewidth=1, edgecolor='r',
                                          facecolor='none')
                 ax.add_patch(rect)
-            plt.tight_layout()
+        plt.tight_layout()
+        plt.axis('off')
         return fig
 
-    def __call__(self, image, line_number=None, slice_number = None):
+    def __call__(self, image, line_number=None, slice_number=None):
         """
         It measures selected resolution criterion on image.
         It uses masking, tiling, border exclusion.
@@ -159,19 +165,23 @@ class Criterion:
         for i, image in enumerate(images):
             # region resolution
             region_resolutions.append(self._tiles_resolution(image))
-            self._save_log_subimage(image, slice_number, i)
+            self._save_log_subimage(image, slice_number, i)  # Input image with drew tiles
 
-        self._save_log_images(image, slice_number)
+        self._save_log_images(slice_number)
         return self.final_regions_resolution(region_resolutions)
 
     def _save_log_subimage(self, image, slice_number, index):
         """ Input image with drew tiles """
-        if self.logging_enabled:
+        # save log image only if it is not line
+        if self.logging_enabled and len(image.shape) == 2 and min(image.shape) > 1:
             fig = self.tile_log_image(image)
-            fig.savefig(f'{self.log_dir}/{slice_number:05}/criterion_subimage_{index}.png')
+            fig.savefig(fold_filename(self.log_dir,slice_number,f'criterion_{self.name}_image_{index}_({Criterion.image_index}).png'))
+            plt.close(fig)
+            Criterion.image_index += 1
 
-    def _save_log_images(self, image, slice_number):
-        # save log mask
-            if self.logging_enabled and self.mask is not None:
-                mask_filename = os.path.join(self.log_dir, f'{slice_number:05}/resolution')
-                self.mask.save_log_images(mask_filename)
+    def _save_log_images(self, slice_number):
+        """ Masked image """
+        if self.logging_enabled and self.mask is not None:
+            mask_filename = fold_filename(self.log_dir,slice_number,f'resolution_({Criterion.image_index})_')
+            Criterion.image_index += 1
+            self.mask.save_log_files(mask_filename)

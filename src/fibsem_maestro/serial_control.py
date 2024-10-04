@@ -12,7 +12,7 @@ from fibsem_maestro.drift_correction.template_matching import TemplateMatchingDr
 from fibsem_maestro.microscope_control.microscope import create_microscope
 from fibsem_maestro.microscope_control.settings import load_settings, save_settings
 from fibsem_maestro.tools.dirs_management import make_dirs
-from fibsem_maestro.tools.support import Point, find_in_dict, find_in_objects
+from fibsem_maestro.tools.support import Point, find_in_dict, find_in_objects, fold_filename
 
 colorama_init(autoreset=True)  # colorful console
 
@@ -35,8 +35,8 @@ class SerialControlLogger:
     def set_log_file(self, slice_number):
         if self.log_enabled:
             # make dir (log/slice_number
-            os.makedirs(os.path.join(self.dirs_log, f'{slice_number:05}'), exist_ok=True)
-            log_filename = os.path.join(self.dirs_log, f'{slice_number:05}/app.log')
+            os.makedirs(fold_filename(self.dirs_log, slice_number), exist_ok=True)
+            log_filename = fold_filename(self.dirs_log, slice_number, 'app.log')
 
             # remove last logging file handler
             if self.logging_file_handler is not None:
@@ -60,7 +60,7 @@ class SerialControlLogger:
         self.log_params['stage_y'] = position.y
 
     def save_log(self, slice_number):
-        with open(os.path.join(self.dirs_log, f'{slice_number:05}/log_dict.yaml'), 'w') as f:
+        with open(fold_filename(self.dirs_log, slice_number,'log_dict.yaml'), 'w') as f:
             yaml.dump(self.log_params, f, default_flow_style=False)
         self.log_params.clear()
 

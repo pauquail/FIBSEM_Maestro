@@ -152,10 +152,10 @@ def get_stripes(img, separate_value=10, minimal_stripe_height=5):
     image_section_index = 0  # actual image section
     for i in range(len(zero_pos) - 1):  # iterate all blank lines - find the image section
         x0 = zero_pos[i]
-        x1 = zero_pos[i + 1]  # 2 blank lines
+        x1 = zero_pos[i + 1]
         # if these 2 blank lines are far from each other (it makes the image section)
         if x1 - x0 >= minimal_stripe_height:
-            bin = np.arange(x0 + 1, x1)  # list of stripe indices
+            bin = np.arange(x0 + 1, x1 - 1)  # list of stripe indices
             yield image_section_index, bin
             image_section_index += 1
 
