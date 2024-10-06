@@ -31,6 +31,8 @@ class Criterion:
         self.border_x = None  # border width in pixels
         self.border_y = None  # border height in pixels
         self.img_with_border = None  # Image without border
+        self._threads = []  # threads list for criterion calculation in separated thread
+        self.finalize_thread = None  # function that is called on the end of separated thread (one argument - resolution)
 
     def _tiles_resolution(self, img):
 
@@ -138,7 +140,7 @@ class Criterion:
         plt.axis('off')
         return fig
 
-    def __call__(self, image, line_number=None, slice_number=None):
+    def __call__(self, image, line_number=None, slice_number=None, separate_thread=False):
         """
         It measures selected resolution criterion on image.
         It uses masking, tiling, border exclusion.
@@ -160,6 +162,12 @@ class Criterion:
                 logging.error('Not enough masked regions for resolution calculation - masking omitted!')
                 images = [image]  # calculate resolution on entire image
 
+        if separate_thread:
+            self._threads.append(Thread(target=self._calculate, args=(images,)))
+        else:
+            return self._calculate(images)
+
+    def _calculate(self, images):
         # resolution from different masked regions
         region_resolutions = []
         for i, image in enumerate(images):
@@ -168,7 +176,15 @@ class Criterion:
             self._save_log_subimage(image, slice_number, i)  # Input image with drew tiles
 
         self._save_log_images(slice_number)
-        return self.final_regions_resolution(region_resolutions)
+        resolution = self.final_regions_resolution(region_resolutions)
+        if self.finalize_thread is not None:
+            self.finalize_thread(resolution)
+        return resolution
+
+    def join_all_threads(self):
+        """ Wait until all resolution calculations are finished """
+        [thread.join() for thread in self._threads]
+        self._threads = []
 
     def _save_log_subimage(self, image, slice_number, index):
         """ Input image with drew tiles """

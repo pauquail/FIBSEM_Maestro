@@ -24,6 +24,7 @@ class AutoFunction:
         self._sweeping = sweeping  # sweeping class
         self._microscope = microscope  # microscope control class
         self._criterion = criterion  # focusing criterion class
+        self._criterion.finalize_thread = self._get_image_finalize  # set the function called on resolution calculation (in separated thread)
         # init criterion dict (array of focusing crit for each variable value)
         self._criterion_values = {}
         self._initialize_criteria_dict()
@@ -65,10 +66,14 @@ class AutoFunction:
         # grab image with defined settings (in self._image_settings). The settings are updated in self._prepare
         image = self._microscope.beam.grab_frame()
         # criterion calculation
-        criterion = self._criterion(image, slice_number=slice_number)
+        # run on separated thread - call self._get_image_finalize on the end of resolution calculation
+        self._criterion(image, slice_number=slice_number, separate_thread=True)
+
+    def _get_image_finalize(self, resolution):
+        """ Finalizing function called on the end of resolution calculation thread"""
         # criterion can be None of not enough masked regions
-        if criterion is not None:
-            self._criterion_values[value].append(criterion)
+        if resolution is not None:
+            self._criterion_values[value].append(resolution)
         else:
             logging.warning('Criterion omitted (not enough masked region)!')
         logging.info(f"Criterion value: {self._criterion_values[value]}")
@@ -89,6 +94,7 @@ class AutoFunction:
         """
         This method is used to evaluate the criteria and determine the best value. It also generates plots.
         """
+        self._criterion.join_all_threads()  # wait to complete all resolution calculations
         # convert list of criteria to mean values for each sweeping variable value
         self._criterion_values = {key: np.mean(value_list) for key, value_list in self._criterion_values.items()}
         # find the maximal value
@@ -310,7 +316,7 @@ class StepAutoFunction(AutoFunction):
 
         # step image mode
         sweep_list = list(self._sweeping.sweep())
-        value = sweep_list[self._step_number]  # select sweeping variable based on current step
+        repetition, value = sweep_list[self._step_number]  # select sweeping variable based on current step
         logging.info(f'Performing autofocus step no. {self._step_number}')
         self._get_image(value)
         self._step_number += 1
