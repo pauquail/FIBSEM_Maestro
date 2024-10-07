@@ -4,6 +4,7 @@ import os
 from colorama import Fore, init as colorama_init
 import yaml
 
+from fibsem_maestro.autofunctions.autofunction import StepAutoFunction
 from fibsem_maestro.autofunctions.autofunction_control import AutofunctionControl
 from fibsem_maestro.image_criteria.criteria import Criterion
 from fibsem_maestro.mask.masking import MaskingModel
@@ -59,7 +60,7 @@ class SerialControlLogger:
         self.log_params['stage_y'] = position.y
 
     def save_log(self, slice_number):
-        with open(fold_filename(self.dirs_log, slice_number,'log_dict.yaml'), 'w') as f:
+        with open(fold_filename(self.dirs_log, slice_number, 'log_dict.yaml'), 'w') as f:
             yaml.dump(self.log_params, f, default_flow_style=False)
         self.log_params.clear()
 
@@ -116,7 +117,6 @@ class SerialControl:
         self._criterion_resolution = self.initialize_criterion_resolution()
         self._criterion_resolution.finalize_thread_func = self.finalize_calculate_resolution
         self._drift_correction = self.initialize_drift_correction()
-
 
     def initialize_microscope(self):
         """ microscope init"""
@@ -184,16 +184,16 @@ class SerialControl:
             print('No drift correction found')
         return drift_correction
 
-    def check_af_main_imaging(self, slice_number):
-        # if main_imaging enabled in active autofunction - use calculated resolution
+    def check_af_on_acquired_image(self, slice_number):
+        # autofunction on acquired image
         aaf = self._autofunctions.active_autofunction
-        if aaf is not None and aaf.main_imaging:
-            logging.info(f'Main imaging autofunction invoked! {aaf.name}')
-            aaf.measure_resolution(self.image, slice_number=slice_number, sweeping_value=aaf.last_sweeping_value)
+        if aaf is not None and isinstance(aaf, StepAutoFunction):
+            logging.info(f'Autofunction on acquired image invoked! {aaf.name}')
+            aaf.evaluate_image(self.image_name, slice_number=slice_number)
 
-    def wait_for_af_main_imaging(self):
+    def wait_for_af_criterion_calculation(self):
         aaf = self._autofunctions.active_autofunction
-        if aaf is not None and aaf.main_imaging:
+        if aaf is not None and isinstance(aaf, StepAutoFunction):
             aaf.wait_to_criterion_calculation()
 
     def finalize_calculate_resolution(self, resolution, slice_number, **kwargs):
@@ -304,7 +304,7 @@ class SerialControl:
     def imaging(self, slice_number):
         # wait for resolution calculation if needed anf AF main imaging criterion calculation
         self._criterion_resolution.join_all_threads()
-        self.wait_for_af_main_imaging()
+        self.wait_for_af_criterion_calculation()
 
         print(Fore.YELLOW + f'Current slice number: {slice_number}')
 
@@ -317,7 +317,7 @@ class SerialControl:
         self.autofunction(slice_number)  # autofunctions handling
         self.logger.log()  # save settings and params
         self.acquire(slice_number)  # acquire image
-        self.check_af_main_imaging(slice_number)  # check if the autofunction on main_imaging is activated
+        self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
         self.drift_correction(slice_number)  # drift correction
 
         # resolution calculation

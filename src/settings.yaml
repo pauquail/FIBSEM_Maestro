@@ -64,7 +64,6 @@ autofunction:
       variable: 'working_distance'
       autofunction: 'StepAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
       sweeping_strategy: 'BasicInterleavedSweeping' # values: 'BasicSweeping', 'SpiralSweeping', 'BasicInterleavedSweeping'
-      evaluation: 'best_diff' # max_mean, best_dif
       sweeping_range: [ -100.0e-6, 100.0e-6 ] # 10.0e-6 for immersion. The range of the sweeping variable.
       sweeping_max_limits: [ 500.0e-6, 70.0e-3 ] # Limits of sweeping_var
       sweeping_steps: 3 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
@@ -74,13 +73,11 @@ autofunction:
       criterion_name: 'autofunction'
       mask_name: 'none'
       delta_x: 0
-      main_imaging: True  # defines if the criterion will be calculated from the main image
 
     - name: 'working_distance - line'
       variable: 'working_distance'
       autofunction: 'LineAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
       sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping', 'BasicInterleavedSweeping'
-      evaluation: 'max_mean' # max_mean, best_dif
       sweeping_range: [-100.0e-6, 100.0e-6] # 10.0e-6 for immersion. The range of the sweeping variable.
       sweeping_max_limits: [500.0e-6, 70.0e-3] # Limits of sweeping_var
       sweeping_steps: 20 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
@@ -93,7 +90,6 @@ autofunction:
       pre_imaging_delay: 1
       keep_time: 10
       forbidden_sections: [0]
-      main_imaging: False  # defines if the criterion will be calculated from the main image
 
 
 contrast_brightness:

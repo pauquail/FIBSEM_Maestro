@@ -1,4 +1,3 @@
-import importlib
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,7 +5,7 @@ import time
 
 from fibsem_maestro.image_criteria.criteria import Criterion
 from fibsem_maestro.autofunctions.sweeping import BasicSweeping
-from fibsem_maestro.tools.support import Point, Image, fold_filename
+from fibsem_maestro.tools.support import Point, fold_filename
 from fibsem_maestro.tools.image_tools import get_stripes
 
 class AutoFunction:
@@ -28,7 +27,6 @@ class AutoFunction:
         self._criterion.finalize_thread_func = self.get_image_finalize  # set the function called on resolution calculation (in separated thread)
         # init criterion dict (array of focusing crit for each variable value)
         self._criterion_values = {}
-        self._initialize_criteria_dict()
         self.af_curve_plot = None
         self.slice_number = None
         self.last_sweeping_value = None
@@ -40,9 +38,7 @@ class AutoFunction:
         self.variable = auto_function_settings['variable']
         self.execute = auto_function_settings['execute']
         self.delta_x = auto_function_settings['delta_x']
-        self.main_imaging = auto_function_settings['main_imaging']
-        evaluation_module = importlib.import_module('fibsem_maestro.autofunctions.evaluation')
-        self.evaluation_func = getattr(evaluation_module, auto_function_settings['evaluation'])
+
 
     def set_sweep(self):
         self._sweeping.set_sweep()
@@ -80,12 +76,10 @@ class AutoFunction:
         logging.info(f'Autofunction setting {self.variable} to {value}')
         self.last_sweeping_value = value
         self._sweeping.value = value
-        if not self.main_imaging and isinstance(self, StepAutoFunction): # skip if StepAutoFunction and main_imaging activated
-            # grab image with defined settings (in self._image_settings). The settings are updated in self._prepare
-            image = self._microscope.beam.grab_frame()
-            self.measure_resolution(image, slice_number, sweeping_value=value)
-        else:
-            logging.info('AF grabbing image omitted. Main_imaging activated.')
+        # grab image with defined settings (in self._image_settings). The settings are updated in self._prepare
+        image = self._microscope.beam.grab_frame()
+        self.measure_resolution(image, slice_number, sweeping_value=value)
+
 
     def get_image_finalize(self, resolution, slice_number, **kwargs):
         """ Finalizing function called on the end of resolution calculation thread"""
@@ -113,7 +107,12 @@ class AutoFunction:
         This method is used to evaluate the criteria and determine the best value. It also generates plots.
         """
         self._criterion.join_all_threads()  # wait to complete all resolution calculations
-        best_value = self.evaluation_func(self._criterion_values)  # call eval function to get the best value
+
+        # convert list of criteria to mean values for each sweeping variable value
+        for key, value_list in list(self._criterion_values.items()):
+            self._criterion_values[key] = np.mean(value_list)  # find the maximal value
+        best_value = max(self._criterion_values, key=self._criterion_values.get)
+
         self._sweeping.value = best_value  # set best value
         logging.info(f'Autofunction best value {self.variable} is {best_value}.')
         # update af plot
@@ -164,6 +163,7 @@ class AutoFunction:
         In both cases, it returns True if the process is finished and False if the process is not yet finished.
         """
         # Focusing on different area
+        self._initialize_criteria_dict()
         self.move_stage_x()
         self._prepare(image_for_mask)  # update mask image if needed and set microscope
         for i, (repetition, s) in enumerate(self._sweeping.sweep()):
@@ -283,6 +283,7 @@ class LineAutoFunction(AutoFunction):
 
         """
         assert not self._microscope.beam.extended_resolution, "Line focus cannot work with extended resolution"
+        self._initialize_criteria_dict()
         self.move_stage_x()  # focusing on different area
         self._prepare(image_for_mask)
         self._line_focus(slice_number)
@@ -317,8 +318,9 @@ class StepAutoFunction(AutoFunction):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._step_number = 0  # actual step
+        self.sweep_list = list(self._sweeping.sweep())
 
-    def __call__(self, image_for_mask=None, slice_number=None):
+    def __call__(self, *args, **kwargs):
         """
         :param image_for_mask: The image to be used for masking. Defaults to None.
         :return: True if the af process is finished, False if the process is not yet finished in step image mode.
@@ -328,24 +330,46 @@ class StepAutoFunction(AutoFunction):
         It performs a step-by-step process.
         In both cases, it returns True if the process is finished and False if the process is not yet finished.
         """
-        if not self.main_imaging:
-            self.move_stage_x()  # focusing on different area
-            self._prepare(image_for_mask)  # update mask image if needed and set microscope
-
         # step image mode
-        sweep_list = list(self._sweeping.sweep())
-        repetition, value = sweep_list[self._step_number]  # select sweeping variable based on current step
-        logging.info(f'Performing autofocus step no. {self._step_number+1}')
-        self._get_image(value, slice_number=slice_number)
+        if self._step_number == 0:
+            self._initialize_criteria_dict()
+        repetition, value = self.sweep_list[self._step_number]  # select sweeping variable based on current step
+        logging.info(f'Performing step autofocus no. {self._step_number+1}')
+        self.last_sweeping_value = value
+        self._sweeping.value = value
         self._step_number += 1
 
-        if not self.main_imaging:
-            self.move_stage_x(back=True)  # focusing on different area
+    def _initialize_criteria_dict(self):
+        self._criterion_values = {}
 
-        if self._step_number >= len(sweep_list):
-            logging.info(f'Step-by-step autofocus finished. Result: {self._criterion_value}')
+    def evaluate_image(self, image, slice_number):
+        # new thread -> goto self.
+        self.measure_resolution(image, slice_number=slice_number, sweeping_value=self.last_sweeping_value)
+
+        if self._step_number >= len(self.sweep_list):
+            self.wait_to_criterion_calculation() # join threads
+            logging.info(f'Step-by-step autofocus finished.')
             self._evaluate(slice_number)
             self._step_number = 0  # restart steps
             return True  # af finished
         else:
             return False  # not finished yet
+
+    def get_image_finalize(self, resolution, slice_number, **kwargs):
+        """ Finalizing function called on the end of resolution calculation thread"""
+        # criterion can be None of not enough masked regions
+        if resolution is not None:
+            self._criterion_values[self._step_number] = (kwargs['sweeping_value'], resolution)
+        else:
+            logging.warning('Criterion omitted (not enough masked region)!')
+        logging.info(f"Criterion value: {resolution}")
+
+    def _evaluate(self, slice_number):
+        """ Evaluate data from all steps. Calculate difference between base resolution and the resolution alternated image"""
+        result_dic = {i: [] for i in list(self._sweeping.sweep_inner(0))}
+        for i in np.arange(1, len(self._criterion_values), step=2):  # (0,2,4... base resolution)
+            sweep_value, sweep_resolution  = self._criterion_values[i]
+            _, base_resolution = self._criterion_values[i-1]
+            result_dic[sweep_value].append(sweep_resolution - base_resolution)
+        self._criterion_values = result_dic
+        super()._evaluate(slice_number)
