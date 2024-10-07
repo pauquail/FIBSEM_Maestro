@@ -18,7 +18,7 @@ dirs:
   template_matching: 'templates'
 
 microscope:
-  ip_address: 'localhost'  # ASV server address (hydra: 147.251.159.93:7520, hydra2: 147.251.159.93:7521)
+  ip_address: '10.56.91.11'  # ASV server address (hydra: 147.251.159.93:7520, hydra2: 147.251.159.93:7521, versa_local: 10.56.91.11)
   stage_tolerance: 1e-7  # Maximal stage error that is considered as ok
   stage_trials: 3  # Number of trials to reach the goal position before raise error
   beam_shift_tolerance: 50.0e-9 # Maximal beam shift error that is considered as ok
@@ -27,12 +27,11 @@ microscope:
   criterion_name: 'image_acquisition'
 
 image:
-  - name: 'image_acquisition'
-    pixel_size: 30.0e-9
-    field_of_view: [30.0e-6, 30.0e-6]
+  - name: 'image_acquisition' # pixel_size: 5.18e-9
+    field_of_view: [31.9e-6, 21.2666666667e-6]
     images_line_integration: [1] # li of images acquisition. it is array for multiple acquisition
     bit_depth: 16
-    dwell: 25.0e-9
+    dwell: 1.0e-6
   - name: 'autofunction'
     resolution: [6144, 4096] # must be in standard res
     field_of_view: [31.9e-6, 21.2666666667e-6]
@@ -42,8 +41,8 @@ image:
 
 criterion_calculation:
   - name: 'image_acquisition'
-    border: 0.1 # part of image that does not go to calculation
-    tile_size: 10.0e-6 # calculation tile size
+    border: 0.3 # part of image that does not go to calculation
+    tile_size: 3.0e-6 # calculation tile size
     final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
     final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
     criterion: 'frc_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
@@ -54,7 +53,7 @@ criterion_calculation:
     final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
     final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
     criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
-    detail: [ 20.0e-9, 150.0e-9 ]
+    detail: [ 100.0e-9, 350.0e-9 ] # 20.0e-9, 150.0e-9 for cryo
     mask_name: 'none'
 
 autofunction:
@@ -63,26 +62,30 @@ autofunction:
   af_values:
     - name: 'working_distance - image'
       variable: 'working_distance'
-      autofunction: 'AutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
-      sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
-      sweeping_range: [ -10.0e-6, 10.0e-6 ] # The range of the sweeping variable.
+      autofunction: 'StepAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
+      sweeping_strategy: 'BasicInterleavedSweeping' # values: 'BasicSweeping', 'SpiralSweeping', 'BasicInterleavedSweeping'
+      evaluation: 'best_diff' # max_mean, best_dif
+      sweeping_range: [ -100.0e-6, 100.0e-6 ] # 10.0e-6 for immersion. The range of the sweeping variable.
       sweeping_max_limits: [ 500.0e-6, 70.0e-3 ] # Limits of sweeping_var
-      sweeping_steps: 10 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
-      sweeping_total_cycles: 2 # sweeping cycles
-      execute: 0 # execute condition - if int = number of slices, if float = image resolution
+      sweeping_steps: 3 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
+      sweeping_total_cycles: 1 # sweeping cycles
+      execute: 2 # execute condition - if int = number of slices, if float = image resolution
       image_name: 'autofunction'
       criterion_name: 'autofunction'
       mask_name: 'none'
       delta_x: 0
+      main_imaging: True  # defines if the criterion will be calculated from the main image
+
     - name: 'working_distance - line'
       variable: 'working_distance'
       autofunction: 'LineAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
-      sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping'
-      sweeping_range: [-10.0e-6, 10.0e-6] # The range of the sweeping variable.
+      sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping', 'BasicInterleavedSweeping'
+      evaluation: 'max_mean' # max_mean, best_dif
+      sweeping_range: [-100.0e-6, 100.0e-6] # 10.0e-6 for immersion. The range of the sweeping variable.
       sweeping_max_limits: [500.0e-6, 70.0e-3] # Limits of sweeping_var
       sweeping_steps: 20 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
-      sweeping_total_cycles: 6 # sweeping cycles
-      execute: 1 # execute condition - if int = number of slices, if float = image resolution
+      sweeping_total_cycles: 4 # sweeping cycles
+      execute: 0 # execute condition - if int = number of slices, if float = image resolution
       image_name: 'autofunction'
       criterion_name: 'autofunction'
       mask_name: 'none'
@@ -90,6 +93,8 @@ autofunction:
       pre_imaging_delay: 1
       keep_time: 10
       forbidden_sections: [0]
+      main_imaging: False  # defines if the criterion will be calculated from the main image
+
 
 contrast_brightness:
   function: 'none' # none, acb

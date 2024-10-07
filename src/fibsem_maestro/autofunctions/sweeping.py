@@ -34,13 +34,18 @@ class BasicSweeping:
         """ Set sweeping start point """
         self._base = self.value
 
-    def sweep_inner(self, repetition):
-        """ Basic sweeping"""
+    def define_sweep_space(self, repetition):
         # ensure zig zag manner
         if repetition % 2 == 0:
-            sweep_space = np.linspace(self._base + self.range[0], self._base + self.range[1], self.steps)  # self.range[0] is negative
+            sweep_space = np.linspace(self._base + self.range[0], self._base + self.range[1],
+                                      self.steps)  # self.range[0] is negative
         else:
             sweep_space = np.linspace(self._base + self.range[1], self._base + self.range[0], self.steps)
+        return sweep_space
+
+    def sweep_inner(self, repetition):
+        """ Basic sweeping"""
+        sweep_space = self.define_sweep_space(repetition)
         for s in sweep_space:
             if self.max_limits[0] < s < self.max_limits[1]:
                 yield s
@@ -60,6 +65,21 @@ class BasicSweeping:
             logging.info(f'Sweep cycle {repetition} of {self.total_cycles}')
             for s in self.sweep_inner(repetition):
                 yield repetition, s
+
+
+class BasicInterleavedSweeping(BasicSweeping):
+    """ Basic sweeping interleaved by base sweeping values """
+    def define_sweep_space(self, *args, **kwargs):
+        # if no of steps is odd -> remove 1. The base wd must be excluded
+        if self.steps % 2 == 1:
+            self.steps -= 1
+
+        sweep_space = np.linspace(self._base + self.range[0], self._base + self.range[1], self.steps)  # self.range[0] is negative
+        interleave = np.ones(len(sweep_space)) * self._base
+        # Merge arrays in interleaved fashion
+        merged_arr = np.dstack((interleave, sweep_space)).reshape(-1)
+        return merged_arr
+
 
 class SpiralSweeping(BasicSweeping):
     def __init__(self, microscope, settings):

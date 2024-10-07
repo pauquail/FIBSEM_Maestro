@@ -1,6 +1,7 @@
 import importlib
 import logging
 import os
+from threading import Thread
 
 import numpy as np
 from matplotlib import pyplot as plt, patches
@@ -32,7 +33,7 @@ class Criterion:
         self.border_y = None  # border height in pixels
         self.img_with_border = None  # Image without border
         self._threads = []  # threads list for criterion calculation in separated thread
-        self.finalize_thread = None  # function that is called on the end of separated thread (one argument - resolution)
+        self.finalize_thread_func = None  # function that is called on the end of separated thread (one argument - resolution)
 
     def _tiles_resolution(self, img):
 
@@ -62,6 +63,7 @@ class Criterion:
             except Exception as e:
                 logging.warning("Resolution calculation error on current tile. " + repr(e))
                 continue
+            logging.info(f'Tile resolution: {res}')
             res_arr.append(res)
 
         logging.debug(f'Image sectioned to {len(res_arr)} sections')
@@ -122,7 +124,7 @@ class Criterion:
             return cropped_img
 
     def tile_log_image(self, img):
-        """ Create image with inpaint rectanges that represent tiling"""
+        """ Create image with inpaint rectangles that represent tiling"""
         # Create figure and axes
         fig, ax = plt.subplots()
         # Display the image
@@ -132,7 +134,7 @@ class Criterion:
             tiles = self._generate_image_fractions(self.img_with_border, return_coordinates=True)
             # Create a Rectangle patch for each tile and add it to the axes
             for tile in tiles:
-                rect = patches.Rectangle((tile[0]+self.border_x, tile[1]+self.border_y), tile[2], tile[3],
+                rect = patches.Rectangle((tile[1]+self.border_y, tile[0]+self.border_x), tile[3], tile[2],
                                          linewidth=1, edgecolor='r',
                                          facecolor='none')
                 ax.add_patch(rect)
@@ -140,12 +142,14 @@ class Criterion:
         plt.axis('off')
         return fig
 
-    def __call__(self, image, line_number=None, slice_number=None, separate_thread=False):
+    def __call__(self, image, line_number=None, slice_number=None, separate_thread=False, **kwargs):
         """
         It measures selected resolution criterion on image.
         It uses masking, tiling, border exclusion.
 
         line_number - if set, only one line is selected from mask image
+
+        **kwargs - all kwargs will be passed to self.finalize_thread_func
         """
 
         self.pixel_size = image.pixel_size
@@ -163,11 +167,13 @@ class Criterion:
                 images = [image]  # calculate resolution on entire image
 
         if separate_thread:
-            self._threads.append(Thread(target=self._calculate, args=(images,)))
+            t = Thread(target=self._calculate, args=(images, slice_number), kwargs=kwargs)
+            t.start()
+            self._threads.append(t)
         else:
-            return self._calculate(images)
+            return self._calculate(images, slice_number, **kwargs)
 
-    def _calculate(self, images):
+    def _calculate(self, images, slice_number, **kwargs):
         # resolution from different masked regions
         region_resolutions = []
         for i, image in enumerate(images):
@@ -177,8 +183,8 @@ class Criterion:
 
         self._save_log_images(slice_number)
         resolution = self.final_regions_resolution(region_resolutions)
-        if self.finalize_thread is not None:
-            self.finalize_thread(resolution)
+        if self.finalize_thread_func is not None:
+            self.finalize_thread_func(resolution, slice_number,  **kwargs)
         return resolution
 
     def join_all_threads(self):

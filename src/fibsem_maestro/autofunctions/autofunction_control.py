@@ -99,6 +99,7 @@ class AutofunctionControl:
             # Add af to scheduler if condition passed
             if af.check_firing(slice_number, image_resolution):
                 if af not in self.scheduler:
+                    af.set_sweep()  # set sweeping base
                     self.scheduler.append(af)
                     logging.info(f'{af.name} autofunction added to scheduler')
                 else:
@@ -113,10 +114,17 @@ class AutofunctionControl:
         # any AF in scheduler in queue
         if len(self.scheduler) > 0:
             self.attempts += 1  # attempts counter
-            af = self.scheduler[0]
+            af = self.active_autofunction
 
             logging.info(f'Executed autofunction: {af.name}. Attempt no {self.attempts}.')
             # run af
             if af(image_for_mask, slice_number=slice_number):  # run af
                 # if finished
                 self.scheduler.pop(0)  # remove the finished af
+
+    @ property
+    def active_autofunction(self):
+        if len(self.scheduler) > 0:
+            return self.scheduler[0]
+        else:
+            return None

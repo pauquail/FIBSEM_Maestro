@@ -1,6 +1,5 @@
 import logging
 import os
-import threading
 
 from colorama import Fore, init as colorama_init
 import yaml
@@ -69,7 +68,6 @@ class SerialControl:
     def __init__(self, settings_path='settings.yaml'):
         self.image = None  # actual image
         self.image_resolution = 0  # initial image resolution = 0 # initial image res
-        self._thread = None  # thread on the end of acquisition (for resolution calculation)
 
         with open(settings_path, "r") as yamlfile:
             settings = yaml.safe_load(yamlfile)
@@ -116,7 +114,9 @@ class SerialControl:
         self._masks = self.initialize_masks()
         self._autofunctions = self.initialize_autofunctions(settings)
         self._criterion_resolution = self.initialize_criterion_resolution()
+        self._criterion_resolution.finalize_thread_func = self.finalize_calculate_resolution
         self._drift_correction = self.initialize_drift_correction()
+
 
     def initialize_microscope(self):
         """ microscope init"""
@@ -184,18 +184,34 @@ class SerialControl:
             print('No drift correction found')
         return drift_correction
 
-    def separate_thread(self, slice_number):
+    def check_af_main_imaging(self, slice_number):
+        # if main_imaging enabled in active autofunction - use calculated resolution
+        aaf = self._autofunctions.active_autofunction
+        if aaf is not None and aaf.main_imaging:
+            logging.info(f'Main imaging autofunction invoked! {aaf.name}')
+            aaf.measure_resolution(self.image, slice_number=slice_number, sweeping_value=aaf.last_sweeping_value)
+
+    def wait_for_af_main_imaging(self):
+        aaf = self._autofunctions.active_autofunction
+        if aaf is not None and aaf.main_imaging:
+            aaf.wait_to_criterion_calculation()
+
+    def finalize_calculate_resolution(self, resolution, slice_number, **kwargs):
         """ Thread on the end of imaging (parallel with milling)"""
-        self.calculate_resolution(slice_number)
         self.logger.log_params['resolution'] = self.image_resolution
-        del self.image
+        print(Fore.GREEN + f'Calculated resolution: {self.image_resolution}')
+        if hasattr(self, 'image'):
+            del self.image
+
         self.logger.save_log(slice_number)  # save log dict
+        self.save_settings()  # save microscope settings
 
     def calculate_resolution(self, slice_number):
         """ Calculate resolution """
         try:
-            self.image_resolution = self._criterion_resolution(self.image, slice_number=slice_number)
-            print(Fore.GREEN + f'Calculated resolution: {self.image_resolution}')
+            # go to self.finalize_calculate_resolution on thread finishing
+            self.image_resolution = self._criterion_resolution(self.image, slice_number=slice_number,
+                                                               separate_thread=True)
         except Exception as e:
             logging.error('Image resolution calculation error. Setting resolution to 0.'+repr(e))
             print(Fore.RED + 'Resolution measurement failed')
@@ -230,9 +246,9 @@ class SerialControl:
         try:
             self._autofunctions(slice_number, self.image_resolution)
             if len(self._autofunctions.scheduler) == 0:
-                print(Fore.GREEN + 'No autofunction')
+                print(Fore.GREEN + 'The autofunction queue is empty.')
             else:
-                print(Fore.YELLOW + f'Current autofunctions: {self._autofunctions.scheduler}')
+                print(Fore.YELLOW + f'Waiting autofunctions: {[x.name for x in self._autofunctions.scheduler]}')
         except Exception as e:
             logging.error('Autofunction error. '+repr(e))
             print(Fore.RED + 'Autofunction error!')
@@ -286,9 +302,9 @@ class SerialControl:
             print(Fore.RED + 'Microscope settings saving failed!')
 
     def imaging(self, slice_number):
-        # wait for resolution calculation if needed
-        if self._thread is not None:
-            self._thread.join()
+        # wait for resolution calculation if needed anf AF main imaging criterion calculation
+        self._criterion_resolution.join_all_threads()
+        self.wait_for_af_main_imaging()
 
         print(Fore.YELLOW + f'Current slice number: {slice_number}')
 
@@ -301,10 +317,8 @@ class SerialControl:
         self.autofunction(slice_number)  # autofunctions handling
         self.logger.log()  # save settings and params
         self.acquire(slice_number)  # acquire image
+        self.check_af_main_imaging(slice_number)  # check if the autofunction on main_imaging is activated
         self.drift_correction(slice_number)  # drift correction
 
-        # resolution calculation (separate thread)
-        self._thread = threading.Thread(target=self.separate_thread, args=[slice_number])
-        self._thread.start()
-
-        self.save_settings()  # save settings
+        # resolution calculation
+        self.calculate_resolution(slice_number)
