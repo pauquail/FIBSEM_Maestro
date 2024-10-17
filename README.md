@@ -9,6 +9,11 @@ Key features:
   - Resolution calculation ([siFRC](https://github.com/prabhatkc/siFRC) or others)
   - Autofocusing, autostigmator, auto-lens alignment (multiple criterions and sweeping strategies)
   - Drift correction & FoV optimization (template matching, or segmented region centering)
+  - 
+
+https://github.com/user-attachments/assets/eb7f36c1-24ef-4932-92d0-4ce785f9060b
+
+
   - Auto contrast-brightness (whole image or segmented region)
 - Email attention
 - Works with ThermoFisher Autoscript. Support of [OpenFIBSEM](https://github.com/DeMarcoLab/fibsem) for other vendors (Tescan, Zeiss) is planned.
