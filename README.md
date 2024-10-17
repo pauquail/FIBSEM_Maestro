@@ -14,7 +14,9 @@ Key features:
 - Works with ThermoFisher Autoscript. Support of [OpenFIBSEM](https://github.com/DeMarcoLab/fibsem) for other vendors (Tescan, Zeiss) is planned.
 
 Drift correction with segmentation aid
+
 https://github.com/user-attachments/assets/eb7f36c1-24ef-4932-92d0-4ce785f9060b
 
 FoV optimization with segmentation aid
+
 https://github.com/user-attachments/assets/b467a4c0-bd52-49a2-8e75-68fe4fdc699f
