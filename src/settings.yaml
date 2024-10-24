@@ -1,8 +1,6 @@
 # Global acquisition setting
-acquisition:
+general:
   library: 'autoscript'  # Microscope control library. Possible values: 'AS'
-  wd_correction: 7.88010753607e-9   # For imaging angle 38deg: slice_distance * cos(38). For imaging angle 90: slice_distance
-  y_correction:  6.15661475326e-9 # For imaging angle 38deg: slice_distance * sin(38). For imaging angle 90: 0
   additive_beam_shift: [0, 0] # Additive beam shift applied in every cycle
   settings_file: 'microscope_settings.yaml' # Actual microscope setting
   variables_to_save: ['position','electron_beam.working_distance','electron_beam.stigmator','electron_beam.lens_alignment',
@@ -11,6 +9,10 @@ acquisition:
   log: True
   log_level: 10 # 10 - debug, 20 - info, 30 - warning, 40 - error, 50 - critical
 
+acquisition:
+  wd_correction: 7.88010753607e-9   # For imaging angle 38deg: slice_distance * cos(38). For imaging angle 90: slice_distance
+  y_correction:  6.15661475326e-9 # For imaging angle 38deg: slice_distance * sin(38). For imaging angle 90: 0
+ 
 # Directories
 dirs:
   output_images: 'images'

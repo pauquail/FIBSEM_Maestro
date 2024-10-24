@@ -75,6 +75,7 @@ class SerialControl:
             print(f'Settings file {settings_path} successfully loaded')
 
         # read settings
+        self.general_settings = settings['general']
         self.acquisition_settings = settings['acquisition']
         self.dirs_settings = settings['dirs']
         self.microscope_settings = settings['microscope']
@@ -85,12 +86,13 @@ class SerialControl:
         self.email_settings = settings['email']
         self.dc_settings = settings['drift_correction']
 
-        self.library = self.acquisition_settings['library']
+        self.library = self.general_settings['library']
+        self.additive_beam_shift = self.general_settings['additive_beam_shift']
+        self.settings_file = self.general_settings['settings_file']
+        self.variables_to_save = self.general_settings['variables_to_save']
+
         self.wd_correction = self.acquisition_settings['wd_correction']
         self.y_correction = self.acquisition_settings['y_correction']
-        self.additive_beam_shift = self.acquisition_settings['additive_beam_shift']
-        self.settings_file = self.acquisition_settings['settings_file']
-        self.variables_to_save = self.acquisition_settings['variables_to_save']
 
         self.dirs_output_images = self.dirs_settings['output_images']
         self.dirs_template_matching = self.dirs_settings['template_matching']
@@ -108,9 +110,9 @@ class SerialControl:
         self._electron = self._microscope.electron_beam
 
         self.logger = SerialControlLogger(self._microscope,
-                                          self.acquisition_settings['log_level'],
-                                          dirs_log=self.dirs_settings['log'],
-                                          log_enabled=self.acquisition_settings['log'])
+                                          self.general_settings['log_level'],
+                                          dirs_log=self.general_settings['log'],
+                                          log_enabled=self.general_settings['log'])
 
         self._masks = self.initialize_masks()
         self._autofunctions = self.initialize_autofunctions(settings)
