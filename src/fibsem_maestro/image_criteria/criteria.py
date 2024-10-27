@@ -11,7 +11,7 @@ from fibsem_maestro.tools.support import fold_filename
 
 class Criterion:
     image_index = 1  # index that is incremented in each figure save (prevention of file rewrite)
-    def __init__(self, criterion_settings, mask=None, logging_enabled=False, log_dir=None):
+    def __init__(self, criterion_settings, mask=None, log_dir=None):
         self.name = criterion_settings['name']
         self.border = criterion_settings['border']
         self.tile_size = criterion_settings['tile_size']
@@ -23,7 +23,6 @@ class Criterion:
         criteria_module = importlib.import_module('fibsem_maestro.image_criteria.criteria_math')
         self.criterion_func = getattr(criteria_module, criterion_settings['criterion'])
 
-        self.logging_enabled = logging_enabled
         self.log_dir = log_dir
         self.mask = mask
 

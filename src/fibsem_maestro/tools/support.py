@@ -185,6 +185,7 @@ def find_in_objects(name, list_of_objects):
 
 
 def fold_filename(log_dir, slice_number, postfix=""):
+    """return: log_dir+slice_number+postfix"""
     if slice_number is None:
         slice_number = -1
     filename = log_dir + f'/{slice_number:05}/{postfix}'

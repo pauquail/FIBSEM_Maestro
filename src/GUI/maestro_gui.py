@@ -15,7 +15,7 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle(QCoreApplication.translate("MainWindow", f"FIBSEM_Maestro v {version.VERSION}", None))
-        self.sem_gui = SemGui(self)
+        self.sem_gui = SemGui(self, serial_control.acquisition_settings, serial_control.image_settings)
 
 
     def about(self):
@@ -32,7 +32,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
 if __name__ == "__main__":
-    serial_control = SerialControl('settings.yaml')
+    serial_control = SerialControl('../settings.yaml')
     app = QApplication(sys.argv)
     win = Window()
     win.show()

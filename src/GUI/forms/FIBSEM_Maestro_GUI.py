@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'FIBSEM_Maestro_GUI.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.0
+## Created by: Qt User Interface Compiler version 6.7.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -16,19 +16,18 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFormLayout,
-    QGridLayout, QHBoxLayout, QLabel, QMainWindow,
-    QMenu, QMenuBar, QPushButton, QSizePolicy,
+from PySide6.QtWidgets import (QApplication, QCheckBox, QFormLayout, QGridLayout,
+    QHBoxLayout, QLabel, QMainWindow, QMenu,
+    QMenuBar, QPushButton, QSizePolicy, QSpacerItem,
     QStatusBar, QTabWidget, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        #MainWindow.setWindowModality(Qt.NonModal)
+        MainWindow.setWindowModality(Qt.NonModal)
         MainWindow.resize(1000, 817)
-        MainWindow.setStyleSheet(u"background-color: rgb(45, 51, 89);\n"
-"color: rgb(85, 255, 0);")
+        MainWindow.setStyleSheet(u"")
         self.actionLoad = QAction(MainWindow)
         self.actionLoad.setObjectName(u"actionLoad")
         self.actionSave = QAction(MainWindow)
@@ -41,45 +40,53 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.tabWidget = QTabWidget(self.centralwidget)
         self.tabWidget.setObjectName(u"tabWidget")
+        self.tabWidget.setStyleSheet(u"")
         self.tabSem = QWidget()
         self.tabSem.setObjectName(u"tabSem")
         self.verticalLayout1 = QVBoxLayout(self.tabSem)
         self.verticalLayout1.setObjectName(u"verticalLayout1")
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.semVerticalLayout = QVBoxLayout()
+        self.semVerticalLayout.setObjectName(u"semVerticalLayout")
         self.imageLabel = QLabel(self.tabSem)
         self.imageLabel.setObjectName(u"imageLabel")
-        self.imageLabel.setMinimumSize(QSize(0, 300))
 
-        self.verticalLayout_2.addWidget(self.imageLabel)
+        self.semVerticalLayout.addWidget(self.imageLabel)
 
-        self.formLayout = QFormLayout()
-        self.formLayout.setObjectName(u"formLayout")
-        self.imageSettingsLabel = QLabel(self.tabSem)
-        self.imageSettingsLabel.setObjectName(u"imageSettingsLabel")
+        self.label_2 = QLabel(self.tabSem)
+        self.label_2.setObjectName(u"label_2")
+        font = QFont()
+        font.setBold(True)
+        self.label_2.setFont(font)
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.imageSettingsLabel)
+        self.semVerticalLayout.addWidget(self.label_2)
 
-        self.imageSettingsComboBox = QComboBox(self.tabSem)
-        self.imageSettingsComboBox.setObjectName(u"imageSettingsComboBox")
+        self.semFormLayout = QFormLayout()
+        self.semFormLayout.setObjectName(u"semFormLayout")
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.imageSettingsComboBox)
+        self.semVerticalLayout.addLayout(self.semFormLayout)
 
-        self.Label = QLabel(self.tabSem)
-        self.Label.setObjectName(u"Label")
+        self.calculateFromSlicePushButton = QPushButton(self.tabSem)
+        self.calculateFromSlicePushButton.setObjectName(u"calculateFromSlicePushButton")
 
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.Label)
-
-        self.changeImageSettingsPushButton = QPushButton(self.tabSem)
-        self.changeImageSettingsPushButton.setObjectName(u"changeImageSettingsPushButton")
-
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.changeImageSettingsPushButton)
+        self.semVerticalLayout.addWidget(self.calculateFromSlicePushButton)
 
 
-        self.verticalLayout_2.addLayout(self.formLayout)
+        self.verticalLayout1.addLayout(self.semVerticalLayout)
+
+        self.semImagingVerticalLayout = QVBoxLayout()
+        self.semImagingVerticalLayout.setObjectName(u"semImagingVerticalLayout")
+        self.label = QLabel(self.tabSem)
+        self.label.setObjectName(u"label")
+        font1 = QFont()
+        font1.setBold(True)
+        font1.setItalic(False)
+        self.label.setFont(font1)
+        self.label.setTextFormat(Qt.AutoText)
+
+        self.semImagingVerticalLayout.addWidget(self.label)
 
 
-        self.verticalLayout1.addLayout(self.verticalLayout_2)
+        self.verticalLayout1.addLayout(self.semImagingVerticalLayout)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -107,6 +114,10 @@ class Ui_MainWindow(object):
 
         self.verticalLayout1.addLayout(self.horizontalLayout)
 
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout1.addItem(self.verticalSpacer)
+
         self.tabWidget.addTab(self.tabSem, "")
         self.tabFib = QWidget()
         self.tabFib.setObjectName(u"tabFib")
@@ -120,7 +131,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1000, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1000, 31))
         self.menuSetting = QMenu(self.menubar)
         self.menuSetting.setObjectName(u"menuSetting")
         self.menuHelp = QMenu(self.menubar)
@@ -148,9 +159,9 @@ class Ui_MainWindow(object):
         self.actionLoad.setText(QCoreApplication.translate("MainWindow", u"Load", None))
         self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.imageLabel.setText("")
-        self.imageSettingsLabel.setText(QCoreApplication.translate("MainWindow", u"Image settings", None))
-        self.Label.setText("")
-        self.changeImageSettingsPushButton.setText(QCoreApplication.translate("MainWindow", u"Change image settings", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Acquisition", None))
+        self.calculateFromSlicePushButton.setText(QCoreApplication.translate("MainWindow", u"Calculate from slice distance (38\u00b0)", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"Imaging", None))
         self.getImagePushButton.setText(QCoreApplication.translate("MainWindow", u"Get image", None))
         self.setImagingAreaPushButton.setText(QCoreApplication.translate("MainWindow", u"Set imaging area", None))
         self.testImagingPushButton.setText(QCoreApplication.translate("MainWindow", u"Test imaging", None))

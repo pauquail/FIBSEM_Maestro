@@ -10,7 +10,7 @@ from fibsem_maestro.tools.image_tools import get_stripes
 
 class AutoFunction:
     def __init__(self, criterion: Criterion, sweeping: BasicSweeping, microscope,
-                 auto_function_settings, image_settings, logging_enabled=False, log_dir=None):
+                 auto_function_settings, image_settings, log_dir=None):
         """
         :param criterion: The focusing criterion instance.
         :param sweeping: The sweeping instance for controlling the sweep process.
@@ -31,7 +31,6 @@ class AutoFunction:
         self.slice_number = None
         self.last_sweeping_value = None
         self._log_dir = log_dir
-        self._logging = logging_enabled
 
     def _initialize_settings(self, auto_function_settings):
         self.name = auto_function_settings['name']
@@ -318,7 +317,7 @@ class StepAutoFunction(AutoFunction):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._step_number = 0  # actual step
-        self.sweep_list = list(self._sweeping.sweep())
+        self.sweep_list = None
 
     def __call__(self, *args, **kwargs):
         """
@@ -332,6 +331,7 @@ class StepAutoFunction(AutoFunction):
         """
         # step image mode
         if self._step_number == 0:
+            self.sweep_list = list(self._sweeping.sweep())
             self._initialize_criteria_dict()
         repetition, value = self.sweep_list[self._step_number]  # select sweeping variable based on current step
         logging.info(f'Performing step autofocus no. {self._step_number+1}')

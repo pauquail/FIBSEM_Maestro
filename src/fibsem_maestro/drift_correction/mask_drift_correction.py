@@ -1,16 +1,17 @@
 import logging
 import os
 
+from fibsem_maestro.tools.support import fold_filename
+
 
 class MaskDriftCorrection:
     """ Drift correction keep the center of masked blob in the center of FoV"""
-    def __init__(self, mask, microscope, logging_dict, logging_enabled=False, log_dir=None):
+    def __init__(self, mask, microscope, logging_dict, log_dir=None):
         assert mask is not None, 'Mask not found. Drift correction failed.'
 
         self._mask = mask
         self._microscope = microscope
         self.logging_dict = logging_dict
-        self.logging_enabled = logging_enabled
         self.log_dir = log_dir
 
     def __call__(self, slice_number=None):
@@ -35,5 +36,5 @@ class MaskDriftCorrection:
 
     def _save_log_images(self, slice_number):
         if self.logging_enabled:
-            mask_filename = fold_filename(log_dir, slice_number, postfix="drift_correction")
+            mask_filename = fold_filename(self.log_dir, slice_number, postfix="drift_correction")
             self.mask.save_log_images(mask_filename)

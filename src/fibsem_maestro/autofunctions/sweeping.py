@@ -18,7 +18,6 @@ class BasicSweeping:
         self.total_cycles = int(settings['sweeping_total_cycles'])
 
         self._base = None  # initial sweeping variable
-        self.set_sweep()
 
     @property
     def value(self):
@@ -50,7 +49,7 @@ class BasicSweeping:
             if self.max_limits[0] < s < self.max_limits[1]:
                 yield s
             else:
-                logging.warning(f'Sweep of {self.sweeping_var} if out of range ({s}')
+                logging.warning(f'Sweep of {self.sweeping_var} is out of range ({s}')
                 # return limit value
                 yield self.max_limits[0] if s < self.max_limits[0] else self.max_limits[1]
 
@@ -68,7 +67,7 @@ class BasicSweeping:
 
 
 class BasicInterleavedSweeping(BasicSweeping):
-    """ Basic sweeping interleaved by base sweeping values """
+    """ Basic sweeping interleaved by base sweeping values (Chans method)"""
     def define_sweep_space(self, *args, **kwargs):
         # if no of steps is odd -> remove 1. The base wd must be excluded
         if self.steps % 2 == 1:
@@ -112,7 +111,7 @@ class SpiralSweeping(BasicSweeping):
             if value_r < self.max_limits:
                 yield value
             else:
-                logging.warning(f'Sweep of {self.sweeping_var} if out of range ({s}')
+                logging.warning(f'Sweep of {self.sweeping_var} is out of range ({s}')
 
     def sweep(self):
         """

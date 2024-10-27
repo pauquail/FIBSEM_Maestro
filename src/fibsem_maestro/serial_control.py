@@ -18,9 +18,8 @@ colorama_init(autoreset=True)  # colorful console
 
 
 class SerialControlLogger:
-    def __init__(self, microscope, log_level, dirs_log, log_enabled):
+    def __init__(self, microscope, log_level, dirs_log):
         self.dirs_log = dirs_log
-        self.log_enabled = log_enabled
         self._microscope = microscope
         self._electron = self._microscope.electron_beam
         self.log_params = {}  # logging dict (important parameters to log)
@@ -33,18 +32,17 @@ class SerialControlLogger:
         self.set_log_file(0)
 
     def set_log_file(self, slice_number):
-        if self.log_enabled:
-            # make dir (log/slice_number
-            os.makedirs(fold_filename(self.dirs_log, slice_number), exist_ok=True)
-            log_filename = fold_filename(self.dirs_log, slice_number, 'app.log')
+        # make dir (log/slice_number
+        os.makedirs(fold_filename(self.dirs_log, slice_number), exist_ok=True)
+        log_filename = fold_filename(self.dirs_log, slice_number, 'app.log')
 
-            # remove last logging file handler
-            if self.logging_file_handler is not None:
-                self.logger.removeHandler(self.logging_file_handler)
-            # set a new logging file handler
-            self.logging_file_handler = logging.FileHandler(log_filename)  # Configure the logger to write into a file
-            self.logging_file_handler.setFormatter(self.logger_formatter)
-            self.logger.addHandler(self.logging_file_handler)  # Add the handler to the logger object
+        # remove last logging file handler
+        if self.logging_file_handler is not None:
+            self.logger.removeHandler(self.logging_file_handler)
+        # set a new logging file handler
+        self.logging_file_handler = logging.FileHandler(log_filename)  # Configure the logger to write into a file
+        self.logging_file_handler.setFormatter(self.logger_formatter)
+        self.logger.addHandler(self.logging_file_handler)  # Add the handler to the logger object
 
     def reset_log(self, slice_number):
         # logging dict (important parameters)
@@ -111,8 +109,7 @@ class SerialControl:
 
         self.logger = SerialControlLogger(self._microscope,
                                           self.general_settings['log_level'],
-                                          dirs_log=self.general_settings['log'],
-                                          log_enabled=self.general_settings['log'])
+                                          dirs_log=self.dirs_settings['log'])
 
         self._masks = self.initialize_masks()
         self._autofunctions = self.initialize_autofunctions(settings)
@@ -147,7 +144,6 @@ class SerialControl:
         """ autofunction init """
         try:
             autofunctions = AutofunctionControl(self._microscope, settings,
-                                                logging_enabled=self.logger.log_enabled,
                                                 log_dir=self.logger.dirs_log,
                                                 masks=self._masks)
             print(f'Autofunctions found: {[x.name for x in autofunctions.autofunctions]}')
@@ -161,7 +157,7 @@ class SerialControl:
         # criterion of resolution calculation of final image - it uses parameters from criterion_calculation settings
         try:
             mask = find_in_objects(self.actual_criterion['mask_name'], self._masks)
-            criterion_resolution = Criterion(self.actual_criterion, mask=mask, logging_enabled=self.logger.log_enabled,
+            criterion_resolution = Criterion(self.actual_criterion, mask=mask,
                                              log_dir=self.logger.dirs_log)
             print(f'Image resolution criterion: {criterion_resolution.criterion_name}')
         except Exception as e:
@@ -176,7 +172,6 @@ class SerialControl:
                 drift_correction = TemplateMatchingDriftCorrection(self._microscope, self.dc_settings,
                                                                    template_matching_dir=self.dirs_template_matching,
                                                                    logging_dict=self.logger.log_params,
-                                                                   logging_enabled=self.logger.log_enabled,
                                                                    log_dir=self.logger.dirs_log)
             except Exception as e:
                 logging.error("Initialization of template matching failed! " + repr(e))

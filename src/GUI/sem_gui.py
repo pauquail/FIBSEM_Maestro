@@ -1,19 +1,42 @@
-from maestro_gui import Window
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QSizePolicy
+from PySide6.QtCore import Qt
+
+from fibsem_maestro.tools.support import find_in_dict
 from gui_tools import populate_form
+from imaging_setting_gui import ImagingSettings
+from image_label import ImageLabel
 
 class SemGui:
-    def __init__(self, window: Window, acquisition_settings, imaging_settings):
+    def __init__(self, window, acquisition_settings, imaging_settings):
         self.window = window
         self.acquisition_settings = acquisition_settings
         self.imaging_settings = imaging_settings
+        self.populate_form()
         self.set_events()
 
+        # image label
+        self.window.imageLabel = ImageLabel()
+        self.window.semVerticalLayout.insertWidget(0, self.window.imageLabel)
+        self.window.semVerticalLayout.setAlignment(self.window.imageLabel, Qt.AlignTop | Qt.AlignLeft)
+        self.window.imageLabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+
+        # selected imaging settings
+        actual_image_settings = find_in_dict(acquisition_settings['image_name'],
+                                             imaging_settings)
+        # imaging settings gui
+        imaging_settings = ImagingSettings(actual_image_settings)
+        self.window.semImagingVerticalLayout.addWidget(imaging_settings)
+
     def set_events(self):
+        pass
         self.window.getImagePushButton.clicked.connect(self.getImagePushButton_clicked)
 
     def populate_form(self):
         populate_form(self.acquisition_settings, excluded_settings=['image_name', 'criterion_name'],
-                      www]
-        # add Calculate from slice distance (38deg)
+                      layout=self.window.semFormLayout)
+
     def getImagePushButton_clicked(self):
-        QPixmap
+        pixmap = QPixmap('pexels.jpg')
+        self.window.imageLabel.setPixmap(pixmap)

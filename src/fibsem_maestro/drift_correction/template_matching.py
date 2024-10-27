@@ -10,12 +10,11 @@ from fibsem_maestro.tools.support import Point
 
 
 class TemplateMatchingDriftCorrection:
-    def __init__(self, microscope, settings, template_matching_dir, logging_dict, logging_enabled=False, log_dir=None):
+    def __init__(self, microscope, settings, template_matching_dir, logging_dict, log_dir=None):
         self._microscope = microscope
         self.min_confidence = settings['min_confidence']
 
         self.log_dir = log_dir
-        self.logging = logging_enabled
         self.template_matching_dir = template_matching_dir
         self.logging_dict = logging_dict
         self.areas = None

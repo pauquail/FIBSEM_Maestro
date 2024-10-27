@@ -8,7 +8,7 @@ from fibsem_maestro.tools.support import find_in_dict, find_in_objects
 
 class AutofunctionControl:
     """ Initialize all autofunctions, it keep af queue and send emails """
-    def __init__(self, microscope, settings, logging_enabled=False, log_dir=None, masks=None):
+    def __init__(self, microscope, settings, log_dir=None, masks=None):
         # settings
         self.autofunction_settings = settings['autofunction']
         self.email_settings = settings['email']
@@ -22,7 +22,6 @@ class AutofunctionControl:
 
         self._microscope = microscope
         self._log_dir = log_dir
-        self._logging = logging_enabled
 
         self._masks = masks
         self.af_values = self.autofunction_settings['af_values']
@@ -57,7 +56,7 @@ class AutofunctionControl:
         sweeping = Sweeping(self._microscope.electron_beam, concrete_af_settings)
 
         # init criterion class
-        criterion = Criterion(actual_criterion_settings, mask=actual_criterion_mask, logging_enabled=self._logging,
+        criterion = Criterion(actual_criterion_settings, mask=actual_criterion_mask,
                               log_dir=self._log_dir)
         # select autofunction based on autofunction setting (settings.yaml)
         autofunction_module = importlib.import_module('fibsem_maestro.autofunctions.autofunction')
@@ -73,7 +72,6 @@ class AutofunctionControl:
             self._microscope,
             auto_function_settings=merged_settings,
             image_settings=actual_image_settings,
-            logging_enabled=self._logging,
             log_dir=self._log_dir)
 
     def _email_attention(self):

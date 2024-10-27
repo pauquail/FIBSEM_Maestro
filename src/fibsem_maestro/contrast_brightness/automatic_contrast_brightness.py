@@ -6,12 +6,11 @@ from fibsem_maestro.tools.image_tools import image_saturation_info, image_bit_de
 
 
 class AutomaticContrastBrightness:
-    def __init__(self, settings, microscope, logging_dict, logging_enabled=False, log_dir=None):
+    def __init__(self, settings, microscope, logging_dict, log_dir=None):
         self._initialize_settings(settings)
         self._microscope = microscope
         self._logging_dict = logging_dict
         self._log_dir = log_dir
-        self._logging = logging_enabled
 
     def _initialize_settings(self, acb_settings):
         self.function = acb_settings['function']

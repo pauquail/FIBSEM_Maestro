@@ -48,6 +48,7 @@ class VirtualMicroscopeBeam():
     """ Fake AS Microscope.electron_beam class and Microscope.ion_beam class """
     def __init__(self):
         self.working_distance = EmptyClass()
+        self.working_distance.value = 0
         self.working_distance.set_value_no_degauss = self.working_distance_set_value_no_degauss
         self.stigmator = EmptyClass()
         self.lens_alignment = EmptyClass()
