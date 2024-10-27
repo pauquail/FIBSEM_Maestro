@@ -1,18 +1,23 @@
 # Global acquisition setting
 general:
-  library: 'autoscript'  # Microscope control library. Possible values: 'AS'
+  library: 'autoscript'  # Microscope control library. Possible values: 'autoscript'
   additive_beam_shift: [0, 0] # Additive beam shift applied in every cycle
   settings_file: 'microscope_settings.yaml' # Actual microscope setting
   variables_to_save: ['position','electron_beam.working_distance','electron_beam.stigmator','electron_beam.lens_alignment',
                       'electron_beam.beam_shift','electron_beam.detector_contrast','electron_beam.detector_brightness',
                       'electron_beam.dwell_time']
-  log: True
   log_level: 10 # 10 - debug, 20 - info, 30 - warning, 40 - error, 50 - critical
 
 acquisition:
   wd_correction: 7.88010753607e-9   # For imaging angle 38deg: slice_distance * cos(38). For imaging angle 90: slice_distance
   y_correction:  6.15661475326e-9 # For imaging angle 38deg: slice_distance * sin(38). For imaging angle 90: 0
- 
+  image_name: 'image_acquisition'
+  criterion_name: 'image_acquisition'
+
+milling:
+  slice_distance: 10.0e-9
+  fiducial_margin: 1.0e-6  # the searching area for the fiducial is bigger than defined size
+
 # Directories
 dirs:
   output_images: 'images'
@@ -25,8 +30,6 @@ microscope:
   stage_trials: 3  # Number of trials to reach the goal position before raise error
   beam_shift_tolerance: 50.0e-9 # Maximal beam shift error that is considered as ok
   relative_beam_shift_to_stage: [1, 1] # Relative move between bs and stage move (direction is set by code)
-  image_name: 'image_acquisition'
-  criterion_name: 'image_acquisition'
 
 image:
   - name: 'image_acquisition' # pixel_size: 5.18e-9

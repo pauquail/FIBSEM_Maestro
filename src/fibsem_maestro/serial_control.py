@@ -97,8 +97,8 @@ class SerialControl:
         self.dirs_output_images = self.dirs_settings['output_images']
         self.dirs_template_matching = self.dirs_settings['template_matching']
 
-        self.image_name = self.microscope_settings['image_name']
-        self.criterion_name = self.microscope_settings['criterion_name']
+        self.image_name = self.acquisition_settings['image_name']
+        self.criterion_name = self.acquisition_settings['criterion_name']
 
         self.actual_image_settings = find_in_dict(self.image_name, self.image_settings)
         self.actual_criterion = find_in_dict(self.criterion_name, self.criterion_calculation_settings)
