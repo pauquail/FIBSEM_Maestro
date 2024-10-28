@@ -9,6 +9,16 @@ from fibsem_maestro.tools.support import find_in_dict, find_in_objects
 class AutofunctionControl:
     """ Initialize all autofunctions, it keep af queue and send emails """
     def __init__(self, microscope, settings, log_dir=None, masks=None):
+        self._microscope = microscope
+        self._log_dir = log_dir
+
+        self._masks = masks
+        self.scheduler = []  # queue of autofunctions waiting to execute
+        self.attempts = 0  # number of af attempts (early stopping)
+
+        self.settings_init(settings)
+
+    def settings_init(self, settings):
         # settings
         self.autofunction_settings = settings['autofunction']
         self.email_settings = settings['email']
@@ -20,15 +30,10 @@ class AutofunctionControl:
         self.email_receiver = self.email_settings['receiver']
         self.password_file = self.email_settings['password_file']
 
-        self._microscope = microscope
-        self._log_dir = log_dir
-
-        self._masks = masks
         self.af_values = self.autofunction_settings['af_values']
         # list of all autofunctions objects
         self.autofunctions = [self._get_autofunction(x) for x in self.af_values]
-        self.scheduler = []  # queue of autofunctions waiting to execute
-        self.attempts = 0  # number of af attempts (early stopping)
+
 
     def _get_autofunction(self, concrete_af_settings):
         """

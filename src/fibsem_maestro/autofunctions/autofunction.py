@@ -19,7 +19,7 @@ class AutoFunction:
         :param image_settings: The settings for the image. (image setting)
         """
         # settings
-        self._initialize_settings(auto_function_settings)
+        self._settings_init(auto_function_settings)
         self._image_settings = image_settings
         self._sweeping = sweeping  # sweeping class
         self._microscope = microscope  # microscope control class
@@ -32,7 +32,7 @@ class AutoFunction:
         self.last_sweeping_value = None
         self._log_dir = log_dir
 
-    def _initialize_settings(self, auto_function_settings):
+    def _settings_init(self, auto_function_settings):
         self.name = auto_function_settings['name']
         self.variable = auto_function_settings['variable']
         self.execute = auto_function_settings['execute']

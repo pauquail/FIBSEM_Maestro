@@ -35,6 +35,5 @@ class MaskDriftCorrection:
         return self._mask
 
     def _save_log_images(self, slice_number):
-        if self.logging_enabled:
-            mask_filename = fold_filename(self.log_dir, slice_number, postfix="drift_correction")
-            self.mask.save_log_images(mask_filename)
+        mask_filename = fold_filename(self.log_dir, slice_number, postfix="drift_correction")
+        self.mask.save_log_images(mask_filename)

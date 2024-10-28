@@ -11,13 +11,15 @@ class BasicSweeping:
     """
     def __init__(self, microscope, settings):
         self._microscope = microscope
+        self._settings_init(settings)
+        self._base = None  # initial sweeping variable
+
+    def _settings_init(self, settings):
         self.sweeping_var = settings['variable']
         self.range = settings['sweeping_range']
         self.max_limits = settings['sweeping_max_limits']
         self.steps = int(settings['sweeping_steps'])
         self.total_cycles = int(settings['sweeping_total_cycles'])
-
-        self._base = None  # initial sweeping variable
 
     @property
     def value(self):

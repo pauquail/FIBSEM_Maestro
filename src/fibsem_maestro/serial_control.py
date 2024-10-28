@@ -72,6 +72,24 @@ class SerialControl:
             settings = yaml.safe_load(yamlfile)
             print(f'Settings file {settings_path} successfully loaded')
 
+        self.settings_init(settings)
+        # make dirs if needed
+        make_dirs(self.dirs_settings)
+
+        self._microscope = self.initialize_microscope()
+        self._electron = self._microscope.electron_beam
+
+        self.logger = SerialControlLogger(self._microscope,
+                                          self.general_settings['log_level'],
+                                          dirs_log=self.dirs_settings['log'])
+
+        self._masks = self.initialize_masks()
+        self._autofunctions = self.initialize_autofunctions(settings)
+        self._criterion_resolution = self.initialize_criterion_resolution()
+        self._criterion_resolution.finalize_thread_func = self.finalize_calculate_resolution
+        self._drift_correction = self.initialize_drift_correction()
+
+    def settings_init(self, settings):
         # read settings
         self.general_settings = settings['general']
         self.acquisition_settings = settings['acquisition']
@@ -101,21 +119,11 @@ class SerialControl:
         self.actual_image_settings = find_in_dict(self.image_name, self.image_settings)
         self.actual_criterion = find_in_dict(self.criterion_name, self.criterion_calculation_settings)
 
-        # make dirs if needed
-        make_dirs(self.dirs_settings)
+        for attr_name, attr_value in vars(self).items():
+            if hasattr(attr_name, 'settings_init'):
+                logging.info(f'Re-initializing {attr_name}')
+                attr_name.settings_init(settings)
 
-        self._microscope = self.initialize_microscope()
-        self._electron = self._microscope.electron_beam
-
-        self.logger = SerialControlLogger(self._microscope,
-                                          self.general_settings['log_level'],
-                                          dirs_log=self.dirs_settings['log'])
-
-        self._masks = self.initialize_masks()
-        self._autofunctions = self.initialize_autofunctions(settings)
-        self._criterion_resolution = self.initialize_criterion_resolution()
-        self._criterion_resolution.finalize_thread_func = self.finalize_calculate_resolution
-        self._drift_correction = self.initialize_drift_correction()
 
     def initialize_microscope(self):
         """ microscope init"""
@@ -298,11 +306,12 @@ class SerialControl:
             logging.error('Microscope settings saving error! ' + repr(e))
             print(Fore.RED + 'Microscope settings saving failed!')
 
-    def imaging(self, slice_number):
+    def cycle(self, slice_number):
         # wait for resolution calculation if needed anf AF main imaging criterion calculation
         self._criterion_resolution.join_all_threads()
         self.wait_for_af_criterion_calculation()
 
+        load settings from file
         print(Fore.YELLOW + f'Current slice number: {slice_number}')
 
         self.logger.set_log_file(slice_number)  # set logging file (logging output)

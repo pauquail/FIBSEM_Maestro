@@ -3,7 +3,7 @@ import os
 
 from scipy.spatial import distance
 
-from fibsem_maestro.tools.support import StagePosition, Point, ScanningArea
+from fibsem_maestro.tools.support import StagePosition, Point, ScanningArea, find_in_dict
 from fibsem_maestro.microscope_control.autoscript_control import AutoscriptMicroscopeControl
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl
 
@@ -29,18 +29,27 @@ def create_microscope(control: str):
             super().__init__(microscope_settings['ip_address'])
             self.beam = self.electron_beam  # default setting for actual beam
 
-            self.image_settings = image_settings
-            self.li = image_settings['images_line_integration']
-            self.stage_tolerance = microscope_settings['stage_tolerance']
-            self.stage_trials = microscope_settings['stage_trials']
-            self.beam_shift_tolerance = microscope_settings['beam_shift_tolerance']
-            self.relative_beam_shift_to_stage = microscope_settings['relative_beam_shift_to_stage']
+            self._settings_init(microscope_settings, image_settings)
 
             self.data_dir = data_dir
 
             self._detector_contrast_backup = None
             self._detector_brightness_backup = None
             self.stage_trial_counter = self.stage_trials
+
+        def _settings_init(self, microscope_settings, image_settings):
+            self.image_settings = image_settings
+            self.li = image_settings['images_line_integration']
+            self.name = image_settings['name']
+            self.stage_tolerance = microscope_settings['stage_tolerance']
+            self.stage_trials = microscope_settings['stage_trials']
+            self.beam_shift_tolerance = microscope_settings['beam_shift_tolerance']
+            self.relative_beam_shift_to_stage = microscope_settings['relative_beam_shift_to_stage']
+
+        def settings_init(self, settings):
+            """ For global re-initialization of settings  (global settings always passed)"""
+            image_settings = find_in_dict(self.name, settings['image'])
+            self._settings_init(settings['microscope'], image_settings)
 
         def stage_move_with_verification(self, new_stage_position: StagePosition):
             """

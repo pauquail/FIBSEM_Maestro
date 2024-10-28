@@ -16,6 +16,7 @@ class ImageLabel(QLabel):
         self.mousePressPos = None
         self.delta = QPoint(0,0)
         self.rect_delta = QPoint(0, 0)
+        self.hide_graphics = False
 
         # zoom in/out
         self.scale = 1
@@ -36,9 +37,14 @@ class ImageLabel(QLabel):
         self.zoom_out_button.setFixedWidth(20)
         self.zoom_out_button.clicked.connect(self.zoom_out)
 
+        self.hide_button = QtWidgets.QPushButton("o", self)
+        self.hide_button.setFixedWidth(20)
+        self.hide_button.clicked.connect(self.hide)
+
         # Positioning the buttons at the top left corner of ImageLabel
         self.zoom_in_button.move(5, 5)
-        self.zoom_out_button.move(self.zoom_in_button.width()+5, 5)
+        self.zoom_out_button.move(self.zoom_in_button.width() + 5, 5)
+        self.hide_button.move(self.zoom_out_button.width() + self.zoom_in_button.width() + 10, 5)
 
         self.last_click_time = 0
         self.click_interval = 0.5
@@ -46,17 +52,17 @@ class ImageLabel(QLabel):
 
     def paintEvent(self, event):
         super().paintEvent(event)
-        painter = QPainter(self)
 
-        lime = QColor(0, 255, 0)
+        if not self.hide_graphics:
+            painter = QPainter(self)
 
-        painter.setPen(QPen(lime, 2, Qt.SolidLine))
-        painter.drawRect(self.adjusted_rect)
-
-        painter.setPen(QPen(lime, 2, Qt.SolidLine))
-        for handle in self.handles:
-            if not handle.isNull():
-                painter.fillRect(handle, lime)
+            lime = QColor(0, 255, 0)
+            painter.setPen(QPen(lime, 2, Qt.SolidLine))
+            painter.drawRect(self.adjusted_rect)
+            painter.setPen(QPen(lime, 2, Qt.SolidLine))
+            for handle in self.handles:
+                if not handle.isNull():
+                    painter.fillRect(handle, lime)
 
     def mousePressEvent(self, event):
         mousePos = event.position().toPoint()
@@ -178,6 +184,10 @@ class ImageLabel(QLabel):
     def zoom_out(self):
         """Zoom out the image"""
         self.zoom(1/1.1)
+
+    def hide(self):
+        self.hide_graphics = not self.hide_graphics
+        self.update()
 
     def repaint_pixmap(self):
         """Repaint the pixmap with new scale"""

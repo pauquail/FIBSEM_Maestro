@@ -6,12 +6,25 @@ from threading import Thread
 import numpy as np
 from matplotlib import pyplot as plt, patches
 
-from fibsem_maestro.tools.support import fold_filename
+from fibsem_maestro.tools.support import fold_filename, find_in_dict
 
 
 class Criterion:
     image_index = 1  # index that is incremented in each figure save (prevention of file rewrite)
     def __init__(self, criterion_settings, mask=None, log_dir=None):
+        self.log_dir = log_dir
+        self.mask = mask
+
+        self.pixel_size = None  # pixel size is measured from image
+        self.tile_width_px = None  # tile width calculated from image size
+        self.border_x = None  # border width in pixels
+        self.border_y = None  # border height in pixels
+        self.img_with_border = None  # Image without border
+        self._threads = []  # threads list for criterion calculation in separated thread
+        self.finalize_thread_func = None  # function that is called on the end of separated thread (one argument - resolution)
+        self._settings_init(criterion_settings)
+
+    def _settings_init(self, criterion_settings):
         self.name = criterion_settings['name']
         self.border = criterion_settings['border']
         self.tile_size = criterion_settings['tile_size']
@@ -23,16 +36,10 @@ class Criterion:
         criteria_module = importlib.import_module('fibsem_maestro.image_criteria.criteria_math')
         self.criterion_func = getattr(criteria_module, criterion_settings['criterion'])
 
-        self.log_dir = log_dir
-        self.mask = mask
-
-        self.pixel_size = None  # pixel size is measured from image
-        self.tile_width_px = None  # tile width calculated from image size
-        self.border_x = None  # border width in pixels
-        self.border_y = None  # border height in pixels
-        self.img_with_border = None  # Image without border
-        self._threads = []  # threads list for criterion calculation in separated thread
-        self.finalize_thread_func = None  # function that is called on the end of separated thread (one argument - resolution)
+    def settings_init(self, settings):
+        """ For global re-initialization of settings  (global settings always passed)"""
+        actual_criterion = find_in_dict(self.name, settings['criterion_calculation'])
+        self._settings_init(actual_criterion)
 
     def _tiles_resolution(self, img):
 

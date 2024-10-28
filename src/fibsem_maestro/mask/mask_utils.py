@@ -83,11 +83,15 @@ class TfModel(ImagePreparator):
     def __init__(self, model_path, iterative_training, patch_size, downsampling_factor, fill_holes):
         super().__init__(patch_size, downsampling_factor, fill_holes)
         self.iterative_training = iterative_training
+        self.model_path = model_path
+        self.load_model()
+
+    def load_model(self):
         try:
-            module = importlib.import_module(model_path)
+            module = importlib.import_module(self.model_path)
             self._model = module.load_model()
         except Exception as e:
-            logging.error(f'Error in loading model {model_path}' + repr(e))
+            logging.error(f'Error in loading model {self.model_path}' + repr(e))
             self._model = None
 
     def predict(self, image):

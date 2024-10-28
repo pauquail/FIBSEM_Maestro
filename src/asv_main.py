@@ -30,14 +30,14 @@ serial_control = SerialControl(settings_path)
 
 print('Initialization finished!')
 
-serial_control.imaging(2) # !!!
-serial_control.imaging(3) # !!!
+serial_control.cycle(2)  # !!!
+serial_control.cycle(3)  # !!!
 
 # run FIBSEM control
 
 
 def run(slice_number):
-    serial_control.imaging(slice_number)
+    serial_control.cycle(slice_number)
 
 
 print('Waiting for imaging call...')

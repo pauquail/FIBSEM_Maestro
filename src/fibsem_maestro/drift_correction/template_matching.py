@@ -12,12 +12,18 @@ from fibsem_maestro.tools.support import Point
 class TemplateMatchingDriftCorrection:
     def __init__(self, microscope, settings, template_matching_dir, logging_dict, log_dir=None):
         self._microscope = microscope
-        self.min_confidence = settings['min_confidence']
-
+        self._settings_init(settings)
         self.log_dir = log_dir
         self.template_matching_dir = template_matching_dir
         self.logging_dict = logging_dict
         self.areas = None
+
+    def _settings_init(self, settings):
+        self.min_confidence = settings['min_confidence']
+
+    def settings_init(self, settings):
+        """ For global re-initialization of settings  (global settings always passed)"""
+        self._settings_init(settings['drift_correction'])
 
     def _prepare_image(self, img):
         pixel_size = img.metadata.binary_result.pixel_size.x

@@ -7,12 +7,12 @@ from fibsem_maestro.tools.image_tools import image_saturation_info, image_bit_de
 
 class AutomaticContrastBrightness:
     def __init__(self, settings, microscope, logging_dict, log_dir=None):
-        self._initialize_settings(settings)
+        self._settings_init(settings)
         self._microscope = microscope
         self._logging_dict = logging_dict
         self._log_dir = log_dir
 
-    def _initialize_settings(self, acb_settings):
+    def _settings_init(self, acb_settings):
         self.function = acb_settings['function']
         self.mask_name = acb_settings['mask_name']
         self.allowed_saturation = acb_settings['allowed_saturation']
@@ -20,6 +20,10 @@ class AutomaticContrastBrightness:
         self.p_increase_contrast = acb_settings['p_increase_contrast']
         self.p_decrease_contrast = acb_settings['p_decrease_contrast']
         self.p_brightness = acb_settings['p_brightness']
+
+    def settings_init(self, settings):
+        """ For global re-initialization of settings  (global settings always passed)"""
+        self._settings_init(settings['contrast_brightness'])
 
     def decrease_contrast(self, decrease_value):
         self._microscope.beam.contrast -= decrease_value * self.p_decrease_contrast

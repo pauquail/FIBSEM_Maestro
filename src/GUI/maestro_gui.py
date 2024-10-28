@@ -15,10 +15,14 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle(QCoreApplication.translate("MainWindow", f"FIBSEM_Maestro v {version.VERSION}", None))
+        self.build_connections()
         self.sem_gui = SemGui(self, serial_control.acquisition_settings, serial_control.image_settings)
 
+    def build_connections(self):
+        self.applySettingsPushButton.clicked.connect(self.applySettingsPushButton_clicked)
+        self.actionAbout.triggered.connect(self.about_clicked)
 
-    def about(self):
+    def about_clicked(self):
         QMessageBox.about(
             self,
             "About FIBSEM_Maestro",
@@ -27,8 +31,9 @@ class Window(QMainWindow, Ui_MainWindow):
             "<p>CEITEC MU - Cryo-electron microscopy core facility</p>"
             "<p>pavel.krep@gmail.com</p>",
         )
-    def load_settings(self):
-        print('hit')
+    def applySettingsPushButton_clicked(self):
+        self.sem_gui.serialize_layout()
+        save
 
 
 if __name__ == "__main__":

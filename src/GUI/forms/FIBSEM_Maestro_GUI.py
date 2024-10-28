@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'FIBSEM_Maestro_GUI.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.1
+## Created by: Qt User Interface Compiler version 6.7.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -32,6 +32,8 @@ class Ui_MainWindow(object):
         self.actionLoad.setObjectName(u"actionLoad")
         self.actionSave = QAction(MainWindow)
         self.actionSave.setObjectName(u"actionSave")
+        self.actionAbout = QAction(MainWindow)
+        self.actionAbout.setObjectName(u"actionAbout")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -128,10 +130,20 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
 
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.applySettingsPushButton = QPushButton(self.centralwidget)
+        self.applySettingsPushButton.setObjectName(u"applySettingsPushButton")
+
+        self.horizontalLayout_2.addWidget(self.applySettingsPushButton)
+
+
+        self.gridLayout.addLayout(self.horizontalLayout_2, 3, 0, 1, 1)
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1000, 31))
+        self.menubar.setGeometry(QRect(0, 0, 1000, 22))
         self.menuSetting = QMenu(self.menubar)
         self.menuSetting.setObjectName(u"menuSetting")
         self.menuHelp = QMenu(self.menubar)
@@ -145,6 +157,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
         self.menuSetting.addAction(self.actionLoad)
         self.menuSetting.addAction(self.actionSave)
+        self.menuHelp.addAction(self.actionAbout)
 
         self.retranslateUi(MainWindow)
 
@@ -158,6 +171,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"FIBSEM_Maestro v 1.0.", None))
         self.actionLoad.setText(QCoreApplication.translate("MainWindow", u"Load", None))
         self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))
+        self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About", None))
         self.imageLabel.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Acquisition", None))
         self.calculateFromSlicePushButton.setText(QCoreApplication.translate("MainWindow", u"Calculate from slice distance (38\u00b0)", None))
@@ -168,7 +182,8 @@ class Ui_MainWindow(object):
         self.fastScanCheckBox.setText(QCoreApplication.translate("MainWindow", u"Fast scan", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabSem), QCoreApplication.translate("MainWindow", u"SEM", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabFib), QCoreApplication.translate("MainWindow", u"FIB", None))
-        self.menuSetting.setTitle(QCoreApplication.translate("MainWindow", u"Setting", None))
+        self.applySettingsPushButton.setText(QCoreApplication.translate("MainWindow", u"Apply settings", None))
+        self.menuSetting.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi
 

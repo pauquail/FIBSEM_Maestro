@@ -17,8 +17,6 @@ acquisition:
 milling:
   slice_distance: 10.0e-9
   fiducial_margin: 1.0e-6  # the searching area for the fiducial is bigger than defined size
-  milling_depth: 1.0-6
-  pattern: 'CCS'
 
 # Directories
 dirs:
