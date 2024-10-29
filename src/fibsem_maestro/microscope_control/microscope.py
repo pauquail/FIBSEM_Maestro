@@ -143,7 +143,7 @@ def create_microscope(control: str):
             img_cropped = img[left_top[0]:left_top[0] + size[0], left_top[1]:left_top[1] + size[1]]
             return img_cropped
 
-        def apply_beam_settings(self, image_settings, line_integration_index=0):
+        def apply_beam_settings(self, image_settings):
             if 'bit_depth' in image_settings:
                 self.beam.bit_depth = image_settings['bit_depth']
             if 'field_of_view' in image_settings:
@@ -155,7 +155,7 @@ def create_microscope(control: str):
             if 'pixel_size' in image_settings:
                 self.beam.pixel_size = float(image_settings['pixel_size'])
             if 'images_line_integration' in image_settings:
-                self.beam.line_integration = image_settings['images_line_integration'][line_integration_index]
+                self.beam.line_integration = image_settings['images_line_integration']
             if 'dwell' in image_settings:
                 self.beam.dwell_time = image_settings['dwell']
 
@@ -170,19 +170,19 @@ def create_microscope(control: str):
             :return: The acquired image.
             """
             image = None
-            for i in range(len(self.li)):
-                self.apply_beam_settings(self.image_settings, i)
 
-                if slice_number is not None:
-                    img_name = f"slice_{slice_number:05}_({i}).tif"
-                else:
-                    img_name = f"slice_test_({i}).tif"
+            self.apply_beam_settings(self.image_settings)
 
-                img_name = os.path.join(self.data_dir, img_name)
-                logging.info(f"Acquiring {img_name}.")
-                image = self.beam.grab_frame(img_name)
-                if slice_number is not None:
-                    print(f"Image {slice_number} acquired.")
+            if slice_number is not None:
+                img_name = f"slice_{slice_number:05}.tif"
+            else:
+                img_name = f"slice_test.tif"
+
+            img_name = os.path.join(self.data_dir, img_name)
+            logging.info(f"Acquiring {img_name}.")
+            image = self.beam.grab_frame(img_name)
+            if slice_number is not None:
+                print(f"Image {slice_number} acquired.")
 
             return image
 

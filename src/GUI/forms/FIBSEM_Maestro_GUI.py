@@ -34,6 +34,8 @@ class Ui_MainWindow(object):
         self.actionSave.setObjectName(u"actionSave")
         self.actionAbout = QAction(MainWindow)
         self.actionAbout.setObjectName(u"actionAbout")
+        self.actionResize = QAction(MainWindow)
+        self.actionResize.setObjectName(u"actionResize")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -43,10 +45,62 @@ class Ui_MainWindow(object):
         self.tabWidget = QTabWidget(self.centralwidget)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tabWidget.setStyleSheet(u"")
+        self.tabFib = QWidget()
+        self.tabFib.setObjectName(u"tabFib")
+        self.verticalLayout1 = QVBoxLayout(self.tabFib)
+        self.verticalLayout1.setObjectName(u"verticalLayout1")
+        self.fibVerticalLayout = QVBoxLayout()
+        self.fibVerticalLayout.setObjectName(u"fibVerticalLayout")
+        self.fibImageLabel = QLabel(self.tabFib)
+        self.fibImageLabel.setObjectName(u"fibImageLabel")
+
+        self.fibVerticalLayout.addWidget(self.fibImageLabel)
+
+        self.label_3 = QLabel(self.tabFib)
+        self.label_3.setObjectName(u"label_3")
+        font = QFont()
+        font.setBold(True)
+        self.label_3.setFont(font)
+
+        self.fibVerticalLayout.addWidget(self.label_3)
+
+        self.fibFormLayout = QFormLayout()
+        self.fibFormLayout.setObjectName(u"fibFormLayout")
+
+        self.fibVerticalLayout.addLayout(self.fibFormLayout)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.getFibImagePushButton = QPushButton(self.tabFib)
+        self.getFibImagePushButton.setObjectName(u"getFibImagePushButton")
+
+        self.horizontalLayout_3.addWidget(self.getFibImagePushButton)
+
+        self.setFibFiducialPushButton = QPushButton(self.tabFib)
+        self.setFibFiducialPushButton.setObjectName(u"setFibFiducialPushButton")
+
+        self.horizontalLayout_3.addWidget(self.setFibFiducialPushButton)
+
+        self.setFibAreaPushButton = QPushButton(self.tabFib)
+        self.setFibAreaPushButton.setObjectName(u"setFibAreaPushButton")
+
+        self.horizontalLayout_3.addWidget(self.setFibAreaPushButton)
+
+
+        self.fibVerticalLayout.addLayout(self.horizontalLayout_3)
+
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.fibVerticalLayout.addItem(self.verticalSpacer_2)
+
+
+        self.verticalLayout1.addLayout(self.fibVerticalLayout)
+
+        self.tabWidget.addTab(self.tabFib, "")
         self.tabSem = QWidget()
         self.tabSem.setObjectName(u"tabSem")
-        self.verticalLayout1 = QVBoxLayout(self.tabSem)
-        self.verticalLayout1.setObjectName(u"verticalLayout1")
+        self.verticalLayout2 = QVBoxLayout(self.tabSem)
+        self.verticalLayout2.setObjectName(u"verticalLayout2")
         self.semVerticalLayout = QVBoxLayout()
         self.semVerticalLayout.setObjectName(u"semVerticalLayout")
         self.imageLabel = QLabel(self.tabSem)
@@ -56,8 +110,6 @@ class Ui_MainWindow(object):
 
         self.label_2 = QLabel(self.tabSem)
         self.label_2.setObjectName(u"label_2")
-        font = QFont()
-        font.setBold(True)
         self.label_2.setFont(font)
 
         self.semVerticalLayout.addWidget(self.label_2)
@@ -73,7 +125,7 @@ class Ui_MainWindow(object):
         self.semVerticalLayout.addWidget(self.calculateFromSlicePushButton)
 
 
-        self.verticalLayout1.addLayout(self.semVerticalLayout)
+        self.verticalLayout2.addLayout(self.semVerticalLayout)
 
         self.semImagingVerticalLayout = QVBoxLayout()
         self.semImagingVerticalLayout.setObjectName(u"semImagingVerticalLayout")
@@ -88,7 +140,7 @@ class Ui_MainWindow(object):
         self.semImagingVerticalLayout.addWidget(self.label)
 
 
-        self.verticalLayout1.addLayout(self.semImagingVerticalLayout)
+        self.verticalLayout2.addLayout(self.semImagingVerticalLayout)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -114,16 +166,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.fastScanCheckBox)
 
 
-        self.verticalLayout1.addLayout(self.horizontalLayout)
+        self.verticalLayout2.addLayout(self.horizontalLayout)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout1.addItem(self.verticalSpacer)
+        self.verticalLayout2.addItem(self.verticalSpacer)
 
         self.tabWidget.addTab(self.tabSem, "")
-        self.tabFib = QWidget()
-        self.tabFib.setObjectName(u"tabFib")
-        self.tabWidget.addTab(self.tabFib, "")
 
         self.verticalLayout.addWidget(self.tabWidget)
 
@@ -148,16 +197,20 @@ class Ui_MainWindow(object):
         self.menuSetting.setObjectName(u"menuSetting")
         self.menuHelp = QMenu(self.menubar)
         self.menuHelp.setObjectName(u"menuHelp")
+        self.menuView = QMenu(self.menubar)
+        self.menuView.setObjectName(u"menuView")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menuSetting.menuAction())
+        self.menubar.addAction(self.menuView.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
         self.menuSetting.addAction(self.actionLoad)
         self.menuSetting.addAction(self.actionSave)
         self.menuHelp.addAction(self.actionAbout)
+        self.menuView.addAction(self.actionResize)
 
         self.retranslateUi(MainWindow)
 
@@ -172,6 +225,13 @@ class Ui_MainWindow(object):
         self.actionLoad.setText(QCoreApplication.translate("MainWindow", u"Load", None))
         self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About", None))
+        self.actionResize.setText(QCoreApplication.translate("MainWindow", u"Resize", None))
+        self.fibImageLabel.setText("")
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
+        self.getFibImagePushButton.setText(QCoreApplication.translate("MainWindow", u"Get image", None))
+        self.setFibFiducialPushButton.setText(QCoreApplication.translate("MainWindow", u"Set fiducial", None))
+        self.setFibAreaPushButton.setText(QCoreApplication.translate("MainWindow", u"Set slicing area", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabFib), QCoreApplication.translate("MainWindow", u"FIB", None))
         self.imageLabel.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Acquisition", None))
         self.calculateFromSlicePushButton.setText(QCoreApplication.translate("MainWindow", u"Calculate from slice distance (38\u00b0)", None))
@@ -181,9 +241,9 @@ class Ui_MainWindow(object):
         self.testImagingPushButton.setText(QCoreApplication.translate("MainWindow", u"Test imaging", None))
         self.fastScanCheckBox.setText(QCoreApplication.translate("MainWindow", u"Fast scan", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabSem), QCoreApplication.translate("MainWindow", u"SEM", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabFib), QCoreApplication.translate("MainWindow", u"FIB", None))
         self.applySettingsPushButton.setText(QCoreApplication.translate("MainWindow", u"Apply settings", None))
         self.menuSetting.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
+        self.menuView.setTitle(QCoreApplication.translate("MainWindow", u"View", None))
     # retranslateUi
 

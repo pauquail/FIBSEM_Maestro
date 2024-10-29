@@ -1,11 +1,8 @@
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtCore import Qt
 
 from fibsem_maestro.tools.support import find_in_dict
-from gui_tools import populate_form, serialize_form
+from gui_tools import populate_form, serialize_form, create_ImageLabel
 from imaging_setting_gui import ImagingSettings
-from image_label import ImageLabel
 
 class SemGui:
     def __init__(self, window, acquisition_settings, imaging_settings):
@@ -15,12 +12,7 @@ class SemGui:
         self.populate_form()
         self.build_connections()
 
-        # image label
-        self.window.imageLabel = ImageLabel()
-        self.window.semVerticalLayout.insertWidget(0, self.window.imageLabel)
-        self.window.semVerticalLayout.setAlignment(self.window.imageLabel, Qt.AlignTop | Qt.AlignLeft)
-        self.window.imageLabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
+        self.window.imageLabel = create_ImageLabel(self.window.semVerticalLayout)
 
         # selected imaging settings
         self.actual_image_settings = find_in_dict(acquisition_settings['image_name'],

@@ -107,6 +107,37 @@ class StagePosition:
         return cls(x, y, z, r, t)
 
 
+class Image(np.ndarray):
+    def __new__(cls, image, pixel_size):
+        obj = np.asarray(image.data).view(cls)
+        obj.pixel_size = pixel_size
+        return obj
+
+    def get8bit_clone(self):
+        """ Get 8 bit version of self"""
+        output = Image(self, self.pixel_size)
+        if np.max(output) > 255:
+            output = output / (np.max(output) / 255)
+        return np.uint8(output)
+
+    @staticmethod
+    def from_as(adorned_image):
+        pixel_size = adorned_image.metadata.binary_result.pixel_size.x
+        image = np.array(adorned_image.data)
+        return Image(image, pixel_size)
+
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        self.pixel_size = getattr(obj, 'pixel_size', None)
+
+    def __getitem__(self, index):
+        result = super(Image, self).__getitem__(index)
+        if type(result) is Image:
+            return result
+        else:
+            return Image(result, self.pixel_size)
+
+
 class ScanningArea:
     def __init__(self, center: Point, width: float, height: float):
         """ Area defined as the fraction (center of the image = 0.5)"""
@@ -137,35 +168,15 @@ class ScanningArea:
     def __str__(self):
         return f"ScanningArea({self.center.x}, {self.center.y}, {self.width}, {self.height})"
 
-    @classmethod
-    def from_str(cls, point_string):
+    @staticmethod
+    def from_str(point_string):
         # Extract the coordinates from the string
         x, y, w, h = map(float, point_string[13:-1].split(', '))
-        return cls(Point(x, y), w, h)
-
-
-class Image(np.ndarray):
-    def __new__(cls, image, pixel_size):
-        obj = np.asarray(image.data).view(cls)
-        obj.pixel_size = pixel_size
-        return obj
+        return ScanningArea(Point(x, y), w, h)
 
     @staticmethod
-    def from_as(adorned_image):
-        pixel_size = adorned_image.metadata.binary_result.pixel_size.x
-        image = np.array(adorned_image.data)
-        return Image(image, pixel_size)
-
-    def __array_finalize__(self, obj):
-        if obj is None: return
-        self.pixel_size = getattr(obj, 'pixel_size', None)
-
-    def __getitem__(self, index):
-        result = super(Image, self).__getitem__(index)
-        if type(result) is Image:
-            return result
-        else:
-            return Image(result, self.pixel_size)
+    def from_image_coordinates(self, image:Image):
+        pass
 
 
 def find_in_dict(name, list_of_dicts):

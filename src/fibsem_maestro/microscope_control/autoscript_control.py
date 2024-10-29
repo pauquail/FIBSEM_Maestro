@@ -5,6 +5,8 @@ from fibsem_maestro.tools.support import Point, Image
 
 
 try:
+    raise ImportError("AS forced to off!!!")
+
     from autoscript_sdb_microscope_client import SdbMicroscopeClient
     from autoscript_sdb_microscope_client.structures import (Point as PointAS, GrabFrameSettings, AdornedImage)
     from autoscript_sdb_microscope_client.enumerations import ImagingDevice, ImageFileFormat

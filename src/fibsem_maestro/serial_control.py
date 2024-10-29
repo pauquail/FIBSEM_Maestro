@@ -67,12 +67,9 @@ class SerialControl:
     def __init__(self, settings_path='settings.yaml'):
         self.image = None  # actual image
         self.image_resolution = 0  # initial image resolution = 0 # initial image res
+        self.settings_path = settings_path
 
-        with open(settings_path, "r") as yamlfile:
-            settings = yaml.safe_load(yamlfile)
-            print(f'Settings file {settings_path} successfully loaded')
-
-        self.settings_init(settings)
+        self.settings_init()
         # make dirs if needed
         make_dirs(self.dirs_settings)
 
@@ -84,14 +81,17 @@ class SerialControl:
                                           dirs_log=self.dirs_settings['log'])
 
         self._masks = self.initialize_masks()
-        self._autofunctions = self.initialize_autofunctions(settings)
+        self._autofunctions = self.initialize_autofunctions(self.settings)
         self._criterion_resolution = self.initialize_criterion_resolution()
         self._criterion_resolution.finalize_thread_func = self.finalize_calculate_resolution
         self._drift_correction = self.initialize_drift_correction()
 
-    def settings_init(self, settings):
+    def settings_init(self):
+        settings = self.read_yaml_settings()
         # read settings
+        self.settings = settings
         self.general_settings = settings['general']
+        self.fib_settings = settings['milling']
         self.acquisition_settings = settings['acquisition']
         self.dirs_settings = settings['dirs']
         self.microscope_settings = settings['microscope']
@@ -124,6 +124,16 @@ class SerialControl:
                 logging.info(f'Re-initializing {attr_name}')
                 attr_name.settings_init(settings)
 
+    def read_yaml_settings(self):
+        with open(self.settings_path, "r") as yamlfile:
+            settings = yaml.safe_load(yamlfile)
+            print(f'Settings file {self.settings_path} successfully loaded')
+        return settings
+
+    def save_yaml_settings(self):
+        with open(self.settings_path, "w") as yamlfile:
+            yaml.safe_dump(self.settings, yamlfile)
+            print(f'Settings file {self.settings_path} successfully saved')
 
     def initialize_microscope(self):
         """ microscope init"""
@@ -294,9 +304,6 @@ class SerialControl:
     def save_settings(self):
         """ Save microscope settings from file from microscope """
         settings_to_save = self.variables_to_save
-        # add drift correction areas if needed
-        if self._drift_correction.areas is not None:
-            settings_to_save['dc_areas'] = self._drift_correction.areas
         try:
             save_settings(self._microscope,
                           settings=settings_to_save,
@@ -311,7 +318,7 @@ class SerialControl:
         self._criterion_resolution.join_all_threads()
         self.wait_for_af_criterion_calculation()
 
-        load settings from file
+        self.settings_init()  # read settings.yaml and reinit all
         print(Fore.YELLOW + f'Current slice number: {slice_number}')
 
         self.logger.set_log_file(slice_number)  # set logging file (logging output)

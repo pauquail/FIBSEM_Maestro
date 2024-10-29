@@ -2,8 +2,10 @@ import time
 
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
-from PySide6.QtGui import QPainter, QPen, QPixmap, QColor
+from PySide6.QtGui import QPainter, QPen, QPixmap, QColor, QImage
 from PySide6.QtCore import QRect, Qt, QPoint, QSize
+
+from fibsem_maestro.tools.support import Image, ScanningArea
 
 class ImageLabel(QLabel):
     def __init__(self, parent=None):
@@ -153,6 +155,10 @@ class ImageLabel(QLabel):
         self.handles[3].setRect(self.adjusted_rect.left() + self.adjusted_rect.width() // 2, self.adjusted_rect.bottom() - handleSize, handleSize,
                                 handleSize)  # bottom
 
+    def setImage(self, image: Image):
+        pixmap = QPixmap(QImage(image.get8bit_clone(), image.shape[1], image.shape[0], QImage.Format_Indexed8))
+        self.setPixmap(pixmap)
+
     def setPixmap(self, pixmap):
         """ Resize if too big """
         screen = QtWidgets.QApplication.primaryScreen()
@@ -212,3 +218,7 @@ class ImageLabel(QLabel):
         width = self.rect.width() * self.scale
         height = self.rect.height() * self.scale
         self.adjusted_rect = QRect(x, y, width, height)
+
+    def get_selected_area(self):
+        """ Get selected rect position and size (ScanningArea)"""
+        x = sefh

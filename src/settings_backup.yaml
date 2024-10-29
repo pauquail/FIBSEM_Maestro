@@ -17,6 +17,9 @@ acquisition:
 milling:
   slice_distance: 10.0e-9
   fiducial_margin: 1.0e-6  # the searching area for the fiducial is bigger than defined size
+  milling_depth: 1.0-6
+  pattern: CCS
+  direction: -1 # -1 slicing progress upwards, 1 down
 
 # Directories
 dirs:
@@ -34,13 +37,13 @@ microscope:
 image:
   - name: 'image_acquisition' # pixel_size: 5.18e-9
     field_of_view: [31.9e-6, 21.2666666667e-6]
-    images_line_integration: [1] # li of images acquisition. it is array for multiple acquisition
+    images_line_integration: 1 # li of images acquisition.
     bit_depth: 16
     dwell: 1.0e-6
   - name: 'autofunction'
     resolution: [6144, 4096] # must be in standard res
     field_of_view: [31.9e-6, 21.2666666667e-6]
-    images_line_integration: [1]
+    images_line_integration: 1 # li of images acquisition.
     bit_depth: 8
     dwell: 1.0e-6
 
