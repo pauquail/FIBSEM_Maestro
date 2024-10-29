@@ -176,6 +176,8 @@ class ScanningArea:
 
     @staticmethod
     def from_image_coordinates(self, image:Image):
+        dodelat
+        dodelat
         pass
 
 
