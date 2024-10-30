@@ -15,6 +15,7 @@ class FibGui:
     def build_connections(self):
         self.window.getFibImagePushButton.clicked.connect(self.getFibImagePushButton_clicked)
         self.window.setFibFiducialPushButton.clicked.connect(self.setFibFiducialPushButton_clicked)
+        self.window.setFibAreaPushButton.clicked.connect(self.setFibAreaPushButton_clicked)
 
     def populate_form(self):
         populate_form(self.fib_settings, layout=self.window.fibFormLayout)
@@ -24,7 +25,9 @@ class FibGui:
 
     def getFibImagePushButton_clicked(self):
         from autoscript_sdb_microscope_client.structures import AdornedImage
-        image = Image.from_as(AdornedImage.load('/home/cemcof/Downloads/cell.tif'))
+        #image = Image.from_as(AdornedImage.load('/home/cemcof/Downloads/cell.tif'))
+        image = Image.from_as(AdornedImage.load('D:\ceitec_data\ins - fccb\data\raw\slice_00547_(0).tif'))
+
         self.window.fibImageLabel.setImage(image)
 
     def setFibFiducialPushButton_clicked(self):
@@ -32,3 +35,6 @@ class FibGui:
         fiducial_area = self.window.fibImageLabel.get_selected_area()
         self.window.fibImageLabel.rects_to_draw = []  # clear prev
         self.window.fibImageLabel.rects_to_draw.append((fiducial_area, (235, 192, 52))) # RGB color
+
+    def setFibAreaPushButton_clicked(self):
+        pass

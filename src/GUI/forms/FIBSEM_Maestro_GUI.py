@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'FIBSEM_Maestro_GUI.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.3
+## Created by: Qt User Interface Compiler version 6.7.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -16,10 +16,11 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QFormLayout, QGridLayout,
-    QHBoxLayout, QLabel, QMainWindow, QMenu,
-    QMenuBar, QPushButton, QSizePolicy, QSpacerItem,
-    QStatusBar, QTabWidget, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFormLayout,
+    QGridLayout, QHBoxLayout, QLabel, QMainWindow,
+    QMenu, QMenuBar, QPushButton, QSizePolicy,
+    QSpacerItem, QStatusBar, QTabWidget, QVBoxLayout,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -36,6 +37,8 @@ class Ui_MainWindow(object):
         self.actionAbout.setObjectName(u"actionAbout")
         self.actionResize = QAction(MainWindow)
         self.actionResize.setObjectName(u"actionResize")
+        self.actionEmail = QAction(MainWindow)
+        self.actionEmail.setObjectName(u"actionEmail")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -149,10 +152,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.getImagePushButton)
 
-        self.setImagingAreaPushButton = QPushButton(self.tabSem)
-        self.setImagingAreaPushButton.setObjectName(u"setImagingAreaPushButton")
+        self.setImagingPushButton = QPushButton(self.tabSem)
+        self.setImagingPushButton.setObjectName(u"setImagingPushButton")
 
-        self.horizontalLayout.addWidget(self.setImagingAreaPushButton)
+        self.horizontalLayout.addWidget(self.setImagingPushButton)
 
         self.testImagingPushButton = QPushButton(self.tabSem)
         self.testImagingPushButton.setObjectName(u"testImagingPushButton")
@@ -173,6 +176,65 @@ class Ui_MainWindow(object):
         self.verticalLayout2.addItem(self.verticalSpacer)
 
         self.tabWidget.addTab(self.tabSem, "")
+        self.tabAutofunctions = QWidget()
+        self.tabAutofunctions.setObjectName(u"tabAutofunctions")
+        self.verticalLayout3 = QVBoxLayout(self.tabAutofunctions)
+        self.verticalLayout3.setObjectName(u"verticalLayout3")
+        self.formLayout = QFormLayout()
+        self.formLayout.setObjectName(u"formLayout")
+        self.autofunctionLabel = QLabel(self.tabAutofunctions)
+        self.autofunctionLabel.setObjectName(u"autofunctionLabel")
+
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.autofunctionLabel)
+
+        self.autofunctionComboBox = QComboBox(self.tabAutofunctions)
+        self.autofunctionComboBox.setObjectName(u"autofunctionComboBox")
+
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.autofunctionComboBox)
+
+        self.newAutofunctionPushButton = QPushButton(self.tabAutofunctions)
+        self.newAutofunctionPushButton.setObjectName(u"newAutofunctionPushButton")
+
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.newAutofunctionPushButton)
+
+        self.removeAutofunctionPushButton = QPushButton(self.tabAutofunctions)
+        self.removeAutofunctionPushButton.setObjectName(u"removeAutofunctionPushButton")
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.removeAutofunctionPushButton)
+
+
+        self.verticalLayout3.addLayout(self.formLayout)
+
+        self.autofunctionFormLayout = QFormLayout()
+        self.autofunctionFormLayout.setObjectName(u"autofunctionFormLayout")
+
+        self.verticalLayout3.addLayout(self.autofunctionFormLayout)
+
+        self.autofunctionCriteriumFormLayout = QFormLayout()
+        self.autofunctionCriteriumFormLayout.setObjectName(u"autofunctionCriteriumFormLayout")
+
+        self.verticalLayout3.addLayout(self.autofunctionCriteriumFormLayout)
+
+        self.autofunctionImagingFormLayout = QFormLayout()
+        self.autofunctionImagingFormLayout.setObjectName(u"autofunctionImagingFormLayout")
+
+        self.verticalLayout3.addLayout(self.autofunctionImagingFormLayout)
+
+        self.acbFormLayout = QFormLayout()
+        self.acbFormLayout.setObjectName(u"acbFormLayout")
+
+        self.verticalLayout3.addLayout(self.acbFormLayout)
+
+        self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout3.addItem(self.verticalSpacer_3)
+
+        self.tabWidget.addTab(self.tabAutofunctions, "")
+        self.tabMasking = QWidget()
+        self.tabMasking.setObjectName(u"tabMasking")
+        self.verticalLayout4 = QVBoxLayout(self.tabMasking)
+        self.verticalLayout4.setObjectName(u"verticalLayout4")
+        self.tabWidget.addTab(self.tabMasking, "")
 
         self.verticalLayout.addWidget(self.tabWidget)
 
@@ -192,7 +254,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1000, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1000, 31))
         self.menuSetting = QMenu(self.menubar)
         self.menuSetting.setObjectName(u"menuSetting")
         self.menuHelp = QMenu(self.menubar)
@@ -209,12 +271,13 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
         self.menuSetting.addAction(self.actionLoad)
         self.menuSetting.addAction(self.actionSave)
+        self.menuSetting.addAction(self.actionEmail)
         self.menuHelp.addAction(self.actionAbout)
         self.menuView.addAction(self.actionResize)
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -226,6 +289,7 @@ class Ui_MainWindow(object):
         self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About", None))
         self.actionResize.setText(QCoreApplication.translate("MainWindow", u"Resize", None))
+        self.actionEmail.setText(QCoreApplication.translate("MainWindow", u"Email", None))
         self.fibImageLabel.setText("")
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.getFibImagePushButton.setText(QCoreApplication.translate("MainWindow", u"Get image", None))
@@ -237,10 +301,15 @@ class Ui_MainWindow(object):
         self.calculateFromSlicePushButton.setText(QCoreApplication.translate("MainWindow", u"Calculate from slice distance (38\u00b0)", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Imaging", None))
         self.getImagePushButton.setText(QCoreApplication.translate("MainWindow", u"Get image", None))
-        self.setImagingAreaPushButton.setText(QCoreApplication.translate("MainWindow", u"Set imaging area", None))
+        self.setImagingPushButton.setText(QCoreApplication.translate("MainWindow", u"Set imaging", None))
         self.testImagingPushButton.setText(QCoreApplication.translate("MainWindow", u"Test imaging", None))
         self.fastScanCheckBox.setText(QCoreApplication.translate("MainWindow", u"Fast scan", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabSem), QCoreApplication.translate("MainWindow", u"SEM", None))
+        self.autofunctionLabel.setText(QCoreApplication.translate("MainWindow", u"Autofunction", None))
+        self.newAutofunctionPushButton.setText(QCoreApplication.translate("MainWindow", u"New autofunction", None))
+        self.removeAutofunctionPushButton.setText(QCoreApplication.translate("MainWindow", u"Remove autofunction", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAutofunctions), QCoreApplication.translate("MainWindow", u"Autofunctions", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabMasking), QCoreApplication.translate("MainWindow", u"Masking", None))
         self.applySettingsPushButton.setText(QCoreApplication.translate("MainWindow", u"Apply settings", None))
         self.menuSetting.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
