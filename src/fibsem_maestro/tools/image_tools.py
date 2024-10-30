@@ -161,6 +161,7 @@ def get_stripes(img, separate_value=10, minimal_stripe_height=5):
 
 
 def image_saturation_info(image):
+    """ How many (in fraction) pixels are saturated or zeroed"""
     max_value = 2 ** image.bit_depth - 1
     total_px = len(image.data)  # total number of pixels
     saturated_px = np.sum(image.data == max_value)
@@ -171,6 +172,7 @@ def image_saturation_info(image):
 
 
 def image_bit_dept_band(image, band_min_value_frac=0.01, histogram_total_width=256):
+    """Returns ratio of used of band of bit depth"""
     # band_min_value_frac - minimal number of pixels (fraction of total pixel count) considered as used band
     # histogram_total_width - histogram bins
 

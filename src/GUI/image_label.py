@@ -11,14 +11,15 @@ class ImageLabel(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.rect = QRect()
-        self.adjusted_rect = QRect()  # zoom applied
+        self.adjusted_rect = QRect()  # zoom and pan applied
         self.handles = [QRect() for _ in range(4)]
         self.handleSize = 10
         self.handleSelected = -1
         self.mousePressPos = None
-        self.delta = QPoint(0,0)
-        self.rect_delta = QPoint(0, 0)
-        self.hide_graphics = False
+        self.delta = QPoint(0,0)  # offset used for panning
+        self.hide_graphics = False  # used form overlay hiding
+        self.image = None  # original image (class Image)
+        self.rects_to_draw = [] # buffer for rectangle drawing (ScanningArea, (R,G,B))
 
         # zoom in/out
         self.scale = 1
@@ -65,51 +66,60 @@ class ImageLabel(QLabel):
             for handle in self.handles:
                 if not handle.isNull():
                     painter.fillRect(handle, lime)
+            for r in self.rects_to_draw:
+                pen_color = QColor(*r[1])
+                painter.setPen(QPen(pen_color, 2, Qt.SolidLine))
+                left_top, [width, height] = r[0].to_img_coordinates(self.image.shape)
+                rect_to_paint = QRect(left_top[0], left_top[1], width, height)
+                rect_to_paint = self.calculate_coordinates(rect_to_paint)
+                painter.drawRect(rect_to_paint)
 
     def mousePressEvent(self, event):
         mousePos = event.position().toPoint()
         self.mousePressPos = mousePos
         if event.buttons() == Qt.LeftButton:
+            # resizing by handle or retangle drawing
             self.handleSelected = -1
             for i, handle in enumerate(self.handles):
                 if handle.contains(mousePos):
                     self.handleSelected = i
             if self.handleSelected == -1:
-                self.rect.setTopLeft(mousePos / self.scale)
-                self.rect.setBottomRight(mousePos / self.scale)
+                self.rect.setTopLeft((mousePos-self.delta) / self.scale)
+                self.rect.setBottomRight((mousePos-self.delta) / self.scale)
             self.updateHandles()
             self.update()
         if event.button() == Qt.RightButton:
+            # panning
             current_time = time.time()
             if current_time - self.last_click_time < self.click_interval:
-                change_scale = self.original_scale / self.scale
-                self.zoom(change_scale)
+                # reset zoom and pan if right double click
+                self.reset_zoom_pan()
             self.last_click_time = current_time
 
     def mouseMoveEvent(self, event):
         mousePos = event.position().toPoint()
         if event.buttons() == Qt.RightButton:
+            # panning
             self.delta += (mousePos - self.mousePressPos) / self.scale
-            self.rect_delta += (mousePos - self.mousePressPos) / self.scale
             self.mousePressPos = mousePos
         elif event.buttons() == Qt.LeftButton:  # when left button is held down
-            self.rect_delta = QPoint(0,0)
+            # rect drawing
             if self.handleSelected >= 0:  # if a handle is selected
                 self.resizeRectangle(mousePos)
             else:  # if no handle is selected, draw rectangle
-                self.rect.setBottomRight(mousePos / self.scale)
+                self.rect.setBottomRight((mousePos-self.delta) / self.scale)
                 self.updateHandles()
         elif event.buttons() == Qt.NoButton:  # when mouse is just hovering
+            # check if the mouse is on some handle
             handleHovered = -1
             for i, handle in enumerate(self.handles):
                 if handle.contains(mousePos):
                     handleHovered = i
-            if handleHovered != self.handleHovered:
-                self.handleHovered = handleHovered
-                self.update()
+            self.handleHovered = handleHovered
         self.update()
 
     def mouseReleaseEvent(self, event):
+        """ Release dragging handle """
         self.handleSelected = -1
         self.mousePressPos = None
         self.update()
@@ -145,7 +155,7 @@ class ImageLabel(QLabel):
 
     def updateHandles(self):
         handleSize = self.handleSize
-        self.update_adjusted_rect()
+        self.adjusted_rect = self.calculate_coordinates(self.rect)
         self.handles[0].setRect(self.adjusted_rect.left(), self.adjusted_rect.top() + self.adjusted_rect.height() // 2, handleSize,
                                 handleSize)  # left
         self.handles[1].setRect(self.adjusted_rect.left() + self.adjusted_rect.width() // 2, self.adjusted_rect.top(), handleSize,
@@ -156,6 +166,7 @@ class ImageLabel(QLabel):
                                 handleSize)  # bottom
 
     def setImage(self, image: Image):
+        self.image = image
         pixmap = QPixmap(QImage(image.get8bit_clone(), image.shape[1], image.shape[0], QImage.Format_Indexed8))
         self.setPixmap(pixmap)
 
@@ -179,7 +190,6 @@ class ImageLabel(QLabel):
 
     def zoom(self, scale):
         self.scale *= scale
-        self.rect_delta *= scale
         self.delta *= scale
         self.update()
 
@@ -190,6 +200,12 @@ class ImageLabel(QLabel):
     def zoom_out(self):
         """Zoom out the image"""
         self.zoom(1/1.1)
+
+    def reset_zoom_pan(self):
+        """ zoom to 1 and panning to 0"""
+        self.zoom(self.original_scale/self.scale)
+        self.delta = QPoint(0, 0)
+        self.update()
 
     def hide(self):
         self.hide_graphics = not self.hide_graphics
@@ -212,13 +228,15 @@ class ImageLabel(QLabel):
 
         super().setPixmap(shifted_pixmap)
 
-    def update_adjusted_rect(self):
-        x = self.rect.left() * self.scale + self.rect_delta.x()
-        y = self.rect.top() * self.scale + self.rect_delta.y()
-        width = self.rect.width() * self.scale
-        height = self.rect.height() * self.scale
-        self.adjusted_rect = QRect(x, y, width, height)
+    def calculate_coordinates(self, r):
+        """ From source coordinates to display coordinates (scale + panning)"""
+        x = r.left() * self.scale + self.delta.x()
+        y = r.top() * self.scale + self.delta.y()
+        width = r.width() * self.scale
+        height = r.height() * self.scale
+        return QRect(x, y, width, height)
 
     def get_selected_area(self):
         """ Get selected rect position and size (ScanningArea)"""
-        x = sefh
+        return ScanningArea.from_image_coordinates(self.image, self.rect.left(), self.rect.top(),
+                                                   self.rect.width(), self.rect.height())

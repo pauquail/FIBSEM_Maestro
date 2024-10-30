@@ -40,7 +40,7 @@ class Point:
     def __mul__(self, other):
         if isinstance(other, Point):
             return Point(self.x * other.x, self.y * other.y)
-        elif isinstance(other, list):
+        elif isinstance(other, (list, tuple)):
             return Point(self.x * other[0], self.y * other[1])
         else:
             return TypeError("Unsupported operand type")
@@ -130,6 +130,14 @@ class Image(np.ndarray):
         if obj is None: return
         self.pixel_size = getattr(obj, 'pixel_size', None)
 
+    @property
+    def height(self):
+        return self.shape[1]
+
+    @property
+    def width(self):
+        return self.shape[0]
+
     def __getitem__(self, index):
         result = super(Image, self).__getitem__(index)
         if type(result) is Image:
@@ -159,11 +167,11 @@ class ScanningArea:
         :rtype: tuple
         """
         center_pix = self.center * img_shape
-        height_pix = img_shape[0] * self.height
-        width_pix = img_shape[1] * self.width
-        left_top = [center_pix.x - height_pix // 2,
-                    center_pix.y - width_pix // 2]
-        return left_top, [height_pix, width_pix]
+        width_pix = img_shape[0] * self.width
+        height_pix = img_shape[1] * self.height
+        left_top = [int(center_pix.x - width_pix / 2),
+                    int(center_pix.y - height_pix / 2)]
+        return left_top, [int(width_pix), int(height_pix)]
 
     def __str__(self):
         return f"ScanningArea({self.center.x}, {self.center.y}, {self.width}, {self.height})"
@@ -175,11 +183,16 @@ class ScanningArea:
         return ScanningArea(Point(x, y), w, h)
 
     @staticmethod
-    def from_image_coordinates(self, image:Image):
-        dodelat
-        dodelat
-        pass
-
+    def from_image_coordinates(image:Image, left, top, width, height):
+        """ Extract the coordinates from position in image"""
+        # move to center
+        x = left + width // 2
+        y = top + height // 2
+        ratio_x = x / image.width
+        ratio_y = y / image.height
+        ratio_w = width / image.width
+        ratio_h = height / image.height
+        return ScanningArea(Point(ratio_x, ratio_y), ratio_w , ratio_h)
 
 def find_in_dict(name, list_of_dicts):
     """ find the item in a dict based on name value """
