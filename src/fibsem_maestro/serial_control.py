@@ -335,3 +335,7 @@ class SerialControl:
 
         # resolution calculation
         self.calculate_resolution(slice_number)
+
+    @property
+    def microscope(self):
+        return self._microscope

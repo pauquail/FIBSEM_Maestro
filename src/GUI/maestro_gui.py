@@ -18,7 +18,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle(QCoreApplication.translate("MainWindow", f"FIBSEM_Maestro v {version.VERSION}", None))
         self.build_connections()
-        self.sem_gui = SemGui(self, serial_control.acquisition_settings, serial_control.image_settings)
+        self.sem_gui = SemGui(self, serial_control.acquisition_settings, serial_control.image_settings, serial_control)
         self.fib_gui = FibGui(self, serial_control.fib_settings)
         self.autofunctions_gui = AutofunctionsGui(self, serial_control.autofunction_settings)
 

@@ -6,10 +6,11 @@ from imaging_setting_gui import ImagingSettings
 from fibsem_maestro.tools.support import Image, ScanningArea, Point
 
 class SemGui:
-    def __init__(self, window, acquisition_settings, imaging_settings):
+    def __init__(self, window, acquisition_settings, imaging_settings, serial_control):
         self.window = window
         self.acquisition_settings = acquisition_settings
         self.imaging_settings = imaging_settings
+        self.serial_control = serial_control
         self.populate_form()
         self.build_connections()
 
@@ -37,15 +38,25 @@ class SemGui:
         serialize_form(self.imaging_settings.imagingFormLayout, self.actual_image_settings)
 
     def getImagePushButton_clicked(self):
-        from autoscript_sdb_microscope_client.structures import AdornedImage
-        #pixmap = QPixmap('/home/cemcof/Downloads/oxford.jpg')
-        image = Image.from_as(AdornedImage.load('/home/cemcof/Downloads/cell.tif'))
+        image = self.serial_control.microscope.acquire_image()
         self.window.imageLabel.setImage(image)
 
     def setImagingPushButton_clicked(self):
         pixel_size = self.window.imageLabel.image.pixel_size
         img_shape = self.window.imageLabel.image.shape
-        imaging_area = self.window.imageLabel.get_selected_area().to_meters()
+        shift, fov = self.window.imageLabel.get_selected_area().to_meters(img_shape, pixel_size)  # drew image
+        shift = shift - Point((img_shape[0]//2)*pixel_size, (img_shape[1]//2)*pixel_size)  # distance to image center
+        # apply shift and fov change
+        self.serial_control.microscope.beam_shift_with_verification(shift)
+        self.serial_control.microscope.electron_beam.resolution = fov
+        self.serial_control.save_settings()  # save microscope settings to file
+        self.window.imageLabel.rect = QRect()  # clear the rectangle
+        image = self.serial_control.microscope.acquire_image()  # update image
+        self.window.imageLabel.setImage(image)
+
 
     def testImagingPushButton_clicked(self):
-        pass
+        self.serial_control.load_settings()  # load microscope settings from file
+        # acquire image and show im imageLabel
+        image = self.serial_control.microscope.acquire_image()
+        self.window.imageLabel.setImage(image)
