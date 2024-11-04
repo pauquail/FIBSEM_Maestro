@@ -140,7 +140,7 @@ def create_microscope(control: str):
             assert self.beam.scanning_area is not None, "Scanning area is not set"
             img = self.beam.grab_frame()
             left_top, size = self.beam.scanning_area.to_img_coordinates(img.shape)
-            img_cropped = img[left_top[0]:left_top[0] + size[0], left_top[1]:left_top[1] + size[1]]
+            img_cropped = img[left_top.x:left_top.x + size[0], left_top.y:left_top.y + size[1]]
             return img_cropped
 
         def apply_beam_settings(self, image_settings):

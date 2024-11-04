@@ -153,6 +153,11 @@ class ScanningArea:
         self.width = width
         self.height = height
 
+    def update(self, scanning_area):
+        self.center = scanning_area.center
+        self.width = scanning_area.width
+        self.height = scanning_area.height
+
     def to_as(self):
         """ Convert the coordinates to AS coordinates """
         raise NotImplementedError("Not implemented yet")
@@ -171,7 +176,15 @@ class ScanningArea:
         height_pix = img_shape[1] * self.height
         left_top = [int(center_pix.x - width_pix / 2),
                     int(center_pix.y - height_pix / 2)]
-        return left_top, [int(width_pix), int(height_pix)]
+        return Point(*left_top), [int(width_pix), int(height_pix)]
+
+    def to_meters(self, img_shape, pixel_size):
+        """ Calculate the coordinates of an object in a real size (with known pixel_size) based on its relative position and size."""
+        left_top, [width_pix, height_pix] = self.to_img_coordinates(img_shape)
+        return Point(left_top.x * pixel_size, left_top.y * pixel_size), [width_pix * pixel_size, height_pix * pixel_size]
+
+    def to_dict(self):
+        return {'x': self.center.x, 'y': self.center.y, 'width': self.width, 'height': self.height}
 
     def __str__(self):
         return f"ScanningArea({self.center.x}, {self.center.y}, {self.width}, {self.height})"
@@ -183,16 +196,24 @@ class ScanningArea:
         return ScanningArea(Point(x, y), w, h)
 
     @staticmethod
-    def from_image_coordinates(image:Image, left, top, width, height):
+    def from_image_coordinates(img_shape, left, top, width, height):
         """ Extract the coordinates from position in image"""
         # move to center
         x = left + width // 2
         y = top + height // 2
-        ratio_x = x / image.width
-        ratio_y = y / image.height
-        ratio_w = width / image.width
-        ratio_h = height / image.height
+        ratio_x = x / img_shape[0]
+        ratio_y = y / img_shape[1]
+        ratio_w = width / img_shape[0]
+        ratio_h = height / img_shape[1]
         return ScanningArea(Point(ratio_x, ratio_y), ratio_w , ratio_h)
+
+    @staticmethod
+    def from_meters(img_shape, pixel_size, left, top, width, height):
+        return ScanningArea.from_image_coordinates(img_shape,
+                                                   int(left/pixel_size),
+                                                   int(top/pixel_size),
+                                                   int(width/pixel_size),
+                                                   int(height/pixel_size))
 
 def find_in_dict(name, list_of_dicts):
     """ find the item in a dict based on name value """

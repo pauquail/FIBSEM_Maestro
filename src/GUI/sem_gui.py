@@ -3,6 +3,7 @@ from PySide6.QtGui import QPixmap
 from fibsem_maestro.tools.support import find_in_dict
 from gui_tools import populate_form, serialize_form, create_ImageLabel
 from imaging_setting_gui import ImagingSettings
+from fibsem_maestro.tools.support import Image, ScanningArea, Point
 
 class SemGui:
     def __init__(self, window, acquisition_settings, imaging_settings):
@@ -36,11 +37,15 @@ class SemGui:
         serialize_form(self.imaging_settings.imagingFormLayout, self.actual_image_settings)
 
     def getImagePushButton_clicked(self):
-        pixmap = QPixmap('/home/cemcof/Downloads/oxford.jpg')
-        self.window.imageLabel.setPixmap(pixmap)
+        from autoscript_sdb_microscope_client.structures import AdornedImage
+        #pixmap = QPixmap('/home/cemcof/Downloads/oxford.jpg')
+        image = Image.from_as(AdornedImage.load('/home/cemcof/Downloads/cell.tif'))
+        self.window.imageLabel.setImage(image)
 
     def setImagingPushButton_clicked(self):
-        pass
+        pixel_size = self.window.imageLabel.image.pixel_size
+        img_shape = self.window.imageLabel.image.shape
+        imaging_area = self.window.imageLabel.get_selected_area().to_meters()
 
     def testImagingPushButton_clicked(self):
         pass

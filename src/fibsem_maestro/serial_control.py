@@ -104,7 +104,7 @@ class SerialControl:
 
         self.library = self.general_settings['library']
         self.additive_beam_shift = self.general_settings['additive_beam_shift']
-        self.settings_file = self.general_settings['settings_file']
+        self.sem_settings_file = self.general_settings['sem_settings_file']
         self.variables_to_save = self.general_settings['variables_to_save']
 
         self.wd_correction = self.acquisition_settings['wd_correction']
@@ -294,7 +294,7 @@ class SerialControl:
         # set microscope
         try:
             logging.info('Microscope setting loading')
-            load_settings(self._microscope, self.settings_file)
+            load_settings(self._microscope, self.sem_settings_file)
             self._microscope.beam = self._electron  # set electron as default beam
             print(Fore.GREEN + 'Microscope settings applied')
         except Exception as e:
@@ -307,7 +307,7 @@ class SerialControl:
         try:
             save_settings(self._microscope,
                           settings=settings_to_save,
-                          path=self.settings_file)
+                          path=self.sem_settings_file)
             print(Fore.GREEN + 'Microscope settings saved')
         except Exception as e:
             logging.error('Microscope settings saving error! ' + repr(e))

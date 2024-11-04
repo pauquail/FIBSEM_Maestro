@@ -67,12 +67,15 @@ class ImageLabel(QLabel):
                 if not handle.isNull():
                     painter.fillRect(handle, lime)
             for r in self.rects_to_draw:
-                pen_color = QColor(*r[1])
-                painter.setPen(QPen(pen_color, 2, Qt.SolidLine))
-                left_top, [width, height] = r[0].to_img_coordinates(self.image.shape)
-                rect_to_paint = QRect(left_top[0], left_top[1], width, height)
-                rect_to_paint = self.calculate_coordinates(rect_to_paint)
-                painter.drawRect(rect_to_paint)
+                if r[0] is not None and r[1] is not None and self.image is not None:
+                    pen_color = QColor(*r[1])
+                    painter.setPen(QPen(pen_color, 2, Qt.SolidLine))
+                    left_top, [width, height] = r[0].to_img_coordinates(self.image.shape)
+                    rect_to_paint = QRect(left_top.x, left_top.y, width, height)
+                    rect_to_paint = self.calculate_coordinates(rect_to_paint)
+                    painter.drawRect(rect_to_paint)
+
+            painter.end()
 
     def mousePressEvent(self, event):
         mousePos = event.position().toPoint()
@@ -213,20 +216,21 @@ class ImageLabel(QLabel):
 
     def repaint_pixmap(self):
         """Repaint the pixmap with new scale"""
-        original_pixmap = self.original_pixmap.copy()  # get a copy of original pixmap
-        width = original_pixmap.width() * self.scale
-        height = original_pixmap.height() * self.scale
-        scaled_pixmap = original_pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        self.updateHandles()
+        if self.original_pixmap is not None:
+            original_pixmap = self.original_pixmap.copy()  # get a copy of original pixmap
+            width = original_pixmap.width() * self.scale
+            height = original_pixmap.height() * self.scale
+            scaled_pixmap = original_pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+            self.updateHandles()
 
-        # shift
-        shifted_pixmap = QPixmap(scaled_pixmap.size())
-        shifted_pixmap.fill(Qt.white)
-        painter = QPainter(shifted_pixmap)
-        painter.drawPixmap(self.delta, scaled_pixmap)
-        painter.end()
+            # shift
+            shifted_pixmap = QPixmap(scaled_pixmap.size())
+            shifted_pixmap.fill(Qt.white)
+            painter = QPainter(shifted_pixmap)
+            painter.drawPixmap(self.delta, scaled_pixmap)
+            painter.end()
 
-        super().setPixmap(shifted_pixmap)
+            super().setPixmap(shifted_pixmap)
 
     def calculate_coordinates(self, r):
         """ From source coordinates to display coordinates (scale + panning)"""
@@ -236,7 +240,7 @@ class ImageLabel(QLabel):
         height = r.height() * self.scale
         return QRect(x, y, width, height)
 
-    def get_selected_area(self):
+    def get_selected_area(self) -> ScanningArea:
         """ Get selected rect position and size (ScanningArea)"""
-        return ScanningArea.from_image_coordinates(self.image, self.rect.left(), self.rect.top(),
+        return ScanningArea.from_image_coordinates(self.image.shape, self.rect.left(), self.rect.top(),
                                                    self.rect.width(), self.rect.height())

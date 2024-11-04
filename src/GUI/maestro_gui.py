@@ -10,6 +10,7 @@ from fib_gui import FibGui
 from GUI.forms.FIBSEM_Maestro_GUI import Ui_MainWindow
 from fibsem_maestro.serial_control import SerialControl
 from sem_gui import SemGui
+from autofunctions_gui import AutofunctionsGui
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -19,6 +20,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.build_connections()
         self.sem_gui = SemGui(self, serial_control.acquisition_settings, serial_control.image_settings)
         self.fib_gui = FibGui(self, serial_control.fib_settings)
+        self.autofunctions_gui = AutofunctionsGui(self, serial_control.autofunction_settings)
 
     def build_connections(self):
         self.applySettingsPushButton.clicked.connect(self.applySettingsPushButton_clicked)

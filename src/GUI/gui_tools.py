@@ -1,6 +1,6 @@
 import logging
 
-from PySide6.QtWidgets import QLabel, QLineEdit, QFormLayout
+from PySide6.QtWidgets import QLabel, QLineEdit, QFormLayout, QMessageBox
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtCore import Qt
 
@@ -54,6 +54,7 @@ def serialize_form(layout: QFormLayout, serialized_settings):
             serialized_settings[settings_name] = value
             logging.debug(f'{settings_name}: {value} updated')
 
+
 def create_ImageLabel(layout):
     # image label
     label = ImageLabel()
@@ -61,3 +62,11 @@ def create_ImageLabel(layout):
     layout.setAlignment(label, Qt.AlignTop | Qt.AlignLeft)
     label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     return label
+
+
+def confirm_action_dialog():
+    msgBox = QMessageBox()
+    msgBox.setWindowTitle("Confirmation")
+    msgBox.setText("Are you sure?")
+    msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+    return msgBox.exec()
