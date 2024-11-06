@@ -6,10 +6,10 @@ acquisition:
 autofunction:
   af_values:
   - autofunction: StepAutoFunction
-    criterion_name: autofunction
+    criterion_name: working_distance - image
     delta_x: 0
     execute: 2
-    image_name: autofunction
+    image_name: working_distance - image
     mask_name: none
     name: working_distance - image
     sweeping_max_limits:
@@ -23,12 +23,12 @@ autofunction:
     sweeping_total_cycles: 1
     variable: working_distance
   - autofunction: LineAutoFunction
-    criterion_name: autofunction
+    criterion_name: working_distance - line
     delta_x: 0
     execute: 0
     forbidden_sections:
     - 0
-    image_name: autofunction
+    image_name: working_distance - line
     keep_time: 10
     mask_name: none
     name: working_distance - line
@@ -68,7 +68,17 @@ criterion_calculation:
   final_regions_resolution: min
   final_resolution: min
   mask_name: none
-  name: autofunction
+  name: working_distance - image
+  tile_size: 0
+- border: 0
+  criterion: bandpass_criterion
+  detail:
+  - 1.0e-07
+  - 3.5e-07
+  final_regions_resolution: min
+  final_resolution: min
+  mask_name: none
+  name: working_distance - line
   tile_size: 0
 dirs:
   log: logs
@@ -111,7 +121,17 @@ image:
   - 3.19e-05
   - 2.12666666667e-05
   images_line_integration: 1
-  name: autofunction
+  name: working_distance - image
+  resolution:
+  - 6144
+  - 4096
+- bit_depth: 8
+  dwell: 1.0e-06
+  field_of_view:
+  - 3.19e-05
+  - 2.12666666667e-05
+  images_line_integration: 1
+  name: working_distance - line
   resolution:
   - 6144
   - 4096
@@ -140,16 +160,16 @@ microscope:
 milling:
   direction: -1
   fiducial_area:
-    height: 0.14127604166666666
-    width: 0.134765625
-    x: 0.31103515625
-    y: 0.2692057291666667
-  fiducial_margin: 1.0e-07
+    height: 0
+    width: 0
+    x: 0
+    y: 0
+  fiducial_margin: 1.0e-06
   milling_area:
-    height: 0.15559895833333334
-    width: 0.16259765625
-    x: 0.63037109375
-    y: 0.17545572916666666
+    height: 0
+    width: 0
+    x: 0
+    y: 0
   milling_depth: 1.0e-06
   pattern: 1.0e-06
   settings_file: fib_microscope_settings.yaml

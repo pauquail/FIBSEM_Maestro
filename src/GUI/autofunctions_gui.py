@@ -38,4 +38,4 @@ class AutofunctionsGui:
         selected_af_text = self.window.autofunctionComboBox.currentText()
         selected_af = find_in_dict(selected_af_text, self.autofunctions_settings['af_values'])
         clear_layout(self.window.autofunctionFormLayout)
-        populate_form(selected_af, excluded_settings=['name'],layout=self.window.autofunctionFormLayout)
+        populate_form(selected_af, excluded_settings=['name','criterion_name','image_name'],layout=self.window.autofunctionFormLayout)

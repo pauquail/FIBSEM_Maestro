@@ -53,7 +53,19 @@ class SemGui:
 
 
     def testImagingPushButton_clicked(self):
-        self.serial_control.load_settings()  # load microscope settings from file
-        # acquire image and show im imageLabel
-        image = self.serial_control.microscope.acquire_image()
+        """Acquire image and show im imageLabel"""
+        # Load microscope settings from file
+        self.serial_control.load_settings()
+        applied_images_settings = self.actual_image_settings
+
+        # Fast scan checkbox reduces dwell or LI
+        if self.window.fastScanCheckBox.isChecked():
+            if applied_images_settings['dwell'] > 200e-9:
+                applied_images_settings['dwell'] = 200e-9
+            if applied_images_settings['images_line_integration'] > 1:
+                applied_images_settings['images_line_integration'] //= 2
+
+        # Apply settings and grab image
+        self.serial_control.microscope.apply_beam_settings(applied_images_settings)
+        image = self.serial_control.microscope.electron_beam.grab_frame()
         self.window.imageLabel.setImage(image)

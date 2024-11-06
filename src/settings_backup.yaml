@@ -53,9 +53,15 @@ image:
     images_line_integration: 1 # li of images acquisition.
     bit_depth: 16
     dwell: 1.0e-6
-  - name: 'autofunction'
+  - name: 'working_distance - image'
     resolution: [6144, 4096] # must be in standard res
     field_of_view: [31.9e-6, 21.2666666667e-6]
+    images_line_integration: 1 # li of images acquisition.
+    bit_depth: 8
+    dwell: 1.0e-6
+  - name: 'working_distance - line'
+    resolution: [ 6144, 4096 ] # must be in standard res
+    field_of_view: [ 31.9e-6, 21.2666666667e-6 ]
     images_line_integration: 1 # li of images acquisition.
     bit_depth: 8
     dwell: 1.0e-6
@@ -68,7 +74,15 @@ criterion_calculation:
     final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
     criterion: 'frc_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
     mask_name: 'none'
-  - name: 'autofunction'
+  - name: 'working_distance - image'
+    border: 0 # part of image that does not go to calculation
+    tile_size: 0 # calculation tile size
+    final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
+    final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
+    criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
+    detail: [ 100.0e-9, 350.0e-9 ] # 20.0e-9, 150.0e-9 for cryo
+    mask_name: 'none'
+  - name: 'working_distance - line'
     border: 0 # part of image that does not go to calculation
     tile_size: 0 # calculation tile size
     final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
@@ -90,8 +104,8 @@ autofunction:
       sweeping_steps: 3 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
       sweeping_total_cycles: 1 # sweeping cycles
       execute: 2 # execute condition - if int = number of slices, if float = image resolution
-      image_name: 'autofunction'
-      criterion_name: 'autofunction'
+      image_name: 'working_distance - image'
+      criterion_name: 'working_distance - image'
       mask_name: 'none'
       delta_x: 0
 
@@ -104,8 +118,8 @@ autofunction:
       sweeping_steps: 20 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
       sweeping_total_cycles: 4 # sweeping cycles
       execute: 0 # execute condition - if int = number of slices, if float = image resolution
-      image_name: 'autofunction'
-      criterion_name: 'autofunction'
+      image_name: 'working_distance - line'
+      criterion_name: 'working_distance - line'
       mask_name: 'none'
       delta_x: 0
       pre_imaging_delay: 1
