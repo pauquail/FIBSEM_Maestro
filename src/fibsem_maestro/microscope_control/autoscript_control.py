@@ -328,12 +328,12 @@ class ElectronBeam(BeamControl):
     def start_acquisition(self):
         logging.debug(f"Starting acquisition ({self._modality})...")
         self.select_modality()  # activate right quad
-        self._microscope.cycle.start_acquisition()
+        self._microscope.imaging.start_acquisition()
 
     def stop_acquisition(self):
         logging.debug(f"Stopping acquisition ({self._modality})...")
         self.select_modality()  # activate right quad
-        self._microscope.cycle.stop_acquisition()
+        self._microscope.imaging.stop_acquisition()
 
     def select_modality(self):
         """
@@ -344,8 +344,8 @@ class ElectronBeam(BeamControl):
         The Electron Beam mode is always in Quad 1, while the Ion Beam mode is always in Quad 2.
 
         """
-        self._microscope.cycle.set_active_view(1)
-        self._microscope.cycle.set_active_device(ImagingDevice.ELECTRON_BEAM)
+        self._microscope.imaging.set_active_view(1)
+        self._microscope.imaging.set_active_device(ImagingDevice.ELECTRON_BEAM)
 
     def grab_frame(self, file_name=None):
         """
@@ -368,7 +368,7 @@ class ElectronBeam(BeamControl):
 
         logging.info(f"Acquiring image..")
         try:
-            grabbed_image = self._microscope.cycle.grab_frame(img_settings)
+            grabbed_image = self._microscope.imaging.grab_frame(img_settings)
             logging.info(f"Image grabbed.")
             if file_name is not None:
                 grabbed_image.save(file_name)
@@ -376,7 +376,7 @@ class ElectronBeam(BeamControl):
         except Exception as e:
             logging.info('Grabbing frame to disk. ' + repr(e))
             if file_name is not None:
-                self._microscope.cycle.grab_frame_to_disk(file_name, ImageFileFormat.TIFF, img_settings)
+                self._microscope.imaging.grab_frame_to_disk(file_name, ImageFileFormat.TIFF, img_settings)
                 logging.info(f"Image grabbed to disk.")
                 img = AdornedImage.load(file_name)
                 return Image.from_as(img)
@@ -392,7 +392,7 @@ class ElectronBeam(BeamControl):
         """
         self.select_modality()  # activate right quad
         logging.debug(f"Getting image ({self._modality}).")
-        img = self._microscope.cycle.get_image()
+        img = self._microscope.imaging.get_image()
         return Image.from_as(img)
 
     @property
@@ -626,8 +626,8 @@ class IonBeam(ElectronBeam):
         The Electron Beam mode is always in Quad 1, while the Ion Beam mode is always in Quad 2.
 
         """
-        self._microscope.cycle.set_active_view(2)
-        self._microscope.cycle.set_active_device(ImagingDevice.ION_BEAM)
+        self._microscope.imaging.set_active_view(2)
+        self._microscope.imaging.set_active_device(ImagingDevice.ION_BEAM)
 
     @ property
     def beam_shift_to_stage_move(self):

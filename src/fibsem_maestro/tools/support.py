@@ -214,6 +214,9 @@ class ScanningArea:
                                                    int(top/pixel_size),
                                                    int(width/pixel_size),
                                                    int(height/pixel_size))
+    @staticmethod
+    def from_dict(d):
+        return ScanningArea(Point(d['x'], d['y']), d['width'] , d['height'])
 
 def find_in_dict(name, list_of_dicts):
     """ find the item in a dict based on name value """

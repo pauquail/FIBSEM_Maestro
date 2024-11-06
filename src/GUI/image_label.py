@@ -177,7 +177,7 @@ class ImageLabel(QLabel):
         """ Resize if too big """
         screen = QtWidgets.QApplication.primaryScreen()
         size = screen.geometry().size()
-        width = size.width() * 0.9
+        width = size.width() * 0.75
         height = size.height() * 0.6
 
         if pixmap.width() > width or pixmap.height() > height:

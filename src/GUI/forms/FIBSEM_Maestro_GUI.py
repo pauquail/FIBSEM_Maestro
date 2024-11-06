@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'FIBSEM_Maestro_GUI.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.1
+## Created by: Qt User Interface Compiler version 6.7.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -142,6 +142,11 @@ class Ui_MainWindow(object):
 
         self.semImagingVerticalLayout.addWidget(self.label)
 
+        self.imageSettingsFormLayout = QFormLayout()
+        self.imageSettingsFormLayout.setObjectName(u"imageSettingsFormLayout")
+
+        self.semImagingVerticalLayout.addLayout(self.imageSettingsFormLayout)
+
 
         self.verticalLayout2.addLayout(self.semImagingVerticalLayout)
 
@@ -192,10 +197,10 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(0, QFormLayout.FieldRole, self.autofunctionComboBox)
 
-        self.newAutofunctionPushButton = QPushButton(self.tabAutofunctions)
-        self.newAutofunctionPushButton.setObjectName(u"newAutofunctionPushButton")
+        self.cloneAutofunctionPushButton = QPushButton(self.tabAutofunctions)
+        self.cloneAutofunctionPushButton.setObjectName(u"cloneAutofunctionPushButton")
 
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.newAutofunctionPushButton)
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.cloneAutofunctionPushButton)
 
         self.removeAutofunctionPushButton = QPushButton(self.tabAutofunctions)
         self.removeAutofunctionPushButton.setObjectName(u"removeAutofunctionPushButton")
@@ -254,7 +259,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1000, 31))
+        self.menubar.setGeometry(QRect(0, 0, 1000, 22))
         self.menuSetting = QMenu(self.menubar)
         self.menuSetting.setObjectName(u"menuSetting")
         self.menuHelp = QMenu(self.menubar)
@@ -306,7 +311,7 @@ class Ui_MainWindow(object):
         self.fastScanCheckBox.setText(QCoreApplication.translate("MainWindow", u"Fast scan", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabSem), QCoreApplication.translate("MainWindow", u"SEM", None))
         self.autofunctionLabel.setText(QCoreApplication.translate("MainWindow", u"Autofunction", None))
-        self.newAutofunctionPushButton.setText(QCoreApplication.translate("MainWindow", u"New autofunction", None))
+        self.cloneAutofunctionPushButton.setText(QCoreApplication.translate("MainWindow", u"Clone autofunction", None))
         self.removeAutofunctionPushButton.setText(QCoreApplication.translate("MainWindow", u"Remove autofunction", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAutofunctions), QCoreApplication.translate("MainWindow", u"Autofunctions", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabMasking), QCoreApplication.translate("MainWindow", u"Masking", None))

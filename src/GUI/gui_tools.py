@@ -11,22 +11,24 @@ def populate_form(settings, excluded_settings=[], layout=None):
     for s in settings:
         if s not in excluded_settings:
             value = settings[s]
+            line_edit = QLineEdit()
             # scalar
             if isinstance(value, (int, float, str)):
-                line_edit = QLineEdit(f'{value}')
-                line_edit.settings_name = s
-                layout.addRow(QLabel(s), line_edit)
-            # two-items array. x,y
-            elif isinstance(value, list) and len(value) == 2:
-                line_edit_x = QLineEdit(f'{value[0]}')
-                line_edit_y = QLineEdit(f'{value[1]}')
-                line_edit_x.settings_name = s + '_x'
-                line_edit_y.settings_name = s + '_y'
-                layout.addRow(QLabel(s + '_x'), line_edit_x)
-                layout.addRow(QLabel(s + '_y'), line_edit_y)
+                line_edit.setText(f'{value}')
+            # array
+            elif isinstance(value, list):
+                for i, v in enumerate(value):
+                    if i == 0:
+                        line_edit.setText(line_edit.text() + f'{v}')
+                    else:
+                        line_edit.setText(line_edit.text() + f',{v}')
+            elif isinstance(value, dict):
+                for k, v in value.items():
+                    line_edit.setText(line_edit.text() + f'{k}:{v},')
             else:
                 raise ValueError(f'Settings {s} has invalid format!')
-
+            line_edit.settings_name = s
+            layout.addRow(QLabel(s), line_edit)
 
 def serialize_form(layout: QFormLayout, serialized_settings):
     """ Get settings dict from layout """
@@ -34,23 +36,21 @@ def serialize_form(layout: QFormLayout, serialized_settings):
     for i in range(layout.rowCount()):
         widget = layout.itemAt(i, QFormLayout.FieldRole).widget()
         if hasattr(widget, 'settings_name'):
+            str_value = widget.text()
             try:
-                int(widget.text())
-                value = int(widget.text())
+                value = int(str_value)
             except ValueError:
                 try:
-                    float(widget.text())
-                    value = float(widget.text())
+                    value = float(str_value)
                 except ValueError:
-                    value = widget
-            settings_name = widget.settings_name
-            if settings_name[-2:] == '_x':
-                x_val = value
-                continue
-            elif settings_name[-2:] == '_y':
-                value = [x_val, value]
-                settings_name = widget.settings_name[:-2]
+                    try:
+                        if ',' in str_value:
+                            parts = str_value.split(',')
+                            value = [float(v) for v in parts]
+                    except ValueError:
+                        raise ValueError(f'Settings "{str_value}" has invalid format!')
 
+            settings_name = widget.settings_name
             serialized_settings[settings_name] = value
             logging.debug(f'{settings_name}: {value} updated')
 
@@ -70,3 +70,9 @@ def confirm_action_dialog():
     msgBox.setText("Are you sure?")
     msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
     return msgBox.exec()
+
+def clear_layout(layout):
+    while layout.count():
+        child = layout.takeAt(0)
+        if child.widget():
+            child.widget().deleteLater()

@@ -87,7 +87,7 @@ general:
   - 0
   library: autoscript
   log_level: 10
-  settings_file: microscope_settings.yaml
+  sem_settings_file: microscope_settings.yaml
   variables_to_save:
   - position
   - electron_beam.working_distance
@@ -139,7 +139,24 @@ microscope:
   stage_trials: 3
 milling:
   direction: -1
-  fiducial_margin: 1.0e-06
+  fiducial_area:
+    height: 0.14127604166666666
+    width: 0.134765625
+    x: 0.31103515625
+    y: 0.2692057291666667
+  fiducial_margin: 1.0e-07
+  milling_area:
+    height: 0.15559895833333334
+    width: 0.16259765625
+    x: 0.63037109375
+    y: 0.17545572916666666
   milling_depth: 1.0e-06
-  pattern: CCS
+  pattern: 1.0e-06
+  settings_file: fib_microscope_settings.yaml
   slice_distance: 1.0e-08
+  variables_to_save:
+  - position
+  - ion_beam.working_distance
+  - ion_beam.beam_shift
+  - ion_beam.detector_contrast
+  - ion_beam.detector_brightness

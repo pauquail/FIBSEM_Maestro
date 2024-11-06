@@ -1,4 +1,4 @@
-class AutoFunction:
+class Milling:
     def __init__(self, milling_settings, log_dir=None):
         self.settings_init(milling_settings)
         self._log_dir = log_dir
@@ -11,5 +11,4 @@ class AutoFunction:
         self.slice_distance = milling_settings['slice_distance']
         self.variables_to_save = milling_settings['variables_to_save']
         self.settings_file = milling_settings['settings_file']
-
 
