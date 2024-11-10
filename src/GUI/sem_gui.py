@@ -1,3 +1,4 @@
+from PySide6.QtCore import QRect
 from PySide6.QtGui import QPixmap
 
 from fibsem_maestro.tools.support import find_in_dict
@@ -25,10 +26,10 @@ class SemGui:
 
 
     def populate_form(self):
-        populate_form(self.acquisition_settings, excluded_settings=['image_name', 'criterion_name'],
-                      layout=self.window.semFormLayout)
-        populate_form(self.actual_image_settings, excluded_settings=['name', 'criterion_name'],
-                      layout=self.window.imageSettingsFormLayout)
+        populate_form(self.acquisition_settings, layout=self.window.semFormLayout,
+                      specific_settings={'image_name':None, 'criterion_name':None})
+        populate_form(self.actual_image_settings, layout=self.window.imageSettingsFormLayout,
+                      specific_settings={'name':None, 'criterion_name':None})
 
     def serialize_layout(self):
         serialize_form(self.window.semFormLayout, self.acquisition_settings)

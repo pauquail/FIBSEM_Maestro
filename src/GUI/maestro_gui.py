@@ -20,7 +20,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.build_connections()
         self.sem_gui = SemGui(self, serial_control.acquisition_settings, serial_control.image_settings, serial_control)
         self.fib_gui = FibGui(self, serial_control.fib_settings)
-        self.autofunctions_gui = AutofunctionsGui(self, serial_control.autofunction_settings)
+        self.autofunctions_gui = AutofunctionsGui(self, serial_control.autofunction_settings,
+                                                  serial_control.mask_settings)
 
     def build_connections(self):
         self.applySettingsPushButton.clicked.connect(self.applySettingsPushButton_clicked)
@@ -43,6 +44,7 @@ class Window(QMainWindow, Ui_MainWindow):
     def applySettingsPushButton_clicked(self):
         self.sem_gui.serialize_layout()
         self.fib_gui.serialize_layout()
+        self.autofunctions_gui.serialize_layout()
         serial_control.save_yaml_settings()
 
 

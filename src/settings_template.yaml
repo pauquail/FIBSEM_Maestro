@@ -13,6 +13,7 @@ acquisition:
   y_correction:  6.15661475326e-9 # For imaging angle 38deg: slice_distance * sin(38). For imaging angle 90: 0
   image_name: 'image_acquisition'
   criterion_name: 'image_acquisition'
+  imaging_enabled: true
 
 milling:
   slice_distance: 10.0e-9
@@ -33,6 +34,7 @@ milling:
     y: 0
     width: 0
     height: 0
+  milling_enabled: true
 
 # Directories
 dirs:
@@ -96,7 +98,7 @@ autofunction:
 
   af_values:
     - name: 'working_distance - image'
-      variable: 'working_distance'
+      variable: 'electron_beam.working_distance'
       autofunction: 'StepAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
       sweeping_strategy: 'BasicInterleavedSweeping' # values: 'BasicSweeping', 'SpiralSweeping', 'BasicInterleavedSweeping'
       sweeping_range: [ -100.0e-6, 100.0e-6 ] # 10.0e-6 for immersion. The range of the sweeping variable.
@@ -110,7 +112,7 @@ autofunction:
       delta_x: 0
 
     - name: 'working_distance - line'
-      variable: 'working_distance'
+      variable: 'electron_beam.working_distance'
       autofunction: 'LineAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
       sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping', 'BasicInterleavedSweeping'
       sweeping_range: [-100.0e-6, 100.0e-6] # 10.0e-6 for immersion. The range of the sweeping variable.
@@ -147,8 +149,8 @@ mask:
     patch_size: [128, 128]
     threshold: 0.5
     min_area: 100 # use None for disable
-    fill_holes: True
-    iterative_training: False
+    fill_holes: true
+    iterative_training: false
 
 email:
   sender: 'pavel.emcf@gmail.com'

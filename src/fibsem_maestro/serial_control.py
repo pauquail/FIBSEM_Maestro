@@ -53,9 +53,12 @@ class SerialControlLogger:
         self.log_params['wd'] = self._electron.working_distance
         self.log_params['beam_shift_x'] = self._electron.beam_shift_x
         self.log_params['beam_shift_y'] = self._electron.beam_shift_y
+        self.log_params['stigmator_x'] = self._electron.stigmator_x
+        self.log_params['stigmator_y'] = self._electron.stigmator_y
         position = self._microscope.position
         self.log_params['stage_x'] = position.x
         self.log_params['stage_y'] = position.y
+        self.log_params['stage_z'] = position.z
 
     def save_log(self, slice_number):
         with open(fold_filename(self.dirs_log, slice_number, 'log_dict.yaml'), 'w') as f:
@@ -115,6 +118,7 @@ class SerialControl:
 
         self.image_name = self.acquisition_settings['image_name']
         self.criterion_name = self.acquisition_settings['criterion_name']
+        self.imaging_enabled = self.acquisition_settings['imaging_enabled']
 
         self.actual_image_settings = find_in_dict(self.image_name, self.image_settings)
         self.actual_criterion = find_in_dict(self.criterion_name, self.criterion_calculation_settings)
@@ -323,18 +327,23 @@ class SerialControl:
 
         self.logger.set_log_file(slice_number)  # set logging file (logging output)
         self.logger.reset_log(slice_number)   # set log of important parameters (dict to yaml)
-        self._microscope.beam = self._microscope.electron_beam  # switch to electrons
 
-        self.load_settings()  # load settings and set microscope
-        self.correction()  # wd and y correction
-        self.autofunction(slice_number)  # autofunctions handling
-        self.logger.log()  # save settings and params
-        self.acquire(slice_number)  # acquire image
-        self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
-        self.drift_correction(slice_number)  # drift correction
 
-        # resolution calculation
-        self.calculate_resolution(slice_number)
+        if self.imaging_enabled:
+            self._microscope.beam = self._microscope.electron_beam  # switch to electrons
+            self.load_settings()  # load settings and set microscope
+            self.correction()  # wd and y correction
+            self.autofunction(slice_number)  # autofunctions handling
+            self.logger.log()  # save settings and params
+            self.acquire(slice_number)  # acquire image
+            self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
+            self.drift_correction(slice_number)  # drift correction
+
+            # resolution calculation
+            self.calculate_resolution(slice_number)
+        else:
+            print(Fore.RED + 'Imaging skipped!')
+            logging.warning('Imaging skipped because imaging is disabled in configuration!')
 
     @property
     def microscope(self):

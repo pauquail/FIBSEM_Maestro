@@ -28,10 +28,12 @@ class FibGui:
         self.window.setFibAreaPushButton.clicked.connect(self.setFibAreaPushButton_clicked)
 
     def populate_form(self):
-        populate_form(self.fib_settings, excluded_settings=['variables_to_save','settings_file','fiducial_area','milling_area']
-                      ,layout=self.window.fibFormLayout)
+        populate_form(self.fib_settings, layout=self.window.fibFormLayout,
+                      specific_settings={'variables_to_save':None,'settings_file':None,'fiducial_area':None,
+                                         'milling_area':None})
 
     def serialize_layout(self):
+
         serialize_form(self.window.fibFormLayout, self.fib_settings)
 
     def getFibImagePushButton_clicked(self):

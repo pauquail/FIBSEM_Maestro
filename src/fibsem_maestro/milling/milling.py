@@ -11,4 +11,5 @@ class Milling:
         self.slice_distance = milling_settings['slice_distance']
         self.variables_to_save = milling_settings['variables_to_save']
         self.settings_file = milling_settings['settings_file']
+        self.milling_enabled = milling_settings['milling_enabled']
 

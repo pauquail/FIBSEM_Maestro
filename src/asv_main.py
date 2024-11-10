@@ -6,17 +6,16 @@ import version
 from fibsem_maestro.serial_control import SerialControl
 
 #  !!! remove line 33: serial_control.imaging(1) # !!!
+#  ACB on reduced area
 #  email if problem (freq)
 #  virtual mode
 #  mask for acb
 #  sweeping max limits to autoscript_control.py
 #  z score for template matching
-# stop on error
-# new image timeout -> email
-# default_settings.yaml + settings.yaml
-# test: multiple masking, spiral af, email, mask online training, reduced scanning, template matching
-
-
+#  stop on error
+#  new image timeout -> email
+#  template_settings.yaml + settings.yaml
+#  test: multiple masking, spiral af, email, mask online training, reduced scanning, template matching, milling
 
 settings_path = 'settings.yaml'
 

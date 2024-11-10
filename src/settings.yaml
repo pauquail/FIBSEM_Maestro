@@ -1,6 +1,7 @@
 acquisition:
   criterion_name: image_acquisition
   image_name: image_acquisition
+  imaging_enabled: true
   wd_correction: 7.88010753607e-09
   y_correction: 6.15661475326e-09
 autofunction:
@@ -21,7 +22,7 @@ autofunction:
     sweeping_steps: 3
     sweeping_strategy: BasicInterleavedSweeping
     sweeping_total_cycles: 1
-    variable: working_distance
+    variable: electron_beam.working_distance
   - autofunction: LineAutoFunction
     criterion_name: working_distance - line
     delta_x: 0
@@ -42,7 +43,7 @@ autofunction:
     sweeping_steps: 20
     sweeping_strategy: BasicSweeping
     sweeping_total_cycles: 4
-    variable: working_distance
+    variable: electron_beam.working_distance
   max_attempts: 8
 contrast_brightness:
   allowed_minimal_band: 0.5
@@ -170,8 +171,9 @@ milling:
     width: 0
     x: 0
     y: 0
-  milling_depth: 1.0e-06
-  pattern: 1.0e-06
+  milling_depth: 1.0-6
+  milling_enabled: true
+  pattern: CCS
   settings_file: fib_microscope_settings.yaml
   slice_distance: 1.0e-08
   variables_to_save:
