@@ -1,8 +1,9 @@
+import logging
 import math
 from scipy.ndimage.measurements import label
 import numpy as np
 from skimage.measure import regionprops
-
+import cv2
 
 def center_padding(image, goal_size):
     """ Add padding to goal_size. The image will be in the center of final image"""
@@ -187,3 +188,12 @@ def image_bit_dept_band(image, band_min_value_frac=0.01, histogram_total_width=2
     # The "width" of the histogram would be:
     histogram_width = max_bin - min_bin + 1
     return histogram_width / histogram_total_width  # return the fraction band of used gray levels
+
+
+def template_matching(template, image, init_position_x, init_position_y):
+    result = cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
+    (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(result)
+    logging.info(f'Template matching confidence: {maxVal}')
+    dx = maxLoc[0] - init_position_x
+    dy = maxLoc[1] - init_position_y
+    return dx, dy, maxVal

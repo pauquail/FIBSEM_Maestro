@@ -223,7 +223,6 @@ class SerialControl:
             del self.image
 
         self.logger.save_log(slice_number)  # save log dict
-        self.save_settings()  # save microscope settings
 
     def calculate_resolution(self, slice_number):
         """ Calculate resolution """
@@ -328,7 +327,6 @@ class SerialControl:
         self.logger.set_log_file(slice_number)  # set logging file (logging output)
         self.logger.reset_log(slice_number)   # set log of important parameters (dict to yaml)
 
-
         if self.imaging_enabled:
             self._microscope.beam = self._microscope.electron_beam  # switch to electrons
             self.load_settings()  # load settings and set microscope
@@ -338,10 +336,10 @@ class SerialControl:
             self.acquire(slice_number)  # acquire image
             self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
             self.drift_correction(slice_number)  # drift correction
-
             # resolution calculation
             self.calculate_resolution(slice_number)
         else:
+            self.logger.log()  # save settings and params
             print(Fore.RED + 'Imaging skipped!')
             logging.warning('Imaging skipped because imaging is disabled in configuration!')
 

@@ -166,6 +166,7 @@ milling:
     x: 0
     y: 0
   fiducial_margin: 1.0e-06
+  fiducial_rescan: 3
   milling_area:
     height: 0
     width: 0

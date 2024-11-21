@@ -169,8 +169,6 @@ def create_microscope(control: str):
             :param slice_number: Optional slice number for the image. Defaults to None.
             :return: The acquired image.
             """
-            image = None
-
             self.apply_beam_settings(self.image_settings)
 
             if slice_number is not None:

@@ -3,9 +3,9 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import numpy as np
-import cv2
 import tifffile
 
+from fibsem_maestro.tools.image_tools import template_matching
 from fibsem_maestro.tools.support import Point
 
 
@@ -66,21 +66,17 @@ class TemplateMatchingDriftCorrection:
         template_image = tifffile.imread(template_image_name)
 
         # locate
-        result = cv2.matchTemplate(img, template_image, cv2.TM_CCOEFF_NORMED)
-        (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(result)
-        logging.info(f'Template matching confidence: {maxVal}')
-        center_x = maxLoc[0] - area[0]
-        center_y = maxLoc[1] - area[1]
+        dx, dy, maxVal = template_matching(template_image, img)
 
         # log
-        self.logging_dict[f"template{i}_dx"] = center_x
-        self.logging_dict[f"template{i}_dy"] = center_y
+        self.logging_dict[f"template{i}_dx"] = dx
+        self.logging_dict[f"template{i}_dy"] = dy
         self.logging_dict[f"template{i}_confidence"] = maxVal
 
         # save shift
         if maxVal > self.min_confidence:
-            shift_x.append(center_x * pixel_size)
-            shift_y.append(center_y * pixel_size)
+            shift_x.append(dx * pixel_size)
+            shift_y.append(dy * pixel_size)
         else:
             logging.warning("Confidence too low")
 

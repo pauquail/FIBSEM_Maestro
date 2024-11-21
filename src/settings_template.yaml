@@ -34,6 +34,7 @@ milling:
     y: 0
     width: 0
     height: 0
+  fiducial_rescan: 3  # number of scans for initial fiducial image
   milling_enabled: true
 
 # Directories
