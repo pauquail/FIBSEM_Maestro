@@ -33,7 +33,6 @@ class FibGui:
                                          'milling_area':None})
 
     def serialize_layout(self):
-
         serialize_form(self.window.fibFormLayout, self.fib_settings)
 
     def getFibImagePushButton_clicked(self):

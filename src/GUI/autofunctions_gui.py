@@ -9,9 +9,11 @@ from gui_tools import populate_form, serialize_form, create_ImageLabel, confirm_
 
 
 class AutofunctionsGui:
-    def __init__(self, window, autofunctions_settings, mask_settings):
+    def __init__(self, window, autofunctions_settings, mask_settings, image_settings, criterion_settings):
         self.window = window
         self.autofunctions_settings = autofunctions_settings
+        self.image_settings = image_settings
+        self.criterion_settings = criterion_settings
         self.mask_settings = mask_settings
         self.build_connections()
 
@@ -27,6 +29,8 @@ class AutofunctionsGui:
 
     def serialize_layout(self):
         serialize_form(self.window.autofunctionFormLayout, self.selected_af)
+        serialize_form(self.window.autofunctionCriteriumFormLayout, find_in_dict(self.selected_af['criterion_name'], self.criterion_settings))
+        serialize_form(self.window.autofunctionImagingFormLayout, find_in_dict(self.selected_af['image_name'], self.image_settings))
 
     def cloneAutoFunctionPushButton_clicked(self):
         text, ok = QInputDialog.getText(self.window, "New autofunction", "Autofunction name: ")
@@ -45,15 +49,30 @@ class AutofunctionsGui:
         """ Autofunction selected by combo-box -> update all"""
         selected_af_text = self.window.autofunctionComboBox.currentText()
         self.selected_af = find_in_dict(selected_af_text, self.autofunctions_settings['af_values'])
+
+        # clear layouts
         clear_layout(self.window.autofunctionFormLayout)
+        clear_layout(self.window.autofunctionImagingFormLayout)
+        clear_layout(self.window.autofunctionCriteriumFormLayout)
+
+        # items for combo boxes
         # list of available autofunctions (only names)
         autofunctions = get_module_members('fibsem_maestro.autofunctions.autofunction', 'class')
         masks = ['none', *[x['name'] for x in self.mask_settings]]  # none + masks defined in settings
         sweepings = get_module_members('fibsem_maestro.autofunctions.sweeping', 'class')
         # all possible electron and ions setters
         sweeping_variables = ['electron_beam.' + x for x in get_setters(BeamControl)] + ['ion_beam.' + x for x in get_setters(BeamControl)]
+        criteria = get_module_members('fibsem_maestro.image_criteria.criteria_math', 'func')
+
         populate_form(self.selected_af, layout=self.window.autofunctionFormLayout,
                       specific_settings={'name': None, 'criterion_name': None, 'image_name': None,
                                          'autofunction': autofunctions, 'mask_name':masks,
                                          'sweeping_strategy': sweepings, 'variable': sweeping_variables })
+        image_settings = find_in_dict(self.selected_af['image_name'], self.image_settings)
+        populate_form(image_settings, layout=self.window.autofunctionImagingFormLayout, specific_settings={'name': None})
+        criterion_settings = find_in_dict(self.selected_af['criterion_name'],self.criterion_settings)
+        populate_form(criterion_settings, layout=self.window.autofunctionCriteriumFormLayout, specific_settings={'name': None, 'mask_name': masks,
+                                                                                                                 'criterion': criteria})
+
+
 

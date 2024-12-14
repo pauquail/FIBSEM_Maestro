@@ -22,7 +22,7 @@ autofunction:
     sweeping_steps: 3
     sweeping_strategy: BasicInterleavedSweeping
     sweeping_total_cycles: 1
-    variable: electron_beam.working_distance
+    variable: ion_beam.beam_shift_y
   - autofunction: LineAutoFunction
     criterion_name: working_distance - line
     delta_x: 0
@@ -61,13 +61,13 @@ criterion_calculation:
   mask_name: none
   name: image_acquisition
   tile_size: 3.0e-06
-- border: 0
+- border: 1
   criterion: bandpass_criterion
   detail:
-  - 1.0e-07
-  - 3.5e-07
-  final_regions_resolution: min
-  final_resolution: min
+  - 2.0
+  - 2.0
+  final_regions_resolution: max
+  final_resolution: max
   mask_name: none
   name: working_distance - image
   tile_size: 0
@@ -116,7 +116,8 @@ image:
   - 2.12666666667e-05
   images_line_integration: 1
   name: image_acquisition
-- bit_depth: 8
+  pixel_size: 5.0e-09
+- bit_depth: 5
   dwell: 1.0e-06
   field_of_view:
   - 3.19e-05
@@ -124,8 +125,8 @@ image:
   images_line_integration: 1
   name: working_distance - image
   resolution:
-  - 6144
-  - 4096
+  - 6144.0
+  - 4096.0
 - bit_depth: 8
   dwell: 1.0e-06
   field_of_view:

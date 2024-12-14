@@ -253,10 +253,49 @@
            <layout class="QFormLayout" name="autofunctionFormLayout"/>
           </item>
           <item>
+           <widget class="QLabel" name="label_4">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Criterium</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QFormLayout" name="autofunctionCriteriumFormLayout"/>
           </item>
           <item>
+           <widget class="QLabel" name="label_5">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Imaging</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QFormLayout" name="autofunctionImagingFormLayout"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>ACB</string>
+            </property>
+           </widget>
           </item>
           <item>
            <layout class="QFormLayout" name="acbFormLayout"/>
@@ -305,7 +344,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>22</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSetting">

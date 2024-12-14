@@ -56,6 +56,7 @@ image:
     images_line_integration: 1 # li of images acquisition.
     bit_depth: 16
     dwell: 1.0e-6
+    pixel_size: 5e-9
   - name: 'working_distance - image'
     resolution: [6144, 4096] # must be in standard res
     field_of_view: [31.9e-6, 21.2666666667e-6]
