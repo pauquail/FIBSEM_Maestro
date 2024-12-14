@@ -36,11 +36,28 @@ class AutofunctionsGui:
         text, ok = QInputDialog.getText(self.window, "New autofunction", "Autofunction name: ")
 
         if ok:
-            print(f"You entered: {text}")
+            self.selected_af = dict(self.selected_af) #
+            self.selected_af['name'] = text
+            self.selected_af['criterion_name'] = text
+            self.selected_af['image_name'] = text
+            self.autofunctions_settings.append({'name': text})
+            self.criterion_settings.append({'name': text})
+            self.image_settings.append({'name': text})
+            self.serialize_layout()
+
 
     def removeAutofunctionPushButton_clicked(self):
-        if confirm_action_dialog():
-            pass
+        if len(self.autofunctions_settings > 1):
+            if confirm_action_dialog():
+                criterion = find_in_dict(self.selected_af['criterion_name'], self.criterion_settings)
+                imaging = find_in_dict(self.selected_af['image_name'], self.image_settings)
+                self.criterion_settings.remmove(criterion)
+                self.image_settings.remmove(imaging)
+                self.autofunctions_settings.remove(self.selected_af)
+                self.serialize_layout()
+                self.window.autofunctionComboBox.currentText = self.autofunctions_settings[0]['name']
+                self.af_set()
+
 
     def autofunctionComboBox_changed(self):
         self.af_set()
@@ -66,7 +83,7 @@ class AutofunctionsGui:
 
         populate_form(self.selected_af, layout=self.window.autofunctionFormLayout,
                       specific_settings={'name': None, 'criterion_name': None, 'image_name': None,
-                                         'autofunction': autofunctions, 'mask_name':masks,
+                                         'autofunction': autofunctions, 'mask_name': masks, # list is shown as combobox
                                          'sweeping_strategy': sweepings, 'variable': sweeping_variables })
         image_settings = find_in_dict(self.selected_af['image_name'], self.image_settings)
         populate_form(image_settings, layout=self.window.autofunctionImagingFormLayout, specific_settings={'name': None})

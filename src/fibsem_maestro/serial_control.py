@@ -59,6 +59,8 @@ class SerialControlLogger:
         self.log_params['stage_x'] = position.x
         self.log_params['stage_y'] = position.y
         self.log_params['stage_z'] = position.z
+        self.log_params['ion_beam_shift_x'] = self._ion.beam_shift_x
+        self.log_params['ion_beam_shift_y'] = self._ion.beam_shift_y
 
     def save_log(self, slice_number):
         with open(fold_filename(self.dirs_log, slice_number, 'log_dict.yaml'), 'w') as f:

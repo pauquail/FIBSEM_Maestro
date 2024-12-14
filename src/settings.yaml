@@ -8,7 +8,7 @@ autofunction:
   af_values:
   - autofunction: StepAutoFunction
     criterion_name: working_distance - image
-    delta_x: 0
+    delta_x: 1
     execute: 2
     image_name: working_distance - image
     mask_name: none
@@ -25,10 +25,9 @@ autofunction:
     variable: ion_beam.beam_shift_y
   - autofunction: LineAutoFunction
     criterion_name: working_distance - line
-    delta_x: 0
-    execute: 0
-    forbidden_sections:
-    - 0
+    delta_x: 3
+    execute: 4
+    forbidden_sections: 0
     image_name: working_distance - line
     keep_time: 10
     mask_name: none
@@ -135,8 +134,8 @@ image:
   images_line_integration: 1
   name: working_distance - line
   resolution:
-  - 6144
-  - 4096
+  - 6144.0
+  - 4096.0
 mask:
 - downsampling_factor: 4
   fill_holes: true
