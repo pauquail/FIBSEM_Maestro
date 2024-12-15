@@ -14,7 +14,6 @@ class AutofunctionControl:
 
         self._masks = masks
         self.scheduler = []  # queue of autofunctions waiting to execute
-        self.attempts = 0  # number of af attempts (early stopping)
 
         self.settings_init(settings)
 
@@ -25,15 +24,12 @@ class AutofunctionControl:
         self.criterion_settings = settings['criterion_calculation']
         self.imaging_settings = settings['image']
 
-        self.max_attempts = self.autofunction_settings['max_attempts']
         self.email_sender = self.email_settings['sender']
         self.email_receiver = self.email_settings['receiver']
         self.password_file = self.email_settings['password_file']
 
-        self.af_values = self.autofunction_settings['af_values']
         # list of all autofunctions objects
-        self.autofunctions = [self._get_autofunction(x) for x in self.af_values]
-
+        self.autofunctions = [self._get_autofunction(x) for x in self.autofunction_settings]
 
     def _get_autofunction(self, concrete_af_settings):
         """
@@ -67,15 +63,10 @@ class AutofunctionControl:
         autofunction_module = importlib.import_module('fibsem_maestro.autofunctions.autofunction')
         Autofunction = getattr(autofunction_module, autofunction)
 
-        # pass merged settings (current af_value + autofunction settings)
-        merged_settings = {
-            **self.autofunction_settings,
-            **concrete_af_settings
-        }
         return Autofunction(
             criterion, sweeping,
             self._microscope,
-            auto_function_settings=merged_settings,
+            auto_function_settings=concrete_af_settings,
             image_settings=actual_image_settings,
             log_dir=self._log_dir)
 
@@ -108,22 +99,26 @@ class AutofunctionControl:
                 else:
                     logging.warning(f'Autofunction {af.name} already executed. It will not be added to the scheduler')
 
-        # if too much number of attempts, send email
-        if self.attempts >= self.max_attempts:
-            self._email_attention()
-            self.af_attempt = 0  # zero attempts
-            self.scheduler.clear()  # clear schedule queue
+
 
         # any AF in scheduler in queue
         if len(self.scheduler) > 0:
-            self.attempts += 1  # attempts counter
             af = self.active_autofunction
+            af.attempts += 1 # attempts counter
 
             logging.info(f'Executed autofunction: {af.name}. Attempt no {self.attempts}.')
-            # run af
-            if af(image_for_mask, slice_number=slice_number):  # run af
-                # if finished
-                self.scheduler.pop(0)  # remove the finished af
+
+            # if too much number of attempts, send email
+            if af.attempts > af.max_attempts:
+                self._email_attention()
+                af.af_attempt = 0  # zero attempts
+                self.scheduler.pop(0)  # remove the af with too much attempts
+            else:
+                # run af
+                if af(image_for_mask, slice_number=slice_number):  # run af
+                    # if finished
+                    af.af_attempt = 0  # zero attempts
+                    self.scheduler.pop(0)  # remove the finished af
 
     @ property
     def active_autofunction(self):

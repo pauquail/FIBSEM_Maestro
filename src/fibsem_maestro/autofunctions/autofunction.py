@@ -15,7 +15,7 @@ class AutoFunction:
         :param criterion: The focusing criterion instance.
         :param sweeping: The sweeping instance for controlling the sweep process.
         :param microscope: The microscope control instance.
-        :param auto_function_settings: The settings for auto function. (af_values setting)
+        :param auto_function_settings: The settings for auto function.
         :param image_settings: The settings for the image. (image setting)
         """
         # settings
@@ -30,6 +30,7 @@ class AutoFunction:
         self.af_curve_plot = None
         self.slice_number = None
         self.last_sweeping_value = None
+        self.attempt = 0
         self._log_dir = log_dir
 
     def _settings_init(self, auto_function_settings):
@@ -37,7 +38,7 @@ class AutoFunction:
         self.variable = auto_function_settings['variable']
         self.execute = auto_function_settings['execute']
         self.delta_x = auto_function_settings['delta_x']
-
+        self.max_attempts = auto_function_settings['max_attempts']
 
     def set_sweep(self):
         self._sweeping.set_sweep()

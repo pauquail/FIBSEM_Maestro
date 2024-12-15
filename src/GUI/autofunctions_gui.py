@@ -17,10 +17,14 @@ class AutofunctionsGui:
         self.mask_settings = mask_settings
         self.build_connections()
 
-        af_names = [af['name'] for af in autofunctions_settings['af_values']]
         self.selected_af = None
-        self.window.autofunctionComboBox.addItems(af_names)
+        self.autofunctionComboBox_fill()
         self.af_set()
+
+    def autofunctionComboBox_fill(self):
+        self.window.autofunctionComboBox.clear()
+        af_names = [af['name'] for af in self.autofunctions_settings]
+        self.window.autofunctionComboBox.addItems(af_names)
 
     def build_connections(self):
         self.window.cloneAutofunctionPushButton.clicked.connect(self.cloneAutoFunctionPushButton_clicked)
@@ -36,27 +40,28 @@ class AutofunctionsGui:
         text, ok = QInputDialog.getText(self.window, "New autofunction", "Autofunction name: ")
 
         if ok:
-            self.selected_af = dict(self.selected_af) #
+            self.selected_af = dict(self.selected_af)  # copy dict
             self.selected_af['name'] = text
             self.selected_af['criterion_name'] = text
             self.selected_af['image_name'] = text
-            self.autofunctions_settings.append({'name': text})
+            self.autofunctions_settings.append(self.selected_af)
             self.criterion_settings.append({'name': text})
             self.image_settings.append({'name': text})
             self.serialize_layout()
+            self.autofunctionComboBox_fill()
+            self.window.autofunctionComboBox.setCurrentText(text)
 
 
     def removeAutofunctionPushButton_clicked(self):
-        if len(self.autofunctions_settings > 1):
+        if len(self.autofunctions_settings) > 1:
             if confirm_action_dialog():
                 criterion = find_in_dict(self.selected_af['criterion_name'], self.criterion_settings)
                 imaging = find_in_dict(self.selected_af['image_name'], self.image_settings)
-                self.criterion_settings.remmove(criterion)
-                self.image_settings.remmove(imaging)
+                self.criterion_settings.remove(criterion)
+                self.image_settings.remove(imaging)
                 self.autofunctions_settings.remove(self.selected_af)
-                self.serialize_layout()
-                self.window.autofunctionComboBox.currentText = self.autofunctions_settings[0]['name']
-                self.af_set()
+                self.autofunctionComboBox_fill()
+                self.window.autofunctionComboBox.setCurrentIndex(0)
 
 
     def autofunctionComboBox_changed(self):
@@ -65,7 +70,11 @@ class AutofunctionsGui:
     def af_set(self):
         """ Autofunction selected by combo-box -> update all"""
         selected_af_text = self.window.autofunctionComboBox.currentText()
-        self.selected_af = find_in_dict(selected_af_text, self.autofunctions_settings['af_values'])
+
+        if selected_af_text == '':
+            return
+
+        self.selected_af = find_in_dict(selected_af_text, self.autofunctions_settings)
 
         # clear layouts
         clear_layout(self.window.autofunctionFormLayout)

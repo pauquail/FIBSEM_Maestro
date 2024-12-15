@@ -98,9 +98,6 @@ criterion_calculation:
     mask_name: 'none'
 
 autofunction:
-  max_attempts: 8
-
-  af_values:
     - name: 'working_distance - image'
       variable: 'electron_beam.working_distance'
       autofunction: 'StepAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
@@ -114,6 +111,7 @@ autofunction:
       criterion_name: 'working_distance - image'
       mask_name: 'none'
       delta_x: 0
+      max_attempts: 8
 
     - name: 'working_distance - line'
       variable: 'electron_beam.working_distance'
@@ -131,6 +129,7 @@ autofunction:
       pre_imaging_delay: 1
       keep_time: 10
       forbidden_sections: [0]
+      max_attempts: 8
 
 
 contrast_brightness:
