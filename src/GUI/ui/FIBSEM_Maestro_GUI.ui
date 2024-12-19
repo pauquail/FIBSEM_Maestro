@@ -25,6 +25,9 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QTabWidget" name="tabWidget">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -220,7 +223,14 @@
          <attribute name="title">
           <string>Autofunctions</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QVBoxLayout" name="autofunctionsVerticalLayout">
+          <item>
+           <widget class="QLabel" name="autofunctionsImageLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
           <item>
            <layout class="QFormLayout" name="formLayout">
             <item row="0" column="0">
@@ -244,6 +254,13 @@
              <widget class="QPushButton" name="removeAutofunctionPushButton">
               <property name="text">
                <string>Remove autofunction</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QPushButton" name="setAfAreaPushButton">
+              <property name="text">
+               <string>Set af area</string>
               </property>
              </widget>
             </item>
@@ -285,22 +302,6 @@
            <layout class="QFormLayout" name="autofunctionImagingFormLayout"/>
           </item>
           <item>
-           <widget class="QLabel" name="label_6">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>ACB</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QFormLayout" name="acbFormLayout"/>
-          </item>
-          <item>
            <spacer name="verticalSpacer_3">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -315,11 +316,23 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="tabAcb">
+         <attribute name="title">
+          <string>ACB</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="acbVerticalLayout"/>
+        </widget>
         <widget class="QWidget" name="tabMasking">
          <attribute name="title">
           <string>Masking</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout"/>
+         <layout class="QVBoxLayout" name="maskingVerticalLayout"/>
+        </widget>
+        <widget class="QWidget" name="tabAttention">
+         <attribute name="title">
+          <string>Attention</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="attentionVerticalLayout"/>
         </widget>
        </widget>
       </item>
@@ -334,6 +347,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="pushRun">
+        <property name="text">
+         <string>Run</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -344,7 +364,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>31</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSetting">
@@ -367,6 +387,14 @@
     </property>
     <addaction name="actionResize"/>
    </widget>
+   <widget class="QMenu" name="menuProject">
+    <property name="title">
+     <string>Project</string>
+    </property>
+    <addaction name="actionNewProject"/>
+    <addaction name="actionLoadProject"/>
+   </widget>
+   <addaction name="menuProject"/>
    <addaction name="menuSetting"/>
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
@@ -395,6 +423,16 @@
   <action name="actionEmail">
    <property name="text">
     <string>Email</string>
+   </property>
+  </action>
+  <action name="actionNewProject">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionLoadProject">
+   <property name="text">
+    <string>Load</string>
    </property>
   </action>
  </widget>

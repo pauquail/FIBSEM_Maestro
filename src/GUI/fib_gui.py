@@ -1,5 +1,3 @@
-from PySide6.QtGui import QPixmap
-
 from GUI.gui_tools import populate_form, serialize_form, create_ImageLabel
 from fibsem_maestro.tools.support import Image, ScanningArea, Point
 

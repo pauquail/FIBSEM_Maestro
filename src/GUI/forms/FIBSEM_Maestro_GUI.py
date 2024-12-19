@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'FIBSEM_Maestro_GUI2.ui'
+## Form generated from reading UI file 'FIBSEM_Maestro_GUI.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.1
+## Created by: Qt User Interface Compiler version 6.7.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -18,9 +18,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFormLayout,
     QGridLayout, QHBoxLayout, QLabel, QMainWindow,
-    QMenu, QMenuBar, QPushButton, QScrollArea,
-    QSizePolicy, QSpacerItem, QStatusBar, QTabWidget,
-    QVBoxLayout, QWidget)
+    QMenu, QMenuBar, QPushButton, QSizePolicy,
+    QSpacerItem, QStatusBar, QTabWidget, QVBoxLayout,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -39,25 +39,24 @@ class Ui_MainWindow(object):
         self.actionResize.setObjectName(u"actionResize")
         self.actionEmail = QAction(MainWindow)
         self.actionEmail.setObjectName(u"actionEmail")
+        self.actionNewProject = QAction(MainWindow)
+        self.actionNewProject.setObjectName(u"actionNewProject")
+        self.actionLoadProject = QAction(MainWindow)
+        self.actionLoadProject.setObjectName(u"actionLoadProject")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.scrollArea = QScrollArea(self.centralwidget)
-        self.scrollArea.setObjectName(u"scrollArea")
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 972, 728))
-        self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.tabWidget = QTabWidget(self.scrollAreaWidgetContents)
+        self.verticalLayout = QVBoxLayout()
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.tabWidget = QTabWidget(self.centralwidget)
         self.tabWidget.setObjectName(u"tabWidget")
+        self.tabWidget.setEnabled(True)
         self.tabWidget.setStyleSheet(u"")
         self.tabFib = QWidget()
         self.tabFib.setObjectName(u"tabFib")
-        self.verticalLayout = QVBoxLayout(self.tabFib)
-        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout1 = QVBoxLayout(self.tabFib)
+        self.verticalLayout1.setObjectName(u"verticalLayout1")
         self.fibVerticalLayout = QVBoxLayout()
         self.fibVerticalLayout.setObjectName(u"fibVerticalLayout")
         self.fibImageLabel = QLabel(self.tabFib)
@@ -103,13 +102,13 @@ class Ui_MainWindow(object):
         self.fibVerticalLayout.addItem(self.verticalSpacer_2)
 
 
-        self.verticalLayout.addLayout(self.fibVerticalLayout)
+        self.verticalLayout1.addLayout(self.fibVerticalLayout)
 
         self.tabWidget.addTab(self.tabFib, "")
         self.tabSem = QWidget()
         self.tabSem.setObjectName(u"tabSem")
-        self.verticalLayout1 = QVBoxLayout(self.tabSem)
-        self.verticalLayout1.setObjectName(u"verticalLayout1")
+        self.verticalLayout2 = QVBoxLayout(self.tabSem)
+        self.verticalLayout2.setObjectName(u"verticalLayout2")
         self.semVerticalLayout = QVBoxLayout()
         self.semVerticalLayout.setObjectName(u"semVerticalLayout")
         self.imageLabel = QLabel(self.tabSem)
@@ -134,7 +133,7 @@ class Ui_MainWindow(object):
         self.semVerticalLayout.addWidget(self.calculateFromSlicePushButton)
 
 
-        self.verticalLayout1.addLayout(self.semVerticalLayout)
+        self.verticalLayout2.addLayout(self.semVerticalLayout)
 
         self.semImagingVerticalLayout = QVBoxLayout()
         self.semImagingVerticalLayout.setObjectName(u"semImagingVerticalLayout")
@@ -154,7 +153,7 @@ class Ui_MainWindow(object):
         self.semImagingVerticalLayout.addLayout(self.imageSettingsFormLayout)
 
 
-        self.verticalLayout1.addLayout(self.semImagingVerticalLayout)
+        self.verticalLayout2.addLayout(self.semImagingVerticalLayout)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -180,23 +179,33 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.fastScanCheckBox)
 
 
-        self.verticalLayout1.addLayout(self.horizontalLayout)
+        self.verticalLayout2.addLayout(self.horizontalLayout)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout1.addItem(self.verticalSpacer)
+        self.verticalLayout2.addItem(self.verticalSpacer)
 
         self.tabWidget.addTab(self.tabSem, "")
         self.tabAutofunctions = QWidget()
         self.tabAutofunctions.setObjectName(u"tabAutofunctions")
-        self.verticalLayout2 = QVBoxLayout(self.tabAutofunctions)
-        self.verticalLayout2.setObjectName(u"verticalLayout2")
+        self.autofunctionsVerticalLayout = QVBoxLayout(self.tabAutofunctions)
+        self.autofunctionsVerticalLayout.setObjectName(u"autofunctionsVerticalLayout")
+        self.autofunctionsImageLabel = QLabel(self.tabAutofunctions)
+        self.autofunctionsImageLabel.setObjectName(u"autofunctionsImageLabel")
+
+        self.autofunctionsVerticalLayout.addWidget(self.autofunctionsImageLabel)
+
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
         self.autofunctionLabel = QLabel(self.tabAutofunctions)
         self.autofunctionLabel.setObjectName(u"autofunctionLabel")
 
         self.formLayout.setWidget(0, QFormLayout.LabelRole, self.autofunctionLabel)
+
+        self.autofunctionComboBox = QComboBox(self.tabAutofunctions)
+        self.autofunctionComboBox.setObjectName(u"autofunctionComboBox")
+
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.autofunctionComboBox)
 
         self.cloneAutofunctionPushButton = QPushButton(self.tabAutofunctions)
         self.cloneAutofunctionPushButton.setObjectName(u"cloneAutofunctionPushButton")
@@ -208,78 +217,100 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(2, QFormLayout.FieldRole, self.removeAutofunctionPushButton)
 
-        self.autofunctionComboBox = QComboBox(self.tabAutofunctions)
-        self.autofunctionComboBox.setObjectName(u"autofunctionComboBox")
+        self.setAfAreaPushButton = QPushButton(self.tabAutofunctions)
+        self.setAfAreaPushButton.setObjectName(u"setAfAreaPushButton")
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.autofunctionComboBox)
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.setAfAreaPushButton)
 
 
-        self.verticalLayout2.addLayout(self.formLayout)
+        self.autofunctionsVerticalLayout.addLayout(self.formLayout)
 
         self.autofunctionFormLayout = QFormLayout()
         self.autofunctionFormLayout.setObjectName(u"autofunctionFormLayout")
 
-        self.verticalLayout2.addLayout(self.autofunctionFormLayout)
+        self.autofunctionsVerticalLayout.addLayout(self.autofunctionFormLayout)
 
         self.label_4 = QLabel(self.tabAutofunctions)
         self.label_4.setObjectName(u"label_4")
         self.label_4.setFont(font)
 
-        self.verticalLayout2.addWidget(self.label_4)
+        self.autofunctionsVerticalLayout.addWidget(self.label_4)
 
         self.autofunctionCriteriumFormLayout = QFormLayout()
         self.autofunctionCriteriumFormLayout.setObjectName(u"autofunctionCriteriumFormLayout")
 
-        self.verticalLayout2.addLayout(self.autofunctionCriteriumFormLayout)
+        self.autofunctionsVerticalLayout.addLayout(self.autofunctionCriteriumFormLayout)
 
         self.label_5 = QLabel(self.tabAutofunctions)
         self.label_5.setObjectName(u"label_5")
         self.label_5.setFont(font)
 
-        self.verticalLayout2.addWidget(self.label_5)
+        self.autofunctionsVerticalLayout.addWidget(self.label_5)
 
         self.autofunctionImagingFormLayout = QFormLayout()
         self.autofunctionImagingFormLayout.setObjectName(u"autofunctionImagingFormLayout")
 
-        self.verticalLayout2.addLayout(self.autofunctionImagingFormLayout)
+        self.autofunctionsVerticalLayout.addLayout(self.autofunctionImagingFormLayout)
 
         self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout2.addItem(self.verticalSpacer_3)
+        self.autofunctionsVerticalLayout.addItem(self.verticalSpacer_3)
 
         self.tabWidget.addTab(self.tabAutofunctions, "")
+        self.tabAcb = QWidget()
+        self.tabAcb.setObjectName(u"tabAcb")
+        self.acbVerticalLayout = QVBoxLayout(self.tabAcb)
+        self.acbVerticalLayout.setObjectName(u"acbVerticalLayout")
+        self.tabWidget.addTab(self.tabAcb, "")
         self.tabMasking = QWidget()
         self.tabMasking.setObjectName(u"tabMasking")
-        self.verticalLayout3 = QVBoxLayout(self.tabMasking)
-        self.verticalLayout3.setObjectName(u"verticalLayout3")
+        self.maskingVerticalLayout = QVBoxLayout(self.tabMasking)
+        self.maskingVerticalLayout.setObjectName(u"maskingVerticalLayout")
         self.tabWidget.addTab(self.tabMasking, "")
+        self.tabAttention = QWidget()
+        self.tabAttention.setObjectName(u"tabAttention")
+        self.attentionVerticalLayout = QVBoxLayout(self.tabAttention)
+        self.attentionVerticalLayout.setObjectName(u"attentionVerticalLayout")
+        self.tabWidget.addTab(self.tabAttention, "")
 
-        self.verticalLayout_2.addWidget(self.tabWidget)
+        self.verticalLayout.addWidget(self.tabWidget)
 
-        self.applySettingsPushButton = QPushButton(self.scrollAreaWidgetContents)
+
+        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.applySettingsPushButton = QPushButton(self.centralwidget)
         self.applySettingsPushButton.setObjectName(u"applySettingsPushButton")
 
-        self.verticalLayout_2.addWidget(self.applySettingsPushButton)
+        self.horizontalLayout_2.addWidget(self.applySettingsPushButton)
 
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.pushRun = QPushButton(self.centralwidget)
+        self.pushRun.setObjectName(u"pushRun")
 
-        self.gridLayout.addWidget(self.scrollArea, 0, 0, 1, 1)
+        self.horizontalLayout_2.addWidget(self.pushRun)
+
+
+        self.gridLayout.addLayout(self.horizontalLayout_2, 3, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1000, 31))
+        self.menubar.setGeometry(QRect(0, 0, 1000, 22))
         self.menuSetting = QMenu(self.menubar)
         self.menuSetting.setObjectName(u"menuSetting")
         self.menuHelp = QMenu(self.menubar)
         self.menuHelp.setObjectName(u"menuHelp")
         self.menuView = QMenu(self.menubar)
         self.menuView.setObjectName(u"menuView")
+        self.menuProject = QMenu(self.menubar)
+        self.menuProject.setObjectName(u"menuProject")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
+        self.menubar.addAction(self.menuProject.menuAction())
         self.menubar.addAction(self.menuSetting.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
@@ -288,6 +319,8 @@ class Ui_MainWindow(object):
         self.menuSetting.addAction(self.actionEmail)
         self.menuHelp.addAction(self.actionAbout)
         self.menuView.addAction(self.actionResize)
+        self.menuProject.addAction(self.actionNewProject)
+        self.menuProject.addAction(self.actionLoadProject)
 
         self.retranslateUi(MainWindow)
 
@@ -304,6 +337,8 @@ class Ui_MainWindow(object):
         self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About", None))
         self.actionResize.setText(QCoreApplication.translate("MainWindow", u"Resize", None))
         self.actionEmail.setText(QCoreApplication.translate("MainWindow", u"Email", None))
+        self.actionNewProject.setText(QCoreApplication.translate("MainWindow", u"New", None))
+        self.actionLoadProject.setText(QCoreApplication.translate("MainWindow", u"Load", None))
         self.fibImageLabel.setText("")
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.getFibImagePushButton.setText(QCoreApplication.translate("MainWindow", u"Get image", None))
@@ -319,16 +354,22 @@ class Ui_MainWindow(object):
         self.testImagingPushButton.setText(QCoreApplication.translate("MainWindow", u"Test imaging", None))
         self.fastScanCheckBox.setText(QCoreApplication.translate("MainWindow", u"Fast scan", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabSem), QCoreApplication.translate("MainWindow", u"SEM", None))
+        self.autofunctionsImageLabel.setText("")
         self.autofunctionLabel.setText(QCoreApplication.translate("MainWindow", u"Autofunction", None))
         self.cloneAutofunctionPushButton.setText(QCoreApplication.translate("MainWindow", u"Clone autofunction", None))
         self.removeAutofunctionPushButton.setText(QCoreApplication.translate("MainWindow", u"Remove autofunction", None))
+        self.setAfAreaPushButton.setText(QCoreApplication.translate("MainWindow", u"Set af area", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Criterium", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Imaging", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAutofunctions), QCoreApplication.translate("MainWindow", u"Autofunctions", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAcb), QCoreApplication.translate("MainWindow", u"ACB", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabMasking), QCoreApplication.translate("MainWindow", u"Masking", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAttention), QCoreApplication.translate("MainWindow", u"Attention", None))
         self.applySettingsPushButton.setText(QCoreApplication.translate("MainWindow", u"Apply settings", None))
+        self.pushRun.setText(QCoreApplication.translate("MainWindow", u"Run", None))
         self.menuSetting.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
         self.menuView.setTitle(QCoreApplication.translate("MainWindow", u"View", None))
+        self.menuProject.setTitle(QCoreApplication.translate("MainWindow", u"Project", None))
     # retranslateUi
 

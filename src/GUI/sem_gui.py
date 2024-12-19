@@ -4,6 +4,7 @@ from PySide6.QtGui import QPixmap
 from fibsem_maestro.tools.support import find_in_dict
 from gui_tools import populate_form, serialize_form, create_ImageLabel
 from fibsem_maestro.tools.support import Image, ScanningArea, Point
+from image_label_manger import ImageLabelManagers
 
 class SemGui:
     def __init__(self, window, acquisition_settings, imaging_settings, serial_control):
@@ -18,6 +19,9 @@ class SemGui:
         self.build_connections()
 
         self.window.imageLabel = create_ImageLabel(self.window.semVerticalLayout)
+
+        # add image label to the manager (for multiple image labels control)
+        ImageLabelManagers.sem_manager.add_image(self.window.imageLabel)
 
     def build_connections(self):
         self.window.getImagePushButton.clicked.connect(self.getImagePushButton_clicked)
@@ -36,10 +40,13 @@ class SemGui:
         serialize_form(self.window.imageSettingsFormLayout, self.actual_image_settings)
 
     def getImagePushButton_clicked(self):
-        image = self.serial_control.microscope.acquire_image()
-        self.window.imageLabel.setImage(image)
+        from autoscript_sdb_microscope_client.structures import AdornedImage
+        #image = self.serial_control.microscope.acquire_image()
+        image = Image.from_as(AdornedImage.load('/home/cemcof/Downloads/cell.tif'))
+        ImageLabelManagers.sem_manager.update_image(image)
 
     def setImagingPushButton_clicked(self):
+        """ Set imaging on selected area """
         pixel_size = self.window.imageLabel.image.pixel_size
         img_shape = self.window.imageLabel.image.shape
         shift, fov = self.window.imageLabel.get_selected_area().to_meters(img_shape, pixel_size)  # drew image

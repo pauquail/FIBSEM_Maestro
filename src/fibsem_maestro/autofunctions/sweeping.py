@@ -81,46 +81,46 @@ class BasicInterleavedSweeping(BasicSweeping):
         merged_arr = np.dstack((interleave, sweep_space)).reshape(-1)
         return merged_arr
 
-
-class SpiralSweeping(BasicSweeping):
-    def __init__(self, microscope, settings):
-        super().__init__(microscope, settings)
-        self.step_per_cycle = int(settings['sweeping_steps'])
-        self.cycles = int(settings['sweeping_spiral_cycles'])
-
-    def sweep_inner(self, repetition):
-        """ Basic sweeping"""
-        if repetition % 2 == 0:
-            sweep_space = np.arange(self.steps)
-        else:
-            sweep_space = np.arange(self.steps)[::-1]
-
-        for s in sweep_space:
-            cycle_no = s // self.step_per_cycle  # cycle number
-            step_no = s % self.step_per_cycle  # step number in the cycle
-            radius = (self.range / self.cycles) * (cycle_no + 1)  # avoid zero radius
-            angle = (2 * np.pi / self.step_per_cycle) * step_no
-
-            if cycle_no % 2 == 1:  # add angle shift for better covering
-                angle += (2 * np.pi / self.step_per_cycle) / 2
-
-            x = np.cos(angle) * radius
-            y = np.sin(angle) * radius
-
-            value = self._base + Point(x, y)
-            value_r = math.sqrt(value.x ** 2 + value.y ** 2)  # distance from zero (radius)
-
-            if value_r < self.max_limits:
-                yield value
-            else:
-                logging.warning(f'Sweep of {self.sweeping_var} is out of range ({s}')
-
-    def sweep(self):
-        """
-        Perform a sweeping motion in a spiral pattern, generating a sequence of points.
-
-        :return: A generator that yields the points of the sweeping motion.
-        """
-        for repetition in range(self.total_cycles):
-            for r in self.sweep_inner(repetition):
-                yield r
+#
+# class SpiralSweeping(BasicSweeping):
+#     def __init__(self, microscope, settings):
+#         super().__init__(microscope, settings)
+#         self.step_per_cycle = int(settings['sweeping_steps'])
+#         self.cycles = int(settings['sweeping_spiral_cycles'])
+#
+#     def sweep_inner(self, repetition):
+#         """ Basic sweeping"""
+#         if repetition % 2 == 0:
+#             sweep_space = np.arange(self.steps)
+#         else:
+#             sweep_space = np.arange(self.steps)[::-1]
+#
+#         for s in sweep_space:
+#             cycle_no = s // self.step_per_cycle  # cycle number
+#             step_no = s % self.step_per_cycle  # step number in the cycle
+#             radius = (self.range / self.cycles) * (cycle_no + 1)  # avoid zero radius
+#             angle = (2 * np.pi / self.step_per_cycle) * step_no
+#
+#             if cycle_no % 2 == 1:  # add angle shift for better covering
+#                 angle += (2 * np.pi / self.step_per_cycle) / 2
+#
+#             x = np.cos(angle) * radius
+#             y = np.sin(angle) * radius
+#
+#             value = self._base + Point(x, y)
+#             value_r = math.sqrt(value.x ** 2 + value.y ** 2)  # distance from zero (radius)
+#
+#             if value_r < self.max_limits:
+#                 yield value
+#             else:
+#                 logging.warning(f'Sweep of {self.sweeping_var} is out of range ({s}')
+#
+#     def sweep(self):
+#         """
+#         Perform a sweeping motion in a spiral pattern, generating a sequence of points.
+#
+#         :return: A generator that yields the points of the sweeping motion.
+#         """
+#         for repetition in range(self.total_cycles):
+#             for r in self.sweep_inner(repetition):
+#                 yield r

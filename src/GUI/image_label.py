@@ -10,26 +10,27 @@ from fibsem_maestro.tools.support import Image, ScanningArea
 class ImageLabel(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
+        # actual drawing rect
         self.rect = QRect()
         self.adjusted_rect = QRect()  # zoom and pan applied
+        # handles of actual drawing rect
         self.handles = [QRect() for _ in range(4)]
         self.handleSize = 10
         self.handleSelected = -1
         self.mousePressPos = None
+
+        # panning
         self.delta = QPoint(0,0)  # offset used for panning
-        self.hide_graphics = False  # used form overlay hiding
-        self.image = None  # original image (class Image)
-        self.rects_to_draw = [] # buffer for rectangle drawing (ScanningArea, (R,G,B))
 
         # zoom in/out
         self.scale = 1
-        self.original_scale = 1  # scale after initial resize
-
-        # image scaling
-        self.original_scale_x = 1
-        self.original_scale_y = 1
+        self.original_scale = 1  # scale after initial resize (after image load)
 
         self.original_pixmap = None
+
+        self.hide_graphics = False  # used form overlay hiding
+        self.image = None  # original image (class Image)
+        self.rects_to_draw = []  # buffer for rectangle drawing (ScanningArea, (R,G,B))
 
         # Setting up the buttons for zooming in and out
         self.zoom_in_button = QtWidgets.QPushButton("+", self)
@@ -49,9 +50,12 @@ class ImageLabel(QLabel):
         self.zoom_out_button.move(self.zoom_in_button.width() + 5, 5)
         self.hide_button.move(self.zoom_out_button.width() + self.zoom_in_button.width() + 10, 5)
 
+        # double-click handling
         self.last_click_time = 0
         self.click_interval = 0.5
 
+        # event of repainting
+        self.repaint_events = []
 
     def paintEvent(self, event):
         super().paintEvent(event)
@@ -89,7 +93,6 @@ class ImageLabel(QLabel):
             if self.handleSelected == -1:
                 self.rect.setTopLeft((mousePos-self.delta) / self.scale)
                 self.rect.setBottomRight((mousePos-self.delta) / self.scale)
-            self.updateHandles()
             self.update()
         if event.button() == Qt.RightButton:
             # panning
@@ -103,7 +106,7 @@ class ImageLabel(QLabel):
         mousePos = event.position().toPoint()
         if event.buttons() == Qt.RightButton:
             # panning
-            self.delta += (mousePos - self.mousePressPos) / self.scale
+            self.pan((mousePos - self.mousePressPos) / self.scale)
             self.mousePressPos = mousePos
         elif event.buttons() == Qt.LeftButton:  # when left button is held down
             # rect drawing
@@ -156,6 +159,11 @@ class ImageLabel(QLabel):
         self.updateHandles()
         self.repaint_pixmap()
 
+    def update_pan_zoom(self, scale: float, delta: QPoint):
+        self.scale = scale
+        self.delta = delta
+        self.update()
+
     def updateHandles(self):
         handleSize = self.handleSize
         self.adjusted_rect = self.calculate_coordinates(self.rect)
@@ -191,10 +199,20 @@ class ImageLabel(QLabel):
         self.original_pixmap = pixmap
         self.update()
 
+    def pan(self, pan):
+        self.delta += pan
+        self.repaint_connections()
+
     def zoom(self, scale):
         self.scale *= scale
         self.delta *= scale
         self.update()
+        self.repaint_connections()
+
+    def repaint_connections(self):
+        """ Zoom on connected images """
+        for repaint_event in self.repaint_events:
+            repaint_event(self.scale, self.delta)
 
     def zoom_in(self):
         """Zoom in the image"""

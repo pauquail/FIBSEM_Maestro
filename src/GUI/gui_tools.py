@@ -14,6 +14,8 @@ def populate_form(settings, layout=None, specific_settings={}):
     specific_settings - dict of non-textbox settings
       - None - omit
       - List - combo box """
+    # clear layouts
+    clear_layout(layout)
 
     for s in settings:
         value_edit = None

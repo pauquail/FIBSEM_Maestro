@@ -1,6 +1,7 @@
 
 from PySide6.QtWidgets import QInputDialog
 
+from image_label_manger import ImageLabelManagers
 from fibsem_maestro.tools.support import find_in_dict
 from fibsem_maestro.microscope_control.autoscript_control import BeamControl
 from gui_tools import populate_form, serialize_form, create_ImageLabel, confirm_action_dialog, clear_layout, \
@@ -17,6 +18,10 @@ class AutofunctionsGui:
         self.mask_settings = mask_settings
         self.build_connections()
 
+        self.window.autofunctionsImageLabel = create_ImageLabel(self.window.autofunctionsVerticalLayout)
+        # add image label to the manager (for multiple image labels control)
+        ImageLabelManagers.sem_manager.add_image(self.window.autofunctionsImageLabel)
+
         self.selected_af = None
         self.autofunctionComboBox_fill()
         self.af_set()
@@ -29,6 +34,7 @@ class AutofunctionsGui:
     def build_connections(self):
         self.window.cloneAutofunctionPushButton.clicked.connect(self.cloneAutoFunctionPushButton_clicked)
         self.window.removeAutofunctionPushButton.clicked.connect(self.removeAutofunctionPushButton_clicked)
+        self.window.setAfAreaPushButton
         self.window.autofunctionComboBox.currentIndexChanged.connect(self.autofunctionComboBox_changed)
 
     def serialize_layout(self):
@@ -75,11 +81,6 @@ class AutofunctionsGui:
             return
 
         self.selected_af = find_in_dict(selected_af_text, self.autofunctions_settings)
-
-        # clear layouts
-        clear_layout(self.window.autofunctionFormLayout)
-        clear_layout(self.window.autofunctionImagingFormLayout)
-        clear_layout(self.window.autofunctionCriteriumFormLayout)
 
         # items for combo boxes
         # list of available autofunctions (only names)
