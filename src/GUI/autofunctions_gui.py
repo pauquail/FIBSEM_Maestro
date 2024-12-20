@@ -2,7 +2,7 @@
 from PySide6.QtWidgets import QInputDialog
 
 from image_label_manger import ImageLabelManagers
-from fibsem_maestro.tools.support import find_in_dict
+from fibsem_maestro.tools.support import find_in_dict, ScanningArea, Point
 from fibsem_maestro.microscope_control.autoscript_control import BeamControl
 from gui_tools import populate_form, serialize_form, create_ImageLabel, confirm_action_dialog, clear_layout, \
     get_module_members, get_setters
@@ -23,8 +23,11 @@ class AutofunctionsGui:
         ImageLabelManagers.sem_manager.add_image(self.window.autofunctionsImageLabel)
 
         self.selected_af = None
+        self._af_area = ScanningArea(Point(0,0),0,0)
         self.autofunctionComboBox_fill()
         self.af_set()
+
+        self.window.autofunctionsImageLabel.rects_to_draw.append((self.af_area, (0, 255, 0)))
 
     def autofunctionComboBox_fill(self):
         self.window.autofunctionComboBox.clear()
@@ -34,7 +37,7 @@ class AutofunctionsGui:
     def build_connections(self):
         self.window.cloneAutofunctionPushButton.clicked.connect(self.cloneAutoFunctionPushButton_clicked)
         self.window.removeAutofunctionPushButton.clicked.connect(self.removeAutofunctionPushButton_clicked)
-        self.window.setAfAreaPushButton
+        self.window.setAfAreaPushButton.clicked.connect(self.setAfAreaPushButton_clicked)
         self.window.autofunctionComboBox.currentIndexChanged.connect(self.autofunctionComboBox_changed)
 
     def serialize_layout(self):
@@ -70,6 +73,11 @@ class AutofunctionsGui:
                 self.window.autofunctionComboBox.setCurrentIndex(0)
 
 
+    def setAfAreaPushButton_clicked(self):
+        self.af_area = self.window.autofunctionsImageLabel.get_selected_area()
+        self.selected_af['af_area'] = self.af_area.to_dict()
+
+
     def autofunctionComboBox_changed(self):
         self.af_set()
 
@@ -92,7 +100,7 @@ class AutofunctionsGui:
         criteria = get_module_members('fibsem_maestro.image_criteria.criteria_math', 'func')
 
         populate_form(self.selected_af, layout=self.window.autofunctionFormLayout,
-                      specific_settings={'name': None, 'criterion_name': None, 'image_name': None,
+                      specific_settings={'name': None, 'criterion_name': None, 'image_name': None, 'af_area': None,
                                          'autofunction': autofunctions, 'mask_name': masks, # list is shown as combobox
                                          'sweeping_strategy': sweepings, 'variable': sweeping_variables })
         image_settings = find_in_dict(self.selected_af['image_name'], self.image_settings)
@@ -101,5 +109,12 @@ class AutofunctionsGui:
         populate_form(criterion_settings, layout=self.window.autofunctionCriteriumFormLayout, specific_settings={'name': None, 'mask_name': masks,
                                                                                                                  'criterion': criteria})
 
+        self.af_area = ScanningArea.from_dict(self.selected_af['af_area'])
 
+    @property
+    def af_area(self):
+        return self._af_area
 
+    @af_area.setter
+    def af_area(self, value):
+        self._af_area.update(value)  # update af area

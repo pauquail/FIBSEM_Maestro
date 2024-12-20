@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'FIBSEM_Maestro_GUI.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.3
+## Created by: Qt User Interface Compiler version 6.7.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -188,42 +188,44 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.tabSem, "")
         self.tabAutofunctions = QWidget()
         self.tabAutofunctions.setObjectName(u"tabAutofunctions")
-        self.autofunctionsVerticalLayout = QVBoxLayout(self.tabAutofunctions)
+        self.verticalLayout_2 = QVBoxLayout(self.tabAutofunctions)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.autofunctionsVerticalLayout = QVBoxLayout()
         self.autofunctionsVerticalLayout.setObjectName(u"autofunctionsVerticalLayout")
         self.autofunctionsImageLabel = QLabel(self.tabAutofunctions)
         self.autofunctionsImageLabel.setObjectName(u"autofunctionsImageLabel")
 
         self.autofunctionsVerticalLayout.addWidget(self.autofunctionsImageLabel)
 
-        self.formLayout = QFormLayout()
-        self.formLayout.setObjectName(u"formLayout")
         self.autofunctionLabel = QLabel(self.tabAutofunctions)
         self.autofunctionLabel.setObjectName(u"autofunctionLabel")
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.autofunctionLabel)
+        self.autofunctionsVerticalLayout.addWidget(self.autofunctionLabel)
 
         self.autofunctionComboBox = QComboBox(self.tabAutofunctions)
         self.autofunctionComboBox.setObjectName(u"autofunctionComboBox")
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.autofunctionComboBox)
+        self.autofunctionsVerticalLayout.addWidget(self.autofunctionComboBox)
 
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.cloneAutofunctionPushButton = QPushButton(self.tabAutofunctions)
         self.cloneAutofunctionPushButton.setObjectName(u"cloneAutofunctionPushButton")
 
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.cloneAutofunctionPushButton)
+        self.horizontalLayout_4.addWidget(self.cloneAutofunctionPushButton)
 
         self.removeAutofunctionPushButton = QPushButton(self.tabAutofunctions)
         self.removeAutofunctionPushButton.setObjectName(u"removeAutofunctionPushButton")
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.removeAutofunctionPushButton)
+        self.horizontalLayout_4.addWidget(self.removeAutofunctionPushButton)
+
+
+        self.autofunctionsVerticalLayout.addLayout(self.horizontalLayout_4)
 
         self.setAfAreaPushButton = QPushButton(self.tabAutofunctions)
         self.setAfAreaPushButton.setObjectName(u"setAfAreaPushButton")
 
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.setAfAreaPushButton)
-
-
-        self.autofunctionsVerticalLayout.addLayout(self.formLayout)
+        self.autofunctionsVerticalLayout.addWidget(self.setAfAreaPushButton)
 
         self.autofunctionFormLayout = QFormLayout()
         self.autofunctionFormLayout.setObjectName(u"autofunctionFormLayout")
@@ -256,22 +258,40 @@ class Ui_MainWindow(object):
 
         self.autofunctionsVerticalLayout.addItem(self.verticalSpacer_3)
 
+
+        self.verticalLayout_2.addLayout(self.autofunctionsVerticalLayout)
+
         self.tabWidget.addTab(self.tabAutofunctions, "")
         self.tabAcb = QWidget()
         self.tabAcb.setObjectName(u"tabAcb")
         self.acbVerticalLayout = QVBoxLayout(self.tabAcb)
         self.acbVerticalLayout.setObjectName(u"acbVerticalLayout")
+        self.verticalLayout_3 = QVBoxLayout()
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.acbImageLabel = QLabel(self.tabAcb)
+        self.acbImageLabel.setObjectName(u"acbImageLabel")
+
+        self.verticalLayout_3.addWidget(self.acbImageLabel)
+
+        self.setAcbPushButton = QPushButton(self.tabAcb)
+        self.setAcbPushButton.setObjectName(u"setAcbPushButton")
+
+        self.verticalLayout_3.addWidget(self.setAcbPushButton)
+
+        self.acbFormLayout = QFormLayout()
+        self.acbFormLayout.setObjectName(u"acbFormLayout")
+
+        self.verticalLayout_3.addLayout(self.acbFormLayout)
+
+
+        self.acbVerticalLayout.addLayout(self.verticalLayout_3)
+
         self.tabWidget.addTab(self.tabAcb, "")
-        self.tabMasking = QWidget()
-        self.tabMasking.setObjectName(u"tabMasking")
-        self.maskingVerticalLayout = QVBoxLayout(self.tabMasking)
+        self.tabDriftCorrection = QWidget()
+        self.tabDriftCorrection.setObjectName(u"tabDriftCorrection")
+        self.maskingVerticalLayout = QVBoxLayout(self.tabDriftCorrection)
         self.maskingVerticalLayout.setObjectName(u"maskingVerticalLayout")
-        self.tabWidget.addTab(self.tabMasking, "")
-        self.tabAttention = QWidget()
-        self.tabAttention.setObjectName(u"tabAttention")
-        self.attentionVerticalLayout = QVBoxLayout(self.tabAttention)
-        self.attentionVerticalLayout.setObjectName(u"attentionVerticalLayout")
-        self.tabWidget.addTab(self.tabAttention, "")
+        self.tabWidget.addTab(self.tabDriftCorrection, "")
 
         self.verticalLayout.addWidget(self.tabWidget)
 
@@ -296,7 +316,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1000, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1000, 31))
         self.menuSetting = QMenu(self.menubar)
         self.menuSetting.setObjectName(u"menuSetting")
         self.menuHelp = QMenu(self.menubar)
@@ -324,7 +344,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -362,9 +382,10 @@ class Ui_MainWindow(object):
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Criterium", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Imaging", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAutofunctions), QCoreApplication.translate("MainWindow", u"Autofunctions", None))
+        self.acbImageLabel.setText("")
+        self.setAcbPushButton.setText(QCoreApplication.translate("MainWindow", u"Set ABC area", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAcb), QCoreApplication.translate("MainWindow", u"ACB", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabMasking), QCoreApplication.translate("MainWindow", u"Masking", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAttention), QCoreApplication.translate("MainWindow", u"Attention", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabDriftCorrection), QCoreApplication.translate("MainWindow", u"Drift corr", None))
         self.applySettingsPushButton.setText(QCoreApplication.translate("MainWindow", u"Apply settings", None))
         self.pushRun.setText(QCoreApplication.translate("MainWindow", u"Run", None))
         self.menuSetting.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))

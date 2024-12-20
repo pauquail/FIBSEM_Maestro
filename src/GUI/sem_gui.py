@@ -40,9 +40,12 @@ class SemGui:
         serialize_form(self.window.imageSettingsFormLayout, self.actual_image_settings)
 
     def getImagePushButton_clicked(self):
-        from autoscript_sdb_microscope_client.structures import AdornedImage
+        #from autoscript_sdb_microscope_client.structures import AdornedImage
         #image = self.serial_control.microscope.acquire_image()
-        image = Image.from_as(AdornedImage.load('/home/cemcof/Downloads/cell.tif'))
+        #image = Image.from_as(AdornedImage.load('/home/cemcof/Downloads/cell.tif'))
+        import matplotlib.image as mpimg
+        image = mpimg.imread('oxford.jpg')
+        image = Image(image, 10e-9)
         ImageLabelManagers.sem_manager.update_image(image)
 
     def setImagingPushButton_clicked(self):

@@ -32,7 +32,7 @@
          <string notr="true"/>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="tabFib">
          <attribute name="title">
@@ -223,96 +223,100 @@
          <attribute name="title">
           <string>Autofunctions</string>
          </attribute>
-         <layout class="QVBoxLayout" name="autofunctionsVerticalLayout">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QLabel" name="autofunctionsImageLabel">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QFormLayout" name="formLayout">
-            <item row="0" column="0">
+           <layout class="QVBoxLayout" name="autofunctionsVerticalLayout">
+            <item>
+             <widget class="QLabel" name="autofunctionsImageLabel">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="autofunctionLabel">
               <property name="text">
                <string>Autofunction</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
+            <item>
              <widget class="QComboBox" name="autofunctionComboBox"/>
             </item>
-            <item row="1" column="1">
-             <widget class="QPushButton" name="cloneAutofunctionPushButton">
-              <property name="text">
-               <string>Clone autofunction</string>
-              </property>
-             </widget>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QPushButton" name="cloneAutofunctionPushButton">
+                <property name="text">
+                 <string>Clone autofunction</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="removeAutofunctionPushButton">
+                <property name="text">
+                 <string>Remove autofunction</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
-            <item row="2" column="1">
-             <widget class="QPushButton" name="removeAutofunctionPushButton">
-              <property name="text">
-               <string>Remove autofunction</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
+            <item>
              <widget class="QPushButton" name="setAfAreaPushButton">
               <property name="text">
                <string>Set af area</string>
               </property>
              </widget>
             </item>
+            <item>
+             <layout class="QFormLayout" name="autofunctionFormLayout"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Criterium</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QFormLayout" name="autofunctionCriteriumFormLayout"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Imaging</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QFormLayout" name="autofunctionImagingFormLayout"/>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
            </layout>
-          </item>
-          <item>
-           <layout class="QFormLayout" name="autofunctionFormLayout"/>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Criterium</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QFormLayout" name="autofunctionCriteriumFormLayout"/>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_5">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Imaging</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QFormLayout" name="autofunctionImagingFormLayout"/>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </widget>
@@ -320,19 +324,35 @@
          <attribute name="title">
           <string>ACB</string>
          </attribute>
-         <layout class="QVBoxLayout" name="acbVerticalLayout"/>
+         <layout class="QVBoxLayout" name="acbVerticalLayout">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QLabel" name="acbImageLabel">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="setAcbPushButton">
+              <property name="text">
+               <string>Set ABC area</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QFormLayout" name="acbFormLayout"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
-        <widget class="QWidget" name="tabMasking">
+        <widget class="QWidget" name="tabDriftCorrection">
          <attribute name="title">
-          <string>Masking</string>
+          <string>Drift corr</string>
          </attribute>
          <layout class="QVBoxLayout" name="maskingVerticalLayout"/>
-        </widget>
-        <widget class="QWidget" name="tabAttention">
-         <attribute name="title">
-          <string>Attention</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="attentionVerticalLayout"/>
         </widget>
        </widget>
       </item>
@@ -364,7 +384,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>22</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSetting">
