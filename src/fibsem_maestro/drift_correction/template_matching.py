@@ -20,6 +20,7 @@ class TemplateMatchingDriftCorrection:
 
     def _settings_init(self, settings):
         self.min_confidence = settings['min_confidence']
+        self.driftcorr_areas = settings['driftcorr_areas']
 
     def settings_init(self, settings):
         """ For global re-initialization of settings  (global settings always passed)"""

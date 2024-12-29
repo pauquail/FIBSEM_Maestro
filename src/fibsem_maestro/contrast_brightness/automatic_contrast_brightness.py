@@ -13,13 +13,14 @@ class AutomaticContrastBrightness:
         self._log_dir = log_dir
 
     def _settings_init(self, acb_settings):
-        self.function = acb_settings['function']
+        self.acb_enabled = acb_settings['acb_enabled']
         self.mask_name = acb_settings['mask_name']
         self.allowed_saturation = acb_settings['allowed_saturation']
         self.allowed_minimal_band = acb_settings['allowed_minimal_band']
         self.p_increase_contrast = acb_settings['p_increase_contrast']
         self.p_decrease_contrast = acb_settings['p_decrease_contrast']
         self.p_brightness = acb_settings['p_brightness']
+        self.acb_area = acb_settings['acb_area']
 
     def settings_init(self, settings):
         """ For global re-initialization of settings  (global settings always passed)"""
@@ -38,7 +39,7 @@ class AutomaticContrastBrightness:
         self._microscope.beam.brighness += increase_value * self.p_brightness
 
     def __call__(self, image):
-        if self.function == 'acb':
+        if self.acb_enabled:
             logging.info('ACB executed')
 
             # get statistics from image

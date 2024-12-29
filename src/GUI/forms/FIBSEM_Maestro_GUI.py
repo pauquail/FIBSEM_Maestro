@@ -47,6 +47,21 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName(u"gridLayout")
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.applySettingsPushButton = QPushButton(self.centralwidget)
+        self.applySettingsPushButton.setObjectName(u"applySettingsPushButton")
+
+        self.horizontalLayout_2.addWidget(self.applySettingsPushButton)
+
+        self.pushRun = QPushButton(self.centralwidget)
+        self.pushRun.setObjectName(u"pushRun")
+
+        self.horizontalLayout_2.addWidget(self.pushRun)
+
+
+        self.gridLayout.addLayout(self.horizontalLayout_2, 2, 0, 1, 1)
+
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.tabWidget = QTabWidget(self.centralwidget)
@@ -151,6 +166,17 @@ class Ui_MainWindow(object):
         self.imageSettingsFormLayout.setObjectName(u"imageSettingsFormLayout")
 
         self.semImagingVerticalLayout.addLayout(self.imageSettingsFormLayout)
+
+        self.label_6 = QLabel(self.tabSem)
+        self.label_6.setObjectName(u"label_6")
+        self.label_6.setFont(font1)
+
+        self.semImagingVerticalLayout.addWidget(self.label_6)
+
+        self.imageCriterionFormLayout = QFormLayout()
+        self.imageCriterionFormLayout.setObjectName(u"imageCriterionFormLayout")
+
+        self.semImagingVerticalLayout.addLayout(self.imageCriterionFormLayout)
 
 
         self.verticalLayout2.addLayout(self.semImagingVerticalLayout)
@@ -298,20 +324,9 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
 
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.applySettingsPushButton = QPushButton(self.centralwidget)
-        self.applySettingsPushButton.setObjectName(u"applySettingsPushButton")
+        self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.horizontalLayout_2.addWidget(self.applySettingsPushButton)
-
-        self.pushRun = QPushButton(self.centralwidget)
-        self.pushRun.setObjectName(u"pushRun")
-
-        self.horizontalLayout_2.addWidget(self.pushRun)
-
-
-        self.gridLayout.addLayout(self.horizontalLayout_2, 3, 0, 1, 1)
+        self.gridLayout.addItem(self.verticalSpacer_4, 3, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
@@ -344,7 +359,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -359,6 +374,8 @@ class Ui_MainWindow(object):
         self.actionEmail.setText(QCoreApplication.translate("MainWindow", u"Email", None))
         self.actionNewProject.setText(QCoreApplication.translate("MainWindow", u"New", None))
         self.actionLoadProject.setText(QCoreApplication.translate("MainWindow", u"Load", None))
+        self.applySettingsPushButton.setText(QCoreApplication.translate("MainWindow", u"Apply settings", None))
+        self.pushRun.setText(QCoreApplication.translate("MainWindow", u"Run", None))
         self.fibImageLabel.setText("")
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.getFibImagePushButton.setText(QCoreApplication.translate("MainWindow", u"Get image", None))
@@ -369,6 +386,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Acquisition", None))
         self.calculateFromSlicePushButton.setText(QCoreApplication.translate("MainWindow", u"Calculate from slice distance (38\u00b0)", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Imaging", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Criterion", None))
         self.getImagePushButton.setText(QCoreApplication.translate("MainWindow", u"Get image", None))
         self.setImagingPushButton.setText(QCoreApplication.translate("MainWindow", u"Set imaging", None))
         self.testImagingPushButton.setText(QCoreApplication.translate("MainWindow", u"Test imaging", None))
@@ -383,11 +401,9 @@ class Ui_MainWindow(object):
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Imaging", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAutofunctions), QCoreApplication.translate("MainWindow", u"Autofunctions", None))
         self.acbImageLabel.setText("")
-        self.setAcbPushButton.setText(QCoreApplication.translate("MainWindow", u"Set ABC area", None))
+        self.setAcbPushButton.setText(QCoreApplication.translate("MainWindow", u"Set ACB area", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAcb), QCoreApplication.translate("MainWindow", u"ACB", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabDriftCorrection), QCoreApplication.translate("MainWindow", u"Drift corr", None))
-        self.applySettingsPushButton.setText(QCoreApplication.translate("MainWindow", u"Apply settings", None))
-        self.pushRun.setText(QCoreApplication.translate("MainWindow", u"Run", None))
         self.menuSetting.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
         self.menuView.setTitle(QCoreApplication.translate("MainWindow", u"View", None))

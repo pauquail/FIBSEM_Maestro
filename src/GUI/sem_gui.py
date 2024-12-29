@@ -2,18 +2,22 @@ from PySide6.QtCore import QRect
 from PySide6.QtGui import QPixmap
 
 from fibsem_maestro.tools.support import find_in_dict
-from gui_tools import populate_form, serialize_form, create_ImageLabel
+from gui_tools import populate_form, serialize_form, create_ImageLabel, get_module_members
 from fibsem_maestro.tools.support import Image, ScanningArea, Point
 from image_label_manger import ImageLabelManagers
 
 class SemGui:
-    def __init__(self, window, acquisition_settings, imaging_settings, serial_control):
+    def __init__(self, window, acquisition_settings, imaging_settings, criterion_settings, mask_settings, serial_control):
         self.window = window
         self.acquisition_settings = acquisition_settings
+        self.criterion_settings = criterion_settings
         self.imaging_settings = imaging_settings
+        self.mask_settings = mask_settings
         # selected imaging settings
         self.actual_image_settings = find_in_dict(acquisition_settings['image_name'],
                                                   imaging_settings)
+        self.actual_criterion_settings = find_in_dict(acquisition_settings['criterion_name'],
+                                                      criterion_settings)
         self.serial_control = serial_control
         self.populate_form()
         self.build_connections()
@@ -35,9 +39,15 @@ class SemGui:
         populate_form(self.actual_image_settings, layout=self.window.imageSettingsFormLayout,
                       specific_settings={'name':None, 'criterion_name':None})
 
+        masks = ['none', *[x['name'] for x in self.mask_settings]]  # none + masks defined in settings
+        criteria = get_module_members('fibsem_maestro.image_criteria.criteria_math', 'func')
+        populate_form(self.actual_criterion_settings, layout=self.window.imageCriterionFormLayout,
+                      specific_settings={'name': None, 'mask_name': masks, 'criterion': criteria})
+
     def serialize_layout(self):
         serialize_form(self.window.semFormLayout, self.acquisition_settings)
         serialize_form(self.window.imageSettingsFormLayout, self.actual_image_settings)
+        serialize_form(self.window.imageCriterionFormLayout, self.actual_criterion_settings)
 
     def getImagePushButton_clicked(self):
         #from autoscript_sdb_microscope_client.structures import AdornedImage

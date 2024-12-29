@@ -106,7 +106,8 @@ autofunction:
       sweeping_max_limits: [ 500.0e-6, 70.0e-3 ] # Limits of sweeping_var
       sweeping_steps: 3 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
       sweeping_total_cycles: 1 # sweeping cycles
-      execute: 2 # execute condition - if int = number of slices, if float = image resolution
+      execute_slices: 0 # execute condition - number of slices, 0 - disabled
+      execute_resolution: 0 # execute condition - image resolution, 0 - disabled
       image_name: 'working_distance - image'
       criterion_name: 'working_distance - image'
       mask_name: 'none'
@@ -126,7 +127,8 @@ autofunction:
       sweeping_max_limits: [500.0e-6, 70.0e-3] # Limits of sweeping_var
       sweeping_steps: 20 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
       sweeping_total_cycles: 4 # sweeping cycles
-      execute: 0 # execute condition - if int = number of slices, if float = image resolution
+      execute_slices: 0 # execute condition - number of slices, 0 - disabled
+      execute_resolution: 0 # execute condition - image resolution, 0 - disabled
       image_name: 'working_distance - line'
       criterion_name: 'working_distance - line'
       mask_name: 'none'
@@ -142,7 +144,7 @@ autofunction:
         height: 0
 
 contrast_brightness:
-  enabled: True # none, acb
+  acb_enabled: True
   mask_name: 'none'
   allowed_saturation: 0.01  # allowed portion of pixels in saturated or zeroed pixels
   allowed_minimal_band: 0.5  # allowed minimal band of the whole bit depth
@@ -176,7 +178,7 @@ email:
 drift_correction:
   type: 'template_matching' # values: 'template_matching', 'mask'
   min_confidence: 0
-    - driftcorr_area:
+    - driftcorr_areas:
       x: 0
       y: 0
       width: 0

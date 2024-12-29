@@ -36,9 +36,11 @@ class AutoFunction:
     def _settings_init(self, auto_function_settings):
         self.name = auto_function_settings['name']
         self.variable = auto_function_settings['variable']
-        self.execute = auto_function_settings['execute']
+        self.execute_slices = auto_function_settings['execute_slices']
+        self.execute_resolution = auto_function_settings['execute_resolution']
         self.delta_x = auto_function_settings['delta_x']
         self.max_attempts = auto_function_settings['max_attempts']
+        self.af_area = auto_function_settings['af_area']
 
     def set_sweep(self):
         self._sweeping.set_sweep()
@@ -137,20 +139,16 @@ class AutoFunction:
 
     def check_firing(self, slice_number, image_resolution):
         """ Check if the firing condition is passed"""
-        execute = self.execute
 
-        # do not fire if execute = 0
-        if execute == 0:
-            return False
+        # number of slices execution
+        if self.execute_slices > 0 and slice_number % self.execute_slices == 0:
+            return True
 
-        # if execute (settings) is int - firing according to slice number
-        # if execute (settings) is int - firing according to image resolution
-        fire = (type(execute) is int and slice_number % execute == 0) or (type(
-            execute) is float and image_resolution > execute)
-        # do not fire on 0. slice
-        if type(execute) is int and slice_number == 0:
-            fire = False
-        return fire
+        # number of slices execution
+        if 0 < self.execute_resolution < image_resolution:
+            return True
+
+        return False
 
     def __call__(self, image_for_mask=None, slice_number=None):
         """

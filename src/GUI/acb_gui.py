@@ -1,16 +1,5 @@
-from PySide6.QtCore import QRect
-from PySide6.QtWidgets import QInputDialog
-
-from image_label_manger import ImageLabelManagers
-from fibsem_maestro.tools.support import find_in_dict, ScanningArea, Point
-from fibsem_maestro.microscope_control.autoscript_control import BeamControl
-from gui_tools import populate_form, serialize_form, create_ImageLabel, confirm_action_dialog, clear_layout, \
-    get_module_members, get_setters
-
-
-
-class AutofunctionsGui:
-    def __init__(self, window, autofunctions_settings, mask_settings, image_settings, criterion_settings):
+class AcbGui:
+    def __init__(self, window, contrast_brightness_settings):
         self.window = window
         self.autofunctions_settings = autofunctions_settings
         self.image_settings = image_settings
@@ -78,46 +67,3 @@ class AutofunctionsGui:
         self.selected_af['af_area'] = self.af_area.to_dict()
         # update view
         self.af_set()
-
-    def autofunctionComboBox_changed(self):
-        self.af_set()
-
-    def af_set(self):
-        """ Autofunction selected by combo-box -> update all"""
-        selected_af_text = self.window.autofunctionComboBox.currentText()
-
-        if selected_af_text == '':
-            return
-
-        self.selected_af = find_in_dict(selected_af_text, self.autofunctions_settings)
-
-        # items for combo boxes
-        # list of available autofunctions (only names)
-        autofunctions = get_module_members('fibsem_maestro.autofunctions.autofunction', 'class')
-        masks = ['none', *[x['name'] for x in self.mask_settings]]  # none + masks defined in settings
-        sweepings = get_module_members('fibsem_maestro.autofunctions.sweeping', 'class')
-        # all possible electron and ions setters
-        sweeping_variables = ['electron_beam.' + x for x in get_setters(BeamControl)] + ['ion_beam.' + x for x in get_setters(BeamControl)]
-        criteria = get_module_members('fibsem_maestro.image_criteria.criteria_math', 'func')
-
-        populate_form(self.selected_af, layout=self.window.autofunctionFormLayout,
-                      specific_settings={'name': None, 'criterion_name': None, 'image_name': None, 'af_area': None,
-                                         'autofunction': autofunctions, 'mask_name': masks, # list is shown as combobox
-                                         'sweeping_strategy': sweepings, 'variable': sweeping_variables })
-        image_settings = find_in_dict(self.selected_af['image_name'], self.image_settings)
-        populate_form(image_settings, layout=self.window.autofunctionImagingFormLayout, specific_settings={'name': None})
-        criterion_settings = find_in_dict(self.selected_af['criterion_name'],self.criterion_settings)
-        populate_form(criterion_settings, layout=self.window.autofunctionCriteriumFormLayout, specific_settings={'name': None, 'mask_name': masks,
-                                                                                                                 'criterion': criteria})
-
-        self.af_area = ScanningArea.from_dict(self.selected_af['af_area'])
-        self.window.autofunctionsImageLabel.rect = QRect()  # clear the drawing rectangle
-        self.window.autofunctionsImageLabel.update()
-
-    @property
-    def af_area(self):
-        return self._af_area
-
-    @af_area.setter
-    def af_area(self, value):
-        self._af_area.update(value)  # update af area
