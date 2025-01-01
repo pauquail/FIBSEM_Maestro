@@ -178,8 +178,8 @@ email:
 drift_correction:
   type: 'template_matching' # values: 'template_matching', 'mask'
   min_confidence: 0
-    - driftcorr_areas:
-      x: 0
+  driftcorr_areas:
+    - x: 0
       y: 0
       width: 0
       height: 0

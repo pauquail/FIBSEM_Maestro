@@ -11,6 +11,7 @@ from GUI.forms.FIBSEM_Maestro_GUI import Ui_MainWindow
 from fibsem_maestro.serial_control import SerialControl
 from sem_gui import SemGui
 from autofunctions_gui import AutofunctionsGui
+from acb_gui import AcbGui
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -25,11 +26,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.autofunctions_gui = AutofunctionsGui(self, serial_control.autofunction_settings,
                                                   serial_control.mask_settings, serial_control.image_settings,
                                                   serial_control.criterion_calculation_settings)
+        self.acb_gui = AcbGui(self, serial_control.contrast_brightness_settings, serial_control.mask_settings)
 
     def build_connections(self):
-        self.applySettingsPushButton.clicked.connect(self.applySettingsPushButton_clicked)
         self.actionAbout.triggered.connect(self.about_clicked)
-        self.actionResize.triggered.connect(self.resize_clicked)
+        self.runPush.clicked.connect(self.runPush_clicked)
 
     def about_clicked(self):
         QMessageBox.about(
@@ -41,13 +42,21 @@ class Window(QMainWindow, Ui_MainWindow):
             "<p>pavel.krep@gmail.com</p>",
         )
 
-    def resize_clicked(self):
-        self.resize(self.sizeHint())
+    def runPush_clicked(self):
+        self.apply_settings()
 
-    def applySettingsPushButton_clicked(self):
-        self.sem_gui.serialize_layout()
-        self.fib_gui.serialize_layout()
-        self.autofunctions_gui.serialize_layout()
+    def apply_settings(self):
+
+        # can be called in initialization, that is why some components may not exist
+        if hasattr(self, 'sem_gui'):
+            self.sem_gui.serialize_layout()
+        if hasattr(self, 'fib_gui'):
+            self.fib_gui.serialize_layout()
+        if hasattr(self, 'autofunctions_gui'):
+            self.autofunctions_gui.serialize_layout()
+        if hasattr(self, 'acb_gui'):
+            self.acb_gui.serialize_layout()
+
         serial_control.save_yaml_settings()
 
 

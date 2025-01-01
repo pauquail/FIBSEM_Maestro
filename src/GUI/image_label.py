@@ -51,7 +51,8 @@ class ImageLabel(QLabel):
         self.hide_button.move(self.zoom_out_button.width() + self.zoom_in_button.width() + 10, 5)
 
         # double-click handling
-        self.last_click_time = 0
+        self.last_right_click_time = 0
+        self.last_left_click_time = 0
         self.click_interval = 0.5
 
         # event of repainting
@@ -93,14 +94,23 @@ class ImageLabel(QLabel):
             if self.handleSelected == -1:
                 self.rect.setTopLeft((mousePos-self.delta) / self.scale)
                 self.rect.setBottomRight((mousePos-self.delta) / self.scale)
-            self.update()
-        if event.button() == Qt.RightButton:
-            # panning
+
             current_time = time.time()
-            if current_time - self.last_click_time < self.click_interval:
+            if current_time - self.last_left_click_time < self.click_interval:
+                # set maximal rectangle if left double click
+                self.reset_zoom_pan()
+                self.rect.setRect(0, 0, self.original_pixmap.width(), self.original_pixmap.height())  # maximize rectangle
+            self.last_left_click_time = current_time
+
+            self.update()
+
+        if event.button() == Qt.RightButton:
+            # zero zoom pan
+            current_time = time.time()
+            if current_time - self.last_right_click_time < self.click_interval:
                 # reset zoom and pan if right double click
                 self.reset_zoom_pan()
-            self.last_click_time = current_time
+            self.last_right_click_time = current_time
 
     def mouseMoveEvent(self, event):
         mousePos = event.position().toPoint()

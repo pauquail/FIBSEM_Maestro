@@ -120,7 +120,7 @@ def get_module_members(module_path: str, member_type: str):
 
     Args:
         module_path (str): The Python path of the module to inspect
-        member_type (str): The type of members to return, either 'class' to return classes, or 'func' to return functions.
+        member_type (str): The type of members to return, either 'class' to return classes, 'mod' to return modules or 'func' to return functions.
 
     Returns:
         List[str]: A list of member names of the specified member_type from the module at module_path.
@@ -132,6 +132,8 @@ def get_module_members(module_path: str, member_type: str):
         inspect_member = inspect.isclass
     elif member_type == 'func':
         inspect_member = inspect.isfunction
+    elif member_type == 'mod':
+        inspect_member = inspect.ismodule()
     else:
         raise ValueError(f'Unknown member type: {member_type}')
     imported_module = importlib.import_module(module_path)

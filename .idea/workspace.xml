@@ -5,16 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="dev progress">
-      <change afterPath="$PROJECT_DIR$/src/GUI/acb_gui.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/GUI/driftcorr_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/acb_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/acb_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/autofunctions_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/autofunctions_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/forms/FIBSEM_Maestro_GUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/forms/FIBSEM_Maestro_GUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/gui_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/gui_tools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/image_label.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/image_label.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/maestro_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/maestro_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/sem_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/sem_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/ui/FIBSEM_Maestro_GUI.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/ui/FIBSEM_Maestro_GUI.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/autofunctions/autofunction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/contrast_brightness/automatic_contrast_brightness.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/contrast_brightness/automatic_contrast_brightness.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/template_matching.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/drift_correction/template_matching.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/settings.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/settings.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/settings_template.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/settings_template.yaml" afterDir="false" />
     </list>
@@ -44,12 +44,12 @@
     &quot;assignee&quot;: &quot;pauquail&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/pauquail/FIBSEM_Maestro",
-    "accountId": "39cede25-570e-42c2-a6a3-d244f14781ed"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/pauquail/FIBSEM_Maestro&quot;,
+    &quot;accountId&quot;: &quot;39cede25-570e-42c2-a6a3-d244f14781ed&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -331,7 +331,8 @@
       <workItem from="1734180088995" duration="2921000" />
       <workItem from="1734209328757" duration="4001000" />
       <workItem from="1734294408045" duration="13117000" />
-      <workItem from="1735498736414" duration="5386000" />
+      <workItem from="1735498736414" duration="7872000" />
+      <workItem from="1735755151798" duration="6212000" />
     </task>
     <task id="LOCAL-00001" summary="init commit">
       <option name="closed" value="true" />
@@ -613,7 +614,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734684321313</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="dev progress">
+      <option name="closed" value="true" />
+      <created>1735505099707</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1735505099707</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -721,7 +730,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/maestro_gui.py</url>
-          <line>50</line>
+          <line>59</line>
           <option name="timeStamp" value="154" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -740,27 +749,14 @@
           <option name="timeStamp" value="215" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/GUI/autofunctions_gui.py</url>
-          <line>22</line>
-          <option name="timeStamp" value="218" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/image_label_manger.py</url>
           <line>20</line>
           <option name="timeStamp" value="223" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/image_label_manger.py</url>
-          <line>5</line>
-          <option name="timeStamp" value="224" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/GUI/fib_gui.py</url>
-          <option name="timeStamp" value="225" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/GUI/sem_gui.py</url>
-          <option name="timeStamp" value="226" />
+          <line>8</line>
+          <option name="timeStamp" value="227" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -776,7 +772,7 @@
     <SUITE FILE_PATH="coverage/FIBSEM_Maestro$microscope_test.coverage" NAME="microscope_test Coverage Results" MODIFIED="1726305838958" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/fibsem_maestro/microscope_control" />
     <SUITE FILE_PATH="coverage/FIBSEM_Maestro$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1734555921274" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../pythonProject" />
     <SUITE FILE_PATH="coverage/FIBSEM_Maestro$move_windows.coverage" NAME="move_windows Coverage Results" MODIFIED="1726474908836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../../../FIBSEM_routines" />
-    <SUITE FILE_PATH="coverage/FIBSEM_Maestro$maestro_gui.coverage" NAME="maestro_gui Coverage Results" MODIFIED="1735505060682" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/GUI" />
+    <SUITE FILE_PATH="coverage/FIBSEM_Maestro$maestro_gui.coverage" NAME="maestro_gui Coverage Results" MODIFIED="1735760175317" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/GUI" />
     <SUITE FILE_PATH="coverage/FIBSEM_Maestro$move_windows2.coverage" NAME="move_windows2 Coverage Results" MODIFIED="1726474280651" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../../../FIBSEM_routines" />
     <SUITE FILE_PATH="coverage/FIBSEM_Maestro$asv_main.coverage" NAME="asv_main Coverage Results" MODIFIED="1728315796898" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/FIBSEM_Maestro$main.coverage" NAME="main Coverage Results" MODIFIED="1722858838055" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

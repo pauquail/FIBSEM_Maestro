@@ -18,16 +18,16 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFormLayout,
     QGridLayout, QHBoxLayout, QLabel, QMainWindow,
-    QMenu, QMenuBar, QPushButton, QSizePolicy,
-    QSpacerItem, QStatusBar, QTabWidget, QVBoxLayout,
-    QWidget)
+    QMenu, QMenuBar, QPushButton, QScrollArea,
+    QSizePolicy, QSpacerItem, QStatusBar, QTabWidget,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.setWindowModality(Qt.NonModal)
-        MainWindow.resize(1000, 817)
+        MainWindow.resize(1334, 1008)
         MainWindow.setStyleSheet(u"")
         self.actionLoad = QAction(MainWindow)
         self.actionLoad.setObjectName(u"actionLoad")
@@ -47,31 +47,22 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.applySettingsPushButton = QPushButton(self.centralwidget)
-        self.applySettingsPushButton.setObjectName(u"applySettingsPushButton")
-
-        self.horizontalLayout_2.addWidget(self.applySettingsPushButton)
-
-        self.pushRun = QPushButton(self.centralwidget)
-        self.pushRun.setObjectName(u"pushRun")
-
-        self.horizontalLayout_2.addWidget(self.pushRun)
-
-
-        self.gridLayout.addLayout(self.horizontalLayout_2, 2, 0, 1, 1)
-
-        self.verticalLayout = QVBoxLayout()
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.tabWidget = QTabWidget(self.centralwidget)
+        self.scrollArea = QScrollArea(self.centralwidget)
+        self.scrollArea.setObjectName(u"scrollArea")
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1306, 874))
+        self.gridLayout_2 = QGridLayout(self.scrollAreaWidgetContents)
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.tabWidget = QTabWidget(self.scrollAreaWidgetContents)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tabWidget.setEnabled(True)
         self.tabWidget.setStyleSheet(u"")
         self.tabFib = QWidget()
         self.tabFib.setObjectName(u"tabFib")
-        self.verticalLayout1 = QVBoxLayout(self.tabFib)
-        self.verticalLayout1.setObjectName(u"verticalLayout1")
+        self.verticalLayout = QVBoxLayout(self.tabFib)
+        self.verticalLayout.setObjectName(u"verticalLayout")
         self.fibVerticalLayout = QVBoxLayout()
         self.fibVerticalLayout.setObjectName(u"fibVerticalLayout")
         self.fibImageLabel = QLabel(self.tabFib)
@@ -117,13 +108,13 @@ class Ui_MainWindow(object):
         self.fibVerticalLayout.addItem(self.verticalSpacer_2)
 
 
-        self.verticalLayout1.addLayout(self.fibVerticalLayout)
+        self.verticalLayout.addLayout(self.fibVerticalLayout)
 
         self.tabWidget.addTab(self.tabFib, "")
         self.tabSem = QWidget()
         self.tabSem.setObjectName(u"tabSem")
-        self.verticalLayout2 = QVBoxLayout(self.tabSem)
-        self.verticalLayout2.setObjectName(u"verticalLayout2")
+        self.verticalLayout1 = QVBoxLayout(self.tabSem)
+        self.verticalLayout1.setObjectName(u"verticalLayout1")
         self.semVerticalLayout = QVBoxLayout()
         self.semVerticalLayout.setObjectName(u"semVerticalLayout")
         self.imageLabel = QLabel(self.tabSem)
@@ -148,7 +139,7 @@ class Ui_MainWindow(object):
         self.semVerticalLayout.addWidget(self.calculateFromSlicePushButton)
 
 
-        self.verticalLayout2.addLayout(self.semVerticalLayout)
+        self.verticalLayout1.addLayout(self.semVerticalLayout)
 
         self.semImagingVerticalLayout = QVBoxLayout()
         self.semImagingVerticalLayout.setObjectName(u"semImagingVerticalLayout")
@@ -179,7 +170,7 @@ class Ui_MainWindow(object):
         self.semImagingVerticalLayout.addLayout(self.imageCriterionFormLayout)
 
 
-        self.verticalLayout2.addLayout(self.semImagingVerticalLayout)
+        self.verticalLayout1.addLayout(self.semImagingVerticalLayout)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -205,11 +196,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.fastScanCheckBox)
 
 
-        self.verticalLayout2.addLayout(self.horizontalLayout)
+        self.verticalLayout1.addLayout(self.horizontalLayout)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout2.addItem(self.verticalSpacer)
+        self.verticalLayout1.addItem(self.verticalSpacer)
 
         self.tabWidget.addTab(self.tabSem, "")
         self.tabAutofunctions = QWidget()
@@ -288,56 +279,99 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addLayout(self.autofunctionsVerticalLayout)
 
         self.tabWidget.addTab(self.tabAutofunctions, "")
-        self.tabAcb = QWidget()
-        self.tabAcb.setObjectName(u"tabAcb")
-        self.acbVerticalLayout = QVBoxLayout(self.tabAcb)
-        self.acbVerticalLayout.setObjectName(u"acbVerticalLayout")
-        self.verticalLayout_3 = QVBoxLayout()
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.acbImageLabel = QLabel(self.tabAcb)
-        self.acbImageLabel.setObjectName(u"acbImageLabel")
-
-        self.verticalLayout_3.addWidget(self.acbImageLabel)
-
-        self.setAcbPushButton = QPushButton(self.tabAcb)
-        self.setAcbPushButton.setObjectName(u"setAcbPushButton")
-
-        self.verticalLayout_3.addWidget(self.setAcbPushButton)
-
-        self.acbFormLayout = QFormLayout()
-        self.acbFormLayout.setObjectName(u"acbFormLayout")
-
-        self.verticalLayout_3.addLayout(self.acbFormLayout)
-
-
-        self.acbVerticalLayout.addLayout(self.verticalLayout_3)
-
-        self.tabWidget.addTab(self.tabAcb, "")
         self.tabDriftCorrection = QWidget()
         self.tabDriftCorrection.setObjectName(u"tabDriftCorrection")
         self.maskingVerticalLayout = QVBoxLayout(self.tabDriftCorrection)
         self.maskingVerticalLayout.setObjectName(u"maskingVerticalLayout")
+        self.driftcorrVerticalLayout = QVBoxLayout()
+        self.driftcorrVerticalLayout.setObjectName(u"driftcorrVerticalLayout")
+        self.driftcorrImageLabel = QLabel(self.tabDriftCorrection)
+        self.driftcorrImageLabel.setObjectName(u"driftcorrImageLabel")
+
+        self.driftcorrVerticalLayout.addWidget(self.driftcorrImageLabel)
+
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.addDriftCorrPushButton = QPushButton(self.tabDriftCorrection)
+        self.addDriftCorrPushButton.setObjectName(u"addDriftCorrPushButton")
+
+        self.horizontalLayout_5.addWidget(self.addDriftCorrPushButton)
+
+        self.removeDriftCorrPushButton = QPushButton(self.tabDriftCorrection)
+        self.removeDriftCorrPushButton.setObjectName(u"removeDriftCorrPushButton")
+
+        self.horizontalLayout_5.addWidget(self.removeDriftCorrPushButton)
+
+
+        self.driftcorrVerticalLayout.addLayout(self.horizontalLayout_5)
+
+
+        self.maskingVerticalLayout.addLayout(self.driftcorrVerticalLayout)
+
+        self.driftCorrFormLayout = QFormLayout()
+        self.driftCorrFormLayout.setObjectName(u"driftCorrFormLayout")
+
+        self.maskingVerticalLayout.addLayout(self.driftCorrFormLayout)
+
+        self.verticalSpacer_5 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.maskingVerticalLayout.addItem(self.verticalSpacer_5)
+
         self.tabWidget.addTab(self.tabDriftCorrection, "")
+        self.tabAcb = QWidget()
+        self.tabAcb.setObjectName(u"tabAcb")
+        self.acbVerticalLayout = QVBoxLayout(self.tabAcb)
+        self.acbVerticalLayout.setObjectName(u"acbVerticalLayout")
+        self.acbVerticalLayout_2 = QVBoxLayout()
+        self.acbVerticalLayout_2.setObjectName(u"acbVerticalLayout_2")
+        self.acbImageLabel = QLabel(self.tabAcb)
+        self.acbImageLabel.setObjectName(u"acbImageLabel")
 
-        self.verticalLayout.addWidget(self.tabWidget)
+        self.acbVerticalLayout_2.addWidget(self.acbImageLabel)
 
+        self.setAcbPushButton = QPushButton(self.tabAcb)
+        self.setAcbPushButton.setObjectName(u"setAcbPushButton")
 
-        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+        self.acbVerticalLayout_2.addWidget(self.setAcbPushButton)
+
+        self.acbFormLayout = QFormLayout()
+        self.acbFormLayout.setObjectName(u"acbFormLayout")
+
+        self.acbVerticalLayout_2.addLayout(self.acbFormLayout)
 
         self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.gridLayout.addItem(self.verticalSpacer_4, 3, 0, 1, 1)
+        self.acbVerticalLayout_2.addItem(self.verticalSpacer_4)
+
+
+        self.acbVerticalLayout.addLayout(self.acbVerticalLayout_2)
+
+        self.tabWidget.addTab(self.tabAcb, "")
+
+        self.gridLayout_2.addWidget(self.tabWidget, 0, 0, 1, 1)
+
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+        self.gridLayout.addWidget(self.scrollArea, 0, 0, 1, 1)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.runPush = QPushButton(self.centralwidget)
+        self.runPush.setObjectName(u"runPush")
+
+        self.horizontalLayout_2.addWidget(self.runPush)
+
+
+        self.gridLayout.addLayout(self.horizontalLayout_2, 1, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1000, 31))
+        self.menubar.setGeometry(QRect(0, 0, 1334, 31))
         self.menuSetting = QMenu(self.menubar)
         self.menuSetting.setObjectName(u"menuSetting")
         self.menuHelp = QMenu(self.menubar)
         self.menuHelp.setObjectName(u"menuHelp")
-        self.menuView = QMenu(self.menubar)
-        self.menuView.setObjectName(u"menuView")
         self.menuProject = QMenu(self.menubar)
         self.menuProject.setObjectName(u"menuProject")
         MainWindow.setMenuBar(self.menubar)
@@ -347,19 +381,17 @@ class Ui_MainWindow(object):
 
         self.menubar.addAction(self.menuProject.menuAction())
         self.menubar.addAction(self.menuSetting.menuAction())
-        self.menubar.addAction(self.menuView.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
         self.menuSetting.addAction(self.actionLoad)
         self.menuSetting.addAction(self.actionSave)
         self.menuSetting.addAction(self.actionEmail)
         self.menuHelp.addAction(self.actionAbout)
-        self.menuView.addAction(self.actionResize)
         self.menuProject.addAction(self.actionNewProject)
         self.menuProject.addAction(self.actionLoadProject)
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -374,8 +406,6 @@ class Ui_MainWindow(object):
         self.actionEmail.setText(QCoreApplication.translate("MainWindow", u"Email", None))
         self.actionNewProject.setText(QCoreApplication.translate("MainWindow", u"New", None))
         self.actionLoadProject.setText(QCoreApplication.translate("MainWindow", u"Load", None))
-        self.applySettingsPushButton.setText(QCoreApplication.translate("MainWindow", u"Apply settings", None))
-        self.pushRun.setText(QCoreApplication.translate("MainWindow", u"Run", None))
         self.fibImageLabel.setText("")
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.getFibImagePushButton.setText(QCoreApplication.translate("MainWindow", u"Get image", None))
@@ -400,13 +430,16 @@ class Ui_MainWindow(object):
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Criterium", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Imaging", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAutofunctions), QCoreApplication.translate("MainWindow", u"Autofunctions", None))
+        self.driftcorrImageLabel.setText("")
+        self.addDriftCorrPushButton.setText(QCoreApplication.translate("MainWindow", u"Set drift correction area", None))
+        self.removeDriftCorrPushButton.setText(QCoreApplication.translate("MainWindow", u"Remove aras", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabDriftCorrection), QCoreApplication.translate("MainWindow", u"Drift corr", None))
         self.acbImageLabel.setText("")
         self.setAcbPushButton.setText(QCoreApplication.translate("MainWindow", u"Set ACB area", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAcb), QCoreApplication.translate("MainWindow", u"ACB", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabDriftCorrection), QCoreApplication.translate("MainWindow", u"Drift corr", None))
+        self.runPush.setText(QCoreApplication.translate("MainWindow", u"Run", None))
         self.menuSetting.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
-        self.menuView.setTitle(QCoreApplication.translate("MainWindow", u"View", None))
         self.menuProject.setTitle(QCoreApplication.translate("MainWindow", u"Project", None))
     # retranslateUi
 

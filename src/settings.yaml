@@ -6,10 +6,10 @@ acquisition:
   y_correction: 6.15661475326e-09
 autofunction:
 - af_area:
-    height: 0.023125
-    width: 0.06181818181818182
-    x: 0.09636363636363636
-    y: 0.035
+    height: 0.34375
+    width: 2.909090909090909
+    x: 1.4545454545454546
+    y: 0.171875
   autofunction: StepAutoFunction
   criterion_name: working_distance - image
   delta_x: 0
@@ -30,10 +30,10 @@ autofunction:
   sweeping_total_cycles: 1
   variable: electron_beam.working_distance
 - af_area:
-    height: 0.016875
-    width: 0.04727272727272727
-    x: 2.827272727272727
-    y: 0.318125
+    height: 0
+    width: 0
+    x: 0
+    y: 0
   autofunction: LineAutoFunction
   criterion_name: working_distance - line
   delta_x: 0
@@ -58,17 +58,17 @@ autofunction:
   variable: electron_beam.working_distance
 contrast_brightness:
   acb_area:
-    height: 0
-    width: 0
-    x: 0
-    y: 0
-  allowed_minimal_band: 0.5
-  allowed_saturation: 0.01
-  enabled: true
+    height: 0.085
+    width: 0.3709090909090909
+    x: 0.98
+    y: 0.156875
+  acb_enabled: false
+  allowed_minimal_band: 2
+  allowed_saturation: 1
   mask_name: none
-  p_brightness: 10
-  p_decrease_contrast: 10
-  p_increase_contrast: 10
+  p_brightness: 5
+  p_decrease_contrast: 3
+  p_increase_contrast: 4
 criterion_calculation:
 - border: 0.3
   criterion: frc_criterion
@@ -130,7 +130,7 @@ general:
   - electron_beam.detector_brightness
   - electron_beam.dwell_time
 image:
-- bit_depth: 16
+- bit_depth: 2
   dwell: 1.0e-06
   field_of_view:
   - 3.19e-05
@@ -188,7 +188,7 @@ milling:
     x: 0
     y: 0
   fiducial_margin: 1.0e-06
-  fiducial_rescan: 3
+  fiducial_rescan: 45
   fiducial_update: 30
   milling_area:
     height: 0

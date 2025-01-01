@@ -6,6 +6,7 @@ import yaml
 
 from fibsem_maestro.autofunctions.autofunction import StepAutoFunction
 from fibsem_maestro.autofunctions.autofunction_control import AutofunctionControl
+from fibsem_maestro.contrast_brightness.automatic_contrast_brightness import AutomaticContrastBrightness
 from fibsem_maestro.image_criteria.criteria import Criterion
 from fibsem_maestro.mask.masking import MaskingModel
 from fibsem_maestro.drift_correction.template_matching import TemplateMatchingDriftCorrection
@@ -87,6 +88,7 @@ class SerialControl:
 
         self._masks = self.initialize_masks()
         self._autofunctions = self.initialize_autofunctions(self.settings)
+        self._acb = self.initialize_acb()
         self._criterion_resolution = self.initialize_criterion_resolution()
         self._criterion_resolution.finalize_thread_func = self.finalize_calculate_resolution
         self._drift_correction = self.initialize_drift_correction()
@@ -103,6 +105,7 @@ class SerialControl:
         self.image_settings = settings['image']
         self.criterion_calculation_settings = settings['criterion_calculation']
         self.autofunction_settings = settings['autofunction']
+        self.contrast_brightness_settings = settings['contrast_brightness']
         self.mask_settings = settings['mask']
         self.email_settings = settings['email']
         self.dc_settings = settings['drift_correction']
@@ -175,6 +178,17 @@ class SerialControl:
             logging.error("Autofunction initialization failed! "+repr(e))
             raise RuntimeError('"Autofunction initialization failed!') from e
         return autofunctions
+
+    def initialize_acb(self):
+        """ Auto contrast-brightness init """
+        try:
+            acb = AutomaticContrastBrightness(self.contrast_brightness_settings, self._microscope, self.logger.log_params,
+                                             log_dir=self.logger.dirs_log)
+            print('ACB initialized')
+        except Exception as e:
+            logging.error("ACB initialization failed! " + repr(e))
+            raise RuntimeError("ACB initialization failed!") from e
+        return acb
 
     def initialize_criterion_resolution(self):
         """ Resolution measurement init """
@@ -273,10 +287,21 @@ class SerialControl:
             logging.error('Autofunction error. '+repr(e))
             print(Fore.RED + 'Autofunction error!')
 
+    def auto_contrast_brightness(self, slice_number):
+        try:
+            self._autofunctions(slice_number, self.image_resolution)
+            if len(self._autofunctions.scheduler) == 0:
+                print(Fore.GREEN + 'The autofunction queue is empty.')
+            else:
+                print(Fore.YELLOW + f'Waiting autofunctions: {[x.name for x in self._autofunctions.scheduler]}')
+        except Exception as e:
+            logging.error('Autofunction error. ' + repr(e))
+            print(Fore.RED + 'Autofunction error!')
+
     def acquire(self, slice_number):
         """ Acquire and save image """
         try:
-            self.image = self._microscope.acquire_image(slice_number)
+            self._microscope.acquire_image(slice_number)
             print(Fore.GREEN + 'Image acquired')
         except Exception as e:
             logging.error('Image acquisition error. '+repr(e))
@@ -338,6 +363,7 @@ class SerialControl:
             self.acquire(slice_number)  # acquire image
             self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
             self.drift_correction(slice_number)  # drift correction
+            self.auto_contrast_brightness(slice_number)
             # resolution calculation
             self.calculate_resolution(slice_number)
         else:

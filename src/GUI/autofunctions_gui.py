@@ -113,6 +113,7 @@ class AutofunctionsGui:
         self.af_area = ScanningArea.from_dict(self.selected_af['af_area'])
         self.window.autofunctionsImageLabel.rect = QRect()  # clear the drawing rectangle
         self.window.autofunctionsImageLabel.update()
+        self.window.apply_settings()  # save settings on af switch
 
     @property
     def af_area(self):
