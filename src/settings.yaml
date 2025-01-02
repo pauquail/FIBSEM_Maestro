@@ -103,11 +103,11 @@ dirs:
   template_matching: templates
 drift_correction:
   driftcorr_areas:
-  - height: 0
-    width: 0
-    x: 0
-    y: 0
-  min_confidence: 0
+  - height: 0.046875
+    width: 0.1290909090909091
+    x: 1.270909090909091
+    y: 0.210625
+  min_confidence: 0.2
   type: template_matching
 email:
   password_file: email_password.txt

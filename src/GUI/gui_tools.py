@@ -133,12 +133,15 @@ def get_module_members(module_path: str, member_type: str):
     elif member_type == 'func':
         inspect_member = inspect.isfunction
     elif member_type == 'mod':
-        inspect_member = inspect.ismodule()
+        inspect_member = inspect.ismodule
     else:
         raise ValueError(f'Unknown member type: {member_type}')
     imported_module = importlib.import_module(module_path)
-    return [cls[0] for cls in inspect.getmembers(imported_module, inspect_member)
-            if cls[1].__module__ == imported_module.__name__]
+    members = inspect.getmembers(imported_module, inspect_member)
+    if member_type == 'mod':
+        return [m[0] for m in members]
+    else:
+        return [m[0] for m in members if m[1].__module__ == imported_module.__name__]
 
 
 def get_setters(cls):

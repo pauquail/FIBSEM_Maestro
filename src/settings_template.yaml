@@ -37,7 +37,7 @@ milling:
   fiducial_rescan: 3  # number of scans for initial fiducial image
   minimal_similarity: 0.9 # minimal similarity of fiducial
   milling_enabled: true
-  fiducial_update: 30 # number of scan to fiducial image update
+  fiducial_update: 300 # number of scan to fiducial image update
 
 # Directories
 dirs:

@@ -12,6 +12,7 @@ from fibsem_maestro.serial_control import SerialControl
 from sem_gui import SemGui
 from autofunctions_gui import AutofunctionsGui
 from acb_gui import AcbGui
+from driftcorr_gui import DriftCorrGui
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -26,11 +27,14 @@ class Window(QMainWindow, Ui_MainWindow):
         self.autofunctions_gui = AutofunctionsGui(self, serial_control.autofunction_settings,
                                                   serial_control.mask_settings, serial_control.image_settings,
                                                   serial_control.criterion_calculation_settings)
+        self.driftcorr_gui = DriftCorrGui(self, serial_control.dc_settings)
         self.acb_gui = AcbGui(self, serial_control.contrast_brightness_settings, serial_control.mask_settings)
+
 
     def build_connections(self):
         self.actionAbout.triggered.connect(self.about_clicked)
-        self.runPush.clicked.connect(self.runPush_clicked)
+        self.runPushButton.clicked.connect(self.runPushButton_clicked)
+        self.stopPushButton.clicked.connect(self.stopPushButton_clicked)
 
     def about_clicked(self):
         QMessageBox.about(
@@ -42,8 +46,15 @@ class Window(QMainWindow, Ui_MainWindow):
             "<p>pavel.krep@gmail.com</p>",
         )
 
-    def runPush_clicked(self):
+    def runPushButton_clicked(self):
         self.apply_settings()
+
+    def stopPushButton_clicked(self):
+        pass
+
+    def closeEvent(self, event):
+        """ Form closing event """
+        self.apply_settings()  # save on form closing
 
     def apply_settings(self):
 
@@ -54,6 +65,8 @@ class Window(QMainWindow, Ui_MainWindow):
             self.fib_gui.serialize_layout()
         if hasattr(self, 'autofunctions_gui'):
             self.autofunctions_gui.serialize_layout()
+        if hasattr(self, 'driftcorr_gui'):
+            self.driftcorr_gui.serialize_layout()
         if hasattr(self, 'acb_gui'):
             self.acb_gui.serialize_layout()
 

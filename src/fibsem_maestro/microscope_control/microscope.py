@@ -94,8 +94,8 @@ def create_microscope(control: str):
                 new_stage_move *= self.beam.beam_shift_to_stage_move  # Direction conversion
                 self.relative_position = StagePosition(x=new_stage_move.x, y=new_stage_move.y)
                 self.beam.beam_shift = Point(0, 0)  # zero beam shift
-                return false
-            return true
+                return False
+            return True
 
         def blank_screen(self):
             """

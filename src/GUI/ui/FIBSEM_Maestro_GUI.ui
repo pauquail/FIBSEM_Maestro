@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>FIBSEM_Maestro v 1.0.</string>
+   <string>FIBSEM_Maestro v </string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -45,7 +45,7 @@
            <string notr="true"/>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabFib">
            <attribute name="title">
@@ -376,7 +376,7 @@
                 <item>
                  <widget class="QPushButton" name="removeDriftCorrPushButton">
                   <property name="text">
-                   <string>Remove aras</string>
+                   <string>Remove areas</string>
                   </property>
                  </widget>
                 </item>
@@ -452,9 +452,16 @@
     <item row="1" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QPushButton" name="runPush">
+       <widget class="QPushButton" name="runPushButton">
         <property name="text">
          <string>Run</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="stopPushButton">
+        <property name="text">
+         <string>Stop</string>
         </property>
        </widget>
       </item>
@@ -475,8 +482,11 @@
     <property name="title">
      <string>Settings</string>
     </property>
+    <addaction name="actionSetFolder"/>
+    <addaction name="separator"/>
     <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
+    <addaction name="separator"/>
     <addaction name="actionEmail"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -485,26 +495,18 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
-   <widget class="QMenu" name="menuProject">
-    <property name="title">
-     <string>Project</string>
-    </property>
-    <addaction name="actionNewProject"/>
-    <addaction name="actionLoadProject"/>
-   </widget>
-   <addaction name="menuProject"/>
    <addaction name="menuSetting"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionLoad">
    <property name="text">
-    <string>Load</string>
+    <string>Load Settings</string>
    </property>
   </action>
   <action name="actionSave">
    <property name="text">
-    <string>Save</string>
+    <string>Save As...</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -522,14 +524,19 @@
     <string>Email</string>
    </property>
   </action>
-  <action name="actionNewProject">
+  <action name="actionSetFolderProject">
    <property name="text">
-    <string>New</string>
+    <string>Set folder</string>
    </property>
   </action>
   <action name="actionLoadProject">
    <property name="text">
     <string>Load</string>
+   </property>
+  </action>
+  <action name="actionSetFolder">
+   <property name="text">
+    <string>Set Folder...</string>
    </property>
   </action>
  </widget>

@@ -23,6 +23,7 @@ class SerialControlLogger:
         self.dirs_log = dirs_log
         self._microscope = microscope
         self._electron = self._microscope.electron_beam
+        self._ion = self._microscope.ion_beam
         self.log_params = {}  # logging dict (important parameters to log)
         # logger settings
         self.logger = logging.getLogger()  # Create a logger object.
@@ -154,7 +155,7 @@ class SerialControl:
             print('Microscope initialized')
         except Exception as e:
             logging.error("Microscope initialization failed! "+repr(e))
-            raise RuntimeError('"Microscope initialization failed!') from e
+            raise RuntimeError('Microscope initialization failed!') from e
         return microscope
 
     def initialize_masks(self):
@@ -163,8 +164,8 @@ class SerialControl:
             # init all masks
             masks = [MaskingModel(m) for m in self.mask_settings]
         except Exception as e:
-            logging.error("Mask loading failed! Masks will be omitted. " + repr(e))
-            masks = None
+            logging.error("Mask loading failed!" + repr(e))
+            raise RuntimeError("Mask loading failed!") from e
         return masks
 
     def initialize_autofunctions(self, settings):

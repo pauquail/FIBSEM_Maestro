@@ -39,10 +39,12 @@ class Ui_MainWindow(object):
         self.actionResize.setObjectName(u"actionResize")
         self.actionEmail = QAction(MainWindow)
         self.actionEmail.setObjectName(u"actionEmail")
-        self.actionNewProject = QAction(MainWindow)
-        self.actionNewProject.setObjectName(u"actionNewProject")
+        self.actionSetFolderProject = QAction(MainWindow)
+        self.actionSetFolderProject.setObjectName(u"actionSetFolderProject")
         self.actionLoadProject = QAction(MainWindow)
         self.actionLoadProject.setObjectName(u"actionLoadProject")
+        self.actionSetFolder = QAction(MainWindow)
+        self.actionSetFolder.setObjectName(u"actionSetFolder")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -356,10 +358,15 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.runPush = QPushButton(self.centralwidget)
-        self.runPush.setObjectName(u"runPush")
+        self.runPushButton = QPushButton(self.centralwidget)
+        self.runPushButton.setObjectName(u"runPushButton")
 
-        self.horizontalLayout_2.addWidget(self.runPush)
+        self.horizontalLayout_2.addWidget(self.runPushButton)
+
+        self.stopPushButton = QPushButton(self.centralwidget)
+        self.stopPushButton.setObjectName(u"stopPushButton")
+
+        self.horizontalLayout_2.addWidget(self.stopPushButton)
 
 
         self.gridLayout.addLayout(self.horizontalLayout_2, 1, 0, 1, 1)
@@ -372,40 +379,39 @@ class Ui_MainWindow(object):
         self.menuSetting.setObjectName(u"menuSetting")
         self.menuHelp = QMenu(self.menubar)
         self.menuHelp.setObjectName(u"menuHelp")
-        self.menuProject = QMenu(self.menubar)
-        self.menuProject.setObjectName(u"menuProject")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
-        self.menubar.addAction(self.menuProject.menuAction())
         self.menubar.addAction(self.menuSetting.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
+        self.menuSetting.addAction(self.actionSetFolder)
+        self.menuSetting.addSeparator()
         self.menuSetting.addAction(self.actionLoad)
         self.menuSetting.addAction(self.actionSave)
+        self.menuSetting.addSeparator()
         self.menuSetting.addAction(self.actionEmail)
         self.menuHelp.addAction(self.actionAbout)
-        self.menuProject.addAction(self.actionNewProject)
-        self.menuProject.addAction(self.actionLoadProject)
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"FIBSEM_Maestro v 1.0.", None))
-        self.actionLoad.setText(QCoreApplication.translate("MainWindow", u"Load", None))
-        self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"FIBSEM_Maestro v ", None))
+        self.actionLoad.setText(QCoreApplication.translate("MainWindow", u"Load Settings", None))
+        self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save As...", None))
         self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About", None))
         self.actionResize.setText(QCoreApplication.translate("MainWindow", u"Resize", None))
         self.actionEmail.setText(QCoreApplication.translate("MainWindow", u"Email", None))
-        self.actionNewProject.setText(QCoreApplication.translate("MainWindow", u"New", None))
+        self.actionSetFolderProject.setText(QCoreApplication.translate("MainWindow", u"Set folder", None))
         self.actionLoadProject.setText(QCoreApplication.translate("MainWindow", u"Load", None))
+        self.actionSetFolder.setText(QCoreApplication.translate("MainWindow", u"Set Folder...", None))
         self.fibImageLabel.setText("")
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.getFibImagePushButton.setText(QCoreApplication.translate("MainWindow", u"Get image", None))
@@ -432,14 +438,14 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAutofunctions), QCoreApplication.translate("MainWindow", u"Autofunctions", None))
         self.driftcorrImageLabel.setText("")
         self.addDriftCorrPushButton.setText(QCoreApplication.translate("MainWindow", u"Set drift correction area", None))
-        self.removeDriftCorrPushButton.setText(QCoreApplication.translate("MainWindow", u"Remove aras", None))
+        self.removeDriftCorrPushButton.setText(QCoreApplication.translate("MainWindow", u"Remove areas", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabDriftCorrection), QCoreApplication.translate("MainWindow", u"Drift corr", None))
         self.acbImageLabel.setText("")
         self.setAcbPushButton.setText(QCoreApplication.translate("MainWindow", u"Set ACB area", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabAcb), QCoreApplication.translate("MainWindow", u"ACB", None))
-        self.runPush.setText(QCoreApplication.translate("MainWindow", u"Run", None))
+        self.runPushButton.setText(QCoreApplication.translate("MainWindow", u"Run", None))
+        self.stopPushButton.setText(QCoreApplication.translate("MainWindow", u"Stop", None))
         self.menuSetting.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
-        self.menuProject.setTitle(QCoreApplication.translate("MainWindow", u"Project", None))
     # retranslateUi
 

@@ -15,7 +15,7 @@ class Milling:
         self.logging_dict = logging_dict
         self._log_dir = log_dir
         self._fiducial_template = None
-        self.position = None
+        self.position = None  # position [m] from milling start edge
 
     def settings_init(self, milling_settings):
         self.direction = milling_settings['direction']
@@ -31,7 +31,6 @@ class Milling:
         self.minimal_similarity = milling_settings['minimal_similarity']
         self.milling_enabled = milling_settings['milling_enabled']
         self.fiducial_update = milling_settings['fiducial_update']
-
 
     def load_settings(self):
         """ Load microscope settings from file and set microscope for milling """
@@ -59,82 +58,102 @@ class Milling:
 
     @property
     def init_position(self):
-        """ Return the edge of milling area (based on mill direction)"""
+        """ Return the initial edge of milling area (based on mill direction)"""
         return self.milling_area.y if self.direction > 0 else self.milling_area.y + self.milling_area.height
 
     @property
     def fiducial_with_margin(self):
-        return ScanningArea(center = Point(self.fiducial_area.x - self.fiducial_margin, self.fiducial_area.y - self.fiducial_margin),
-                            width = self.fiducial_area.width + 2*self.fiducial_margin,
-                            height = self.fiducial_area.height + 2*self.fiducial_margin)
+        """ Get fiducial area extended by the margin"""
+        return ScanningArea(center=Point(self.fiducial_area.x - self.fiducial_margin, self.fiducial_area.y - self.fiducial_margin),
+                            width=self.fiducial_area.width + 2*self.fiducial_margin,
+                            height=self.fiducial_area.height + 2*self.fiducial_margin)
 
     def milling_init(self):
+        """ Save the milling fiducial """
         image = np.zeros([self.fiducial_rescan, self.fiducial_area.width, self.fiducial_area.height])
+        # scan the fiducial several times
         for i in range(self.fiducial_rescan):
             self._microscope.beam.reduced_scanning = self.fiducial_area
             image[i] = self._microscope.area_scanning()
 
-        width = image[0].shape[0]//2
-        height = image[1].shape[1]//2
-        dx1, dy1, maxval1 = template_matching(image[0], image[2], width, height)
-        dx2, dy2, maxval2 = template_matching(image[1], image[2], width, height)
+        center_x = image[0].shape[0]//2
+        center_y = image[0].shape[1]//2
 
-        if min([maxval1, maxval2]) < self.minimal_similarity:
-            print(Fore.RED, 'Fiducial scan failed. Scan similarity is too low.')
-            logging.error(f'Fiducial scan failed. Similarity 1-3 is {maxval1} and 2-3 is {maxval2}. '
-                          f'Threshold is set to {self.minimal_similarity}')
-            self._fiducial_template = None
-        else:
-            max_rescan_drift = max([abs(dx1), abs(dx2), abs(dy1), abs(dy2)])
-            if max_rescan_drift > self.slice_distance:
-                print(Fore.RED, 'Fiducial scan failed. Drift is too high.')
-                logging.error(f'Fiducial scan failed. Drift is {max_rescan_drift} and slice distance is {self.slice_distance}')
+        # all possible pairs of rescan images (without repetitions)
+        pairs = [(a, b) for a in range(self.fiducial_rescan) for b in range(a + 1, self.fiducial_rescan)]
+        for a, b in pairs:
+            dx, dy, max_val = template_matching(image[a], image[b], center_x, center_y)
+            if max_val < self.minimal_similarity:
+                print(Fore.RED, f'Fiducial scan failed. Scan similarity between {a + 1}-{b + 1} is too low.')
+                logging.error(
+                    f'Fiducial scan failed. Similarity {a + 1}-{b + 1} is {max_val}. Threshold is set to {self.minimal_similarity}')
                 self._fiducial_template = None
-            else:
-                self.position = 0
-                self._fiducial_template = np.mean(image, axis=0)
+                return
+            if max([dx, dy]) > self.slice_distance:
+                print(Fore.RED, 'Fiducial scan failed. Drift is too high.')
+                logging.error(
+                    f'Fiducial scan failed. Drift is {max([dx, dy])} and slice distance is {self.slice_distance}')
+                self._fiducial_template = None
+                return
+
+        self.position = 0
+        # calculate template as mean of images
+        self._fiducial_template = np.mean(image, axis=0)
 
     def fiducial_correction(self):
+        """ Set beam_shift & stage to mill """
         self._microscope.beam.reduced_scanning = self.fiducial_with_margin
         fiducial_image = self._microscope.area_scanning()
-        width = fiducial_image.shape[0] // 2
-        height = fiducial_image.shape[1] // 2
-        dx, dy, sim = template_matching(fiducial_image, self._fiducial_template, width, height)
+        center_x = fiducial_image.shape[0] // 2
+        center_y = fiducial_image.shape[1] // 2
+        dx, dy, sim = template_matching(fiducial_image, self._fiducial_template, center_x, center_y)
         if sim < self.minimal_similarity:
             print(Fore.RED, 'Fiducial localization failed')
-            raise exceptions.FiducialLocalizationError('Fiducial localization failed', sim, self._fiducial_template,
-                                                       fiducial_image)
+            raise RuntimeError(f'Fiducial localization failed. Similarity={sim}')
 
+        # convert shift in the image to the beam shift
         shift_x = dx * fiducial_image.pixel_size * self._microscope.beam.image_to_beam_shift.x
         shift_y = dy * fiducial_image.pixel_size * self._microscope.beam.image_to_beam_shift.y
+
         logging.info(f'Milling correction: x={shift_x}, y={shift_y}')
-        if self._microscope.beam_shift_with_verification(Point(shift_x, shift_y)) == false:  # stage moved
+        if not self._microscope.beam_shift_with_verification(Point(shift_x, shift_y)):  # stage moved
             logging.warning('Stage moved. The fiducial must be rescanned!')
             self.fiducial_correction()
 
-    def milling(self):
+    def milling(self, slice_number: int):
         pixel_size = self._fiducial_template.pixel_size
+        # increment milling pattern position by slice distance
         self.position += self.slice_distance * self.direction
-        beam_shift = (self._microscope.ion_beam.beam_shift +
-                      Point(0, self.position % pixel_size * self._microscope.ion_beam.image_to_beam_shift.y))
-        pattern_shift = self.position - beam_shift
-        pattern_position = self.init_position + pattern_shift
+        # change beam_shift for subpixel precision of milling
+        beam_shift = Point(0, -self.position % pixel_size * self._microscope.ion_beam.image_to_beam_shift.y)
+        # final pattern position
+        pattern_position = self.init_position + self.position
 
         logging.debug('Pattern position: ' + str(pattern_position))
-        logging.debug('Beam shift: ' + str(beam_shift))
+        logging.debug('Beam shift: ' + str(beam_shift.y))
         self.logging_dict['ion_pattern_position'] = pattern_position
-        self.logging_dict['ion_beam_beam_shift'] = beam_shift
+        self.logging_dict['ion_beam_shift'] = beam_shift.y
 
-        if self._microscope.beam_shift_with_verification(beam_shift) == false:
-            logging.error('Beam shift is on limit. Set the new milling position.')
-            raise exceptions.FiducialLocalizationError('Beam shift is on limit')
+        if not self._microscope.beam_shift_with_verification(self._microscope.ion_beam.beam_shift + beam_shift):
+            print(Fore.RED, 'Beam shift is on the limit')
+            raise RuntimeError('Beam shift is on the limit')
 
-        # set pattern. y: pattern_position check if it is in fov
+        try:
+        # set pattern.
+        except:
+            print(Fore.RED, 'Milling pattern is out of FoV. Set the new milling position.')
+            raise RuntimeError('Milling pattern is out of FoV')
 
+        # fiducial image rescan
+        if slice_number % self.fiducial_update == 0:
+            print(Fore.YELLOW, 'Milling fiducial update')
+            logging.warning(f'Milling fiducial update on slice {slice_number}')
+            self.milling_init()
 
-    def __call__(self):
+    def __call__(self, slice_number: int):
         if self.milling_enabled:
             self._microscope.beam = self._microscope.ion_beam  # switch to ion
             self.load_settings()  # apply fib settings
-            self.milling()
+            self.fiducial_correction()  # set beam shift to correct drifts
+            self.milling(slice_number)
             self.save_settings()
