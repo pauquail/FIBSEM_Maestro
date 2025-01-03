@@ -21,7 +21,7 @@ class Milling:
         self.direction = milling_settings['direction']
         self.fiducial_margin = milling_settings['fiducial_margin']
         self.milling_depth = milling_settings['milling_depth']
-        self.pattern = milling_settings['pattern']
+        self.pattern_file = milling_settings['pattern_file']
         self.slice_distance = milling_settings['slice_distance']
         self.variables_to_save = milling_settings['variables_to_save']
         self.settings_file = milling_settings['settings_file']
@@ -138,11 +138,13 @@ class Milling:
             print(Fore.RED, 'Beam shift is on the limit')
             raise RuntimeError('Beam shift is on the limit')
 
-        try:
-        # set pattern.
-        except:
-            print(Fore.RED, 'Milling pattern is out of FoV. Set the new milling position.')
-            raise RuntimeError('Milling pattern is out of FoV')
+        image_shape = self._microscope.ion_beam.resolution
+        left_top, size = self.milling_area.to_img_coordinates(image_shape)
+        left_top[1] = pattern_position  # modify pattern y
+        size[1] = self.slice_distance  # modify height
+        milling_rect = ScanningArea.from_image_coordinates(image_shape, left_top[0], left_top[1], size[0], size[1])
+        logging.info(f'Milling on position: {milling_rect.to_dict()}')
+        self._microscope.ion_beam.rectangle_milling(self.pattern_file, rect=milling_rect, depth=self.milling_depth)
 
         # fiducial image rescan
         if slice_number % self.fiducial_update == 0:
@@ -155,5 +157,5 @@ class Milling:
             self._microscope.beam = self._microscope.ion_beam  # switch to ion
             self.load_settings()  # apply fib settings
             self.fiducial_correction()  # set beam shift to correct drifts
-            self.milling(slice_number)
+            self.milling(slice_number)  # pattern milling
             self.save_settings()

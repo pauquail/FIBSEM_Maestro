@@ -1,3 +1,4 @@
+import concurrent.futures
 import logging
 import os
 
@@ -72,6 +73,7 @@ class SerialControlLogger:
 
 class SerialControl:
     def __init__(self, settings_path='settings.yaml'):
+        self._stopping_flag = False
         self.image = None  # actual image
         self.image_resolution = 0  # initial image resolution = 0 # initial image res
         self.settings_path = settings_path
@@ -344,13 +346,37 @@ class SerialControl:
             logging.error('Microscope settings saving error! ' + repr(e))
             print(Fore.RED + 'Microscope settings saving failed!')
 
+    def stop(self):
+        self._stopping_flag = True
+
+    def run(self, start_slice_number):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(self.run_async, start_slice_number)
+
+    def run_async(self, start_slice_number):
+        slice_number = start_slice_number
+        while self.cycle(slice_number):
+            logging.info(f'---Slice {slice_number} completed ---')
+
+    def check_stopping(self):
+        if self._stopping_flag:
+            logging.warning('Stopping executed')
+            self.microscope.electron_beam.stop_acquisition()
+            self.microscope.ion_beam.stop_acquisition()
+            self._stopping_flag = False
+            return True
+        else:
+            return False
+
     def cycle(self, slice_number):
         # wait for resolution calculation if needed anf AF main imaging criterion calculation
         self._criterion_resolution.join_all_threads()
         self.wait_for_af_criterion_calculation()
-
+        if self.check_stopping():
+            return False
         self.settings_init()  # read settings.yaml and reinit all
         print(Fore.YELLOW + f'Current slice number: {slice_number}')
+        logging.info(f'Current slice number: {slice_number}')
 
         self.logger.set_log_file(slice_number)  # set logging file (logging output)
         self.logger.reset_log(slice_number)   # set log of important parameters (dict to yaml)
@@ -358,20 +384,34 @@ class SerialControl:
         if self.imaging_enabled:
             self._microscope.beam = self._microscope.electron_beam  # switch to electrons
             self.load_settings()  # load settings and set microscope
+            if self.check_stopping():
+                return False
             self.correction()  # wd and y correction
+            if self.check_stopping():
+                return False
             self.autofunction(slice_number)  # autofunctions handling
+            if self.check_stopping():
+                return False
             self.logger.log()  # save settings and params
             self.acquire(slice_number)  # acquire image
+            if self.check_stopping():
+                return False
             self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
+            if self.check_stopping():
+                return False
             self.drift_correction(slice_number)  # drift correction
+            if self.check_stopping():
+                return False
             self.auto_contrast_brightness(slice_number)
+            if self.check_stopping():
+                return False
             # resolution calculation
             self.calculate_resolution(slice_number)
         else:
             self.logger.log()  # save settings and params
             print(Fore.RED + 'Imaging skipped!')
             logging.warning('Imaging skipped because imaging is disabled in configuration!')
-
+        return True
     @property
     def microscope(self):
         return self._microscope

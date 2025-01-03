@@ -19,7 +19,7 @@ milling:
   slice_distance: 10.0e-9
   fiducial_margin: 1.0e-6  # the searching area for the fiducial is bigger than defined size
   milling_depth: 1.0-6
-  pattern: CCS
+  pattern_file: CCS
   direction: -1 # -1 slicing progress upwards, 1 down
   variables_to_save: [ 'position','ion_beam.working_distance',
                        'ion_beam.beam_shift','ion_beam.detector_contrast','ion_beam.detector_brightness']

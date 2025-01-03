@@ -1,15 +1,14 @@
 import logging
 
 from fibsem_maestro.microscope_control.abstract_control import MicroscopeControl, StagePosition, BeamControl
-from fibsem_maestro.tools.support import Point, Image
-
+from fibsem_maestro.tools.support import Point, Image, ScanningArea
 
 try:
     raise ImportError("AS forced to off!!!")
 
     from autoscript_sdb_microscope_client import SdbMicroscopeClient
     from autoscript_sdb_microscope_client.structures import (Point as PointAS, GrabFrameSettings, AdornedImage)
-    from autoscript_sdb_microscope_client.enumerations import ImagingDevice, ImageFileFormat
+    from autoscript_sdb_microscope_client.enumerations import ImagingDevice, ImageFileFormat, BeamType
 
     virtual_mode = False
     logging.info("AS library imported.")
@@ -98,6 +97,7 @@ class ElectronBeam(BeamControl):
         self._microscope = microscope
         self._beam = self._microscope.beams.electron_beam
         self._modality = 'eb'
+        self._beam_type = BeamType.ELECTRON
 
         # default values
         self._line_integration = 1
@@ -395,6 +395,39 @@ class ElectronBeam(BeamControl):
         img = self._microscope.imaging.get_image()
         return Image.from_as(img)
 
+    def rectangle_milling(self, app_file: str, rect: ScanningArea, depth: float):
+        self.select_modality()  # activate right quad
+        self._microscope.patterning.clear_patterns()
+        self._microscope.patterning.set_default_beam_type(self._beam_type)
+        self._microscope.patterning.set_default_application_file(app_file)
+        try:
+            if 'ccs' in str.lower(app_file):
+                pattern = self._microscope.patterning.create_cleaning_cross_section(center_x=rect.center.y,
+                                                                                    center_y=rect.center.y,
+                                                                                    width=rect.width,
+                                                                                    height=rect.height,
+                                                                                    depth=depth)
+            elif 'rcs' in str.lower(app_file):
+                pattern = self._microscope.patterning.create_regular_cross_section(center_x=rect.center.y,
+                                                                                    center_y=rect.center.y,
+                                                                                    width=rect.width,
+                                                                                    height=rect.height,
+                                                                                    depth=depth)
+            else:
+                pattern = self._microscope.patterning.create_rectangle(center_x=rect.center.y,
+                                                                       center_y=rect.center.y,
+                                                                       width=rect.width,
+                                                                       height=rect.height,
+                                                                       depth=depth)
+        except Exception as e:
+            logging.error('Pattern create error. ' + repr(e))
+            raise Exception('Pattern create error. ' + repr(e))
+
+        logging.debug("Patterning in progress...")
+        self._microscope.patterning.run()
+        self._microscope.patterning.clear_patterns()
+        logging.debug("Patterning completed")
+
     @property
     def line_integration(self):
         logging.debug(f"Getting line integration ({self._modality}): {self._line_integration}.")
@@ -595,6 +628,7 @@ class IonBeam(ElectronBeam):
         super().__init__(microscope)
         self._beam = self._microscope.beams.ion_beam
         self._modality = 'ib'
+        self._beam_type = BeamType.ION
 
     @property
     def working_distance(self):
@@ -613,21 +647,10 @@ class IonBeam(ElectronBeam):
         :param wd: The working distance value to be set.
 
         This method is used to set the working distance of the beam in the microscope.
+        WD of ion beam is set differently the e beam.
         """
         logging.debug(f"Setting working distance ({self._modality}): {wd}")
         self._beam.working_distance.value = wd
-
-    def select_modality(self):
-        """
-        This method is used to switch the microscope's modality between the Electron Beam (eb) mode and the Ion Beam
-        (ib) mode. The selection of the modality will have an impact on starting and stopping the acquisition,
-        grab and get image, and on the selected detector.
-
-        The Electron Beam mode is always in Quad 1, while the Ion Beam mode is always in Quad 2.
-
-        """
-        self._microscope.imaging.set_active_view(2)
-        self._microscope.imaging.set_active_device(ImagingDevice.ION_BEAM)
 
     @ property
     def beam_shift_to_stage_move(self):

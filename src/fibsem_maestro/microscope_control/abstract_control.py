@@ -165,6 +165,10 @@ class BeamControl(ABC):
     def get_image(self):
         pass
 
+    @abstractmethod
+    def rectangle_milling(self, app_file: str, rect: ScanningArea, depth: float):
+        pass
+
     @property
     @abstractmethod
     def line_integration(self):

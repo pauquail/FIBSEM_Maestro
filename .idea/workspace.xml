@@ -6,19 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="41eb1022-c48c-4110-84d2-0a62addead13" name="Changes" comment="dev progress">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/driftcorr_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/driftcorr_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/forms/FIBSEM_Maestro_GUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/forms/FIBSEM_Maestro_GUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/gui_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/gui_tools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/maestro_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/maestro_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/ui/FIBSEM_Maestro_GUI.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/ui/FIBSEM_Maestro_GUI.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/asv_adapter.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/asv_main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/microscope.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/abstract_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/abstract_control.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/autoscript_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/microscope_control/autoscript_control.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/milling/milling.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/milling/milling.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fibsem_maestro/serial_control.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/settings.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/settings.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/settings_template.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/settings_template.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/version.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -334,7 +326,7 @@
       <workItem from="1734209328757" duration="4001000" />
       <workItem from="1734294408045" duration="13117000" />
       <workItem from="1735498736414" duration="7872000" />
-      <workItem from="1735755151798" duration="16323000" />
+      <workItem from="1735755151798" duration="26468000" />
     </task>
     <task id="LOCAL-00001" summary="init commit">
       <option name="closed" value="true" />
@@ -632,7 +624,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735768477312</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="dev progress">
+      <option name="closed" value="true" />
+      <created>1735855661347</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1735855661347</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
