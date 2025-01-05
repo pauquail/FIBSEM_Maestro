@@ -14,7 +14,7 @@ try:
     logging.info("AS library imported.")
 except ImportError:
     from fibsem_maestro.microscope_control.virtual_control import VirtualMicroscope
-    from fibsem_maestro.microscope_control.virtual_control import StagePosition as StagePositionAS, ImagingDevice
+    from fibsem_maestro.microscope_control.virtual_control import StagePosition as StagePositionAS, ImagingDevice, BeamType
 
     virtual_mode = True
     logging.warning("AS library could not be imported. Virtual mode used.")
@@ -376,12 +376,13 @@ class ElectronBeam(BeamControl):
         except Exception as e:
             logging.info('Grabbing frame to disk. ' + repr(e))
             if file_name is not None:
-                self._microscope.imaging.grab_frame_to_disk(file_name, ImageFileFormat.TIFF, img_settings)
-                logging.info(f"Image grabbed to disk.")
-                img = AdornedImage.load(file_name)
-                return Image.from_as(img)
-            else:
-                raise Exception('Unable to grab the image. File name must be provided')
+                file_name = 'temp.tiff'
+                logging.warning('File name was not provided. The image will be saved to temp.tiff')
+            self._microscope.imaging.grab_frame_to_disk(file_name, ImageFileFormat.TIFF, img_settings)
+            logging.info(f"Image grabbed to disk.")
+            img = AdornedImage.load(file_name)
+            return Image.from_as(img)
+
 
     def get_image(self):
         """

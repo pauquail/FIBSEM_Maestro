@@ -91,6 +91,12 @@ def serialize_form(layout: QFormLayout, serialized_settings):
 
 
 def create_ImageLabel(layout):
+    for i in range(layout.count()):
+        field_item = layout.itemAt(i)
+        if field_item is not None:
+            widget = field_item.widget()
+            if isinstance(widget, ImageLabel):
+                return widget
     # image label
     label = ImageLabel()
     layout.insertWidget(0, label)

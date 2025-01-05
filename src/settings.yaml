@@ -6,10 +6,10 @@ acquisition:
   y_correction: 6.15661475326e-09
 autofunction:
 - af_area:
-    height: 0.34375
-    width: 2.909090909090909
-    x: 1.4545454545454546
-    y: 0.171875
+    height: 0
+    width: 0
+    x: 0
+    y: 0
   autofunction: StepAutoFunction
   criterion_name: working_distance - image
   delta_x: 0
@@ -39,7 +39,8 @@ autofunction:
   delta_x: 0
   execute_resolution: 0
   execute_slices: 0
-  forbidden_sections: 0
+  forbidden_sections:
+  - 0
   image_name: working_distance - line
   keep_time: 10
   mask_name: none
@@ -58,17 +59,17 @@ autofunction:
   variable: electron_beam.working_distance
 contrast_brightness:
   acb_area:
-    height: 0.085
-    width: 0.3709090909090909
-    x: 0.98
-    y: 0.156875
-  acb_enabled: false
-  allowed_minimal_band: 2
-  allowed_saturation: 1
+    height: 0
+    width: 0
+    x: 0
+    y: 0
+  acb_enabled: true
+  allowed_minimal_band: 0.5
+  allowed_saturation: 0.01
   mask_name: none
-  p_brightness: 5
-  p_decrease_contrast: 3
-  p_increase_contrast: 4
+  p_brightness: 10
+  p_decrease_contrast: 10
+  p_increase_contrast: 10
 criterion_calculation:
 - border: 0.3
   criterion: frc_criterion
@@ -98,16 +99,17 @@ criterion_calculation:
   name: working_distance - line
   tile_size: 0
 dirs:
-  log: logs
-  output_images: images
-  template_matching: templates
+  log: D:/TEMP\logs
+  output_images: D:/TEMP\images
+  template_matching: D:/TEMP\templates
 drift_correction:
   driftcorr_areas:
-  - height: 0.046875
-    width: 0.1290909090909091
-    x: 1.270909090909091
-    y: 0.210625
-  min_confidence: 0.2
+  - height: 0
+    width: 0
+    x: 0
+    y: 0
+  min_confidence: 0
+  rescan: 20
   type: template_matching
 email:
   password_file: email_password.txt
@@ -130,7 +132,7 @@ general:
   - electron_beam.detector_brightness
   - electron_beam.dwell_time
 image:
-- bit_depth: 2
+- bit_depth: 16
   dwell: 1.0e-06
   field_of_view:
   - 3.19e-05
@@ -156,8 +158,8 @@ image:
   images_line_integration: 1
   name: working_distance - line
   resolution:
-  - 6144.0
-  - 4096.0
+  - 6144
+  - 4096
 mask:
 - downsampling_factor: 4
   fill_holes: true
@@ -188,8 +190,8 @@ milling:
     x: 0
     y: 0
   fiducial_margin: 1.0e-06
-  fiducial_rescan: 45
-  fiducial_update: 30
+  fiducial_rescan: 3
+  fiducial_update: 300
   milling_area:
     height: 0
     width: 0
@@ -198,7 +200,7 @@ milling:
   milling_depth: 1.0-6
   milling_enabled: true
   minimal_similarity: 0.9
-  pattern: CCS
+  pattern_file: CCS
   settings_file: fib_microscope_settings.yaml
   slice_distance: 1.0e-08
   variables_to_save:

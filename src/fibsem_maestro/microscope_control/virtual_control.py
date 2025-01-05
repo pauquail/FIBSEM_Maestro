@@ -8,6 +8,9 @@ class ImagingDevice(Enum):
     ELECTRON_BEAM = 1
     ION_BEAM = 2
 
+class BeamType(Enum):
+    ELECTRON = 1
+    ION = 2
 
 class StagePosition:
     """ Fake stage position. It save all arguments in the constructor to attributes """

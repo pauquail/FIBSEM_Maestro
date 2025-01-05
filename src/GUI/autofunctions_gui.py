@@ -10,12 +10,12 @@ from gui_tools import populate_form, serialize_form, create_ImageLabel, confirm_
 
 
 class AutofunctionsGui:
-    def __init__(self, window, autofunctions_settings, mask_settings, image_settings, criterion_settings):
+    def __init__(self, window):
         self.window = window
-        self.autofunctions_settings = autofunctions_settings
-        self.image_settings = image_settings
-        self.criterion_settings = criterion_settings
-        self.mask_settings = mask_settings
+        self.autofunctions_settings = self.window.serial_control.autofunctions_settings
+        self.image_settings = self.window.serial_control.image_settings
+        self.criterion_settings = self.window.serial_control.criterion_settings
+        self.mask_settings = self.window.serial_control.mask_settings
         self.build_connections()
 
         self.window.autofunctionsImageLabel = create_ImageLabel(self.window.autofunctionsVerticalLayout)

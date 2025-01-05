@@ -386,7 +386,6 @@ class Ui_MainWindow(object):
 
         self.menubar.addAction(self.menuSetting.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
-        self.menuSetting.addAction(self.actionSetFolder)
         self.menuSetting.addSeparator()
         self.menuSetting.addAction(self.actionLoad)
         self.menuSetting.addAction(self.actionSave)
@@ -404,11 +403,11 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"FIBSEM_Maestro v ", None))
-        self.actionLoad.setText(QCoreApplication.translate("MainWindow", u"Load Settings", None))
-        self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save As...", None))
+        self.actionLoad.setText(QCoreApplication.translate("MainWindow", u"Load Settings...", None))
+        self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save Settings As...", None))
         self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About", None))
         self.actionResize.setText(QCoreApplication.translate("MainWindow", u"Resize", None))
-        self.actionEmail.setText(QCoreApplication.translate("MainWindow", u"Email", None))
+        self.actionEmail.setText(QCoreApplication.translate("MainWindow", u"Email...", None))
         self.actionSetFolderProject.setText(QCoreApplication.translate("MainWindow", u"Set folder", None))
         self.actionLoadProject.setText(QCoreApplication.translate("MainWindow", u"Load", None))
         self.actionSetFolder.setText(QCoreApplication.translate("MainWindow", u"Set Folder...", None))

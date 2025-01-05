@@ -10,9 +10,9 @@ from fibsem_maestro.tools.support import ScanningArea, Point
 
 
 class DriftCorrGui:
-    def __init__(self, window, drift_correction_settings):
+    def __init__(self, window):
         self.window = window
-        self.drift_correction_settings = drift_correction_settings
+        self.drift_correction_settings = self.window.serial_control.drift_correction_settings
         self.populate_form()
 
         self.window.driftcorrImageLabel = create_ImageLabel(self.window.driftcorrVerticalLayout)

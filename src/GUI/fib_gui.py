@@ -3,9 +3,9 @@ from fibsem_maestro.tools.support import Image, ScanningArea, Point
 
 
 class FibGui:
-    def __init__(self, window, fib_settings):
+    def __init__(self, window):
         self.window = window
-        self.fib_settings = fib_settings
+        self.fib_settings = self.window.serial_control.fib_settings
         self.populate_form()
         self.build_connections()
 

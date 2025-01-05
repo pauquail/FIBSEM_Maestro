@@ -28,7 +28,7 @@ class SerialControlLogger:
         self.log_params = {}  # logging dict (important parameters to log)
         # logger settings
         self.logger = logging.getLogger()  # Create a logger object.
-        self.logger.setLevel(log_level)
+        self.log_level = log_level
         fmt = '%(module)s - %(levelname)s - %(message)s'
         self.logger_formatter = logging.Formatter(fmt)
         self.logging_file_handler = None
@@ -70,12 +70,21 @@ class SerialControlLogger:
             yaml.dump(self.log_params, f, default_flow_style=False)
         self.log_params.clear()
 
+    @property
+    def log_level(self):
+        return self.logger.level
+
+    @log_level.setter
+    def log_level(self, value):
+        self.logger.setLevel(value)
+
 
 class SerialControl:
     def __init__(self, settings_path='settings.yaml'):
         self._stopping_flag = False
         self.image = None  # actual image
         self.image_resolution = 0  # initial image resolution = 0 # initial image res
+        self.future = None  # thread for acquisition running
         self.settings_path = settings_path
 
         self.settings_init()
@@ -130,6 +139,10 @@ class SerialControl:
 
         self.actual_image_settings = find_in_dict(self.image_name, self.image_settings)
         self.actual_criterion = find_in_dict(self.criterion_name, self.criterion_calculation_settings)
+
+        if hasattr(self, 'logger'):
+            self.logger.dirs_log = self.dirs_settings['log']
+            self.logger.log_level = self.general_settings['log_level']
 
         for attr_name, attr_value in vars(self).items():
             if hasattr(attr_name, 'settings_init'):
@@ -351,7 +364,11 @@ class SerialControl:
 
     def run(self, start_slice_number):
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(self.run_async, start_slice_number)
+            self.future = executor.submit(self.run_async, start_slice_number)
+
+    @property
+    def running(self):
+        return self.future is not None and self.future.running()
 
     def run_async(self, start_slice_number):
         slice_number = start_slice_number
@@ -412,6 +429,12 @@ class SerialControl:
             print(Fore.RED + 'Imaging skipped!')
             logging.warning('Imaging skipped because imaging is disabled in configuration!')
         return True
+
+    def change_dir_settings(self, new_dir):
+        self.dirs_settings['output_images'] = os.path.join(new_dir, 'images')
+        self.dirs_settings['log'] = os.path.join(new_dir, 'logs')
+        self.dirs_settings['template_matching'] = os.path.join(new_dir, 'templates')
+
     @property
     def microscope(self):
         return self._microscope

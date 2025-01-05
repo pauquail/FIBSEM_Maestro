@@ -6,10 +6,10 @@ from fibsem_maestro.tools.support import ScanningArea, Point
 
 
 class AcbGui:
-    def __init__(self, window, contrast_brightness_settings, mask_settings):
+    def __init__(self, window):
         self.window = window
-        self.contrast_brightness_settings = contrast_brightness_settings
-        self.mask_settings = mask_settings
+        self.contrast_brightness_settings = self.window.serial_control.contrast_brightness_settings
+        self.mask_settings = self.window.serial_control.mask_settings
         self._acb_area = ScanningArea(Point(0,0),0,0)
 
         self.populate_form()

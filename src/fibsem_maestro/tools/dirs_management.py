@@ -1,5 +1,7 @@
+import glob
 import logging
 import os
+import re
 
 
 def make_dirs(dirs):
@@ -17,3 +19,25 @@ def make_dirs(dirs):
         if not os.path.isdir(new_dir):
             logging.info(f"{new_dir} created.")
             os.makedirs(new_dir)
+
+
+def findfile(data_dir):
+    """
+    Find the file with highest slice_number
+    """
+    max_slice = -1
+    image_filename = None
+    list_files = glob.glob(f"{data_dir}*.tif")
+    # Iterate through each string in the list
+    for s in list_files:
+        # Use re.search to find the match in the string
+        match = re.search(r'slice_(\d+)_.tif', s)
+
+        # Extract the numbers from the match groups
+        if match:
+            slice_number = int(match.group(1))
+            if slice_number > max_slice:
+                max_slice = slice_number
+                image_filename = s
+
+    return max_slice, image_filename

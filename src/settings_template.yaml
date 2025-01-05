@@ -1,185 +1,211 @@
-# Global acquisition setting
-general:
-  library: 'autoscript'  # Microscope control library. Possible values: 'autoscript'
-  additive_beam_shift: [0, 0] # Additive beam shift applied in every cycle
-  sem_settings_file: 'microscope_settings.yaml' # Actual microscope setting
-  variables_to_save: ['position','electron_beam.working_distance','electron_beam.stigmator','electron_beam.lens_alignment',
-                      'electron_beam.beam_shift','electron_beam.detector_contrast','electron_beam.detector_brightness',
-                      'electron_beam.dwell_time']
-  log_level: 10 # 10 - debug, 20 - info, 30 - warning, 40 - error, 50 - critical
-
 acquisition:
-  wd_correction: 7.88010753607e-9   # For imaging angle 38deg: slice_distance * cos(38). For imaging angle 90: slice_distance
-  y_correction:  6.15661475326e-9 # For imaging angle 38deg: slice_distance * sin(38). For imaging angle 90: 0
-  image_name: 'image_acquisition'
-  criterion_name: 'image_acquisition'
+  criterion_name: image_acquisition
+  image_name: image_acquisition
   imaging_enabled: true
-
-milling:
-  slice_distance: 10.0e-9
-  fiducial_margin: 1.0e-6  # the searching area for the fiducial is bigger than defined size
-  milling_depth: 1.0-6
-  pattern_file: CCS
-  direction: -1 # -1 slicing progress upwards, 1 down
-  variables_to_save: [ 'position','ion_beam.working_distance',
-                       'ion_beam.beam_shift','ion_beam.detector_contrast','ion_beam.detector_brightness']
-  settings_file: 'fib_microscope_settings.yaml' # Actual microscope setting
-  fiducial_area:
-    x: 0
-    y: 0
-    width: 0
-    height: 0
-  milling_area:
-    x: 0
-    y: 0
-    width: 0
-    height: 0
-  fiducial_rescan: 3  # number of scans for initial fiducial image
-  minimal_similarity: 0.9 # minimal similarity of fiducial
-  milling_enabled: true
-  fiducial_update: 300 # number of scan to fiducial image update
-
-# Directories
-dirs:
-  output_images: 'images'
-  log: 'logs'
-  template_matching: 'templates'
-
-microscope:
-  ip_address: '10.56.91.11'  # ASV server address (hydra: 147.251.159.93:7520, hydra2: 147.251.159.93:7521, versa_local: 10.56.91.11)
-  stage_tolerance: 1e-7  # Maximal stage error that is considered as ok
-  stage_trials: 3  # Number of trials to reach the goal position before raise error
-  beam_shift_tolerance: 50.0e-9 # Maximal beam shift error that is considered as ok
-  relative_beam_shift_to_stage: [1, 1] # Relative move between bs and stage move (direction is set by code)
-
-image:
-  - name: 'image_acquisition' # pixel_size: 5.18e-9
-    field_of_view: [31.9e-6, 21.2666666667e-6]
-    images_line_integration: 1 # li of images acquisition.
-    bit_depth: 16
-    dwell: 1.0e-6
-    pixel_size: 5e-9
-  - name: 'working_distance - image'
-    resolution: [6144, 4096] # must be in standard res
-    field_of_view: [31.9e-6, 21.2666666667e-6]
-    images_line_integration: 1 # li of images acquisition.
-    bit_depth: 8
-    dwell: 1.0e-6
-  - name: 'working_distance - line'
-    resolution: [ 6144, 4096 ] # must be in standard res
-    field_of_view: [ 31.9e-6, 21.2666666667e-6 ]
-    images_line_integration: 1 # li of images acquisition.
-    bit_depth: 8
-    dwell: 1.0e-6
-
-criterion_calculation:
-  - name: 'image_acquisition'
-    border: 0.3 # part of image that does not go to calculation
-    tile_size: 3.0e-6 # calculation tile size
-    final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
-    final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
-    criterion: 'frc_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
-    mask_name: 'none'
-  - name: 'working_distance - image'
-    border: 0 # part of image that does not go to calculation
-    tile_size: 0 # calculation tile size
-    final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
-    final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
-    criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
-    detail: [ 100.0e-9, 350.0e-9 ] # 20.0e-9, 150.0e-9 for cryo
-    mask_name: 'none'
-  - name: 'working_distance - line'
-    border: 0 # part of image that does not go to calculation
-    tile_size: 0 # calculation tile size
-    final_resolution: 'min' # how to calculate final resolution from tiles resolution (numpy methods supported)
-    final_regions_resolution: 'min' # how to calculate final resolution from different masked regions (numpy methods supported)
-    criterion: 'bandpass_criterion'  # criterion. Values: 'bandpass_criterion', 'bandpass_var_criterion', 'fft_criterion', 'frc_criterion'
-    detail: [ 100.0e-9, 350.0e-9 ] # 20.0e-9, 150.0e-9 for cryo
-    mask_name: 'none'
-
+  wd_correction: 7.88010753607e-09
+  y_correction: 6.15661475326e-09
 autofunction:
-    - name: 'working_distance - image'
-      variable: 'electron_beam.working_distance'
-      autofunction: 'StepAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
-      sweeping_strategy: 'BasicInterleavedSweeping' # values: 'BasicSweeping', 'SpiralSweeping', 'BasicInterleavedSweeping'
-      sweeping_range: [ -100.0e-6, 100.0e-6 ] # 10.0e-6 for immersion. The range of the sweeping variable.
-      sweeping_max_limits: [ 500.0e-6, 70.0e-3 ] # Limits of sweeping_var
-      sweeping_steps: 3 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
-      sweeping_total_cycles: 1 # sweeping cycles
-      execute_slices: 0 # execute condition - number of slices, 0 - disabled
-      execute_resolution: 0 # execute condition - image resolution, 0 - disabled
-      image_name: 'working_distance - image'
-      criterion_name: 'working_distance - image'
-      mask_name: 'none'
-      delta_x: 0
-      max_attempts: 8
-      af_area:
-        x: 0
-        y: 0
-        width: 0
-        height: 0
-
-    - name: 'working_distance - line'
-      variable: 'electron_beam.working_distance'
-      autofunction: 'LineAutoFunction'  # type of autofunction. Values: 'none', 'AutoFunction', 'LineAutoFunction'
-      sweeping_strategy: 'BasicSweeping' # values: 'BasicSweeping', 'SpiralSweeping', 'BasicInterleavedSweeping'
-      sweeping_range: [-100.0e-6, 100.0e-6] # 10.0e-6 for immersion. The range of the sweeping variable.
-      sweeping_max_limits: [500.0e-6, 70.0e-3] # Limits of sweeping_var
-      sweeping_steps: 20 # sweeping steps (number of value variation) (in spiral, it is number of steps per cycle)
-      sweeping_total_cycles: 4 # sweeping cycles
-      execute_slices: 0 # execute condition - number of slices, 0 - disabled
-      execute_resolution: 0 # execute condition - image resolution, 0 - disabled
-      image_name: 'working_distance - line'
-      criterion_name: 'working_distance - line'
-      mask_name: 'none'
-      delta_x: 0
-      pre_imaging_delay: 1
-      keep_time: 10
-      forbidden_sections: [0]
-      max_attempts: 8
-      af_area:
-        x: 0
-        y: 0
-        width: 0
-        height: 0
-
-contrast_brightness:
-  acb_enabled: True
-  mask_name: 'none'
-  allowed_saturation: 0.01  # allowed portion of pixels in saturated or zeroed pixels
-  allowed_minimal_band: 0.5  # allowed minimal band of the whole bit depth
-  p_decrease_contrast: 10  # p-constant for decrease contrast. New_contrast -= p_decrease_contrast * max(portion_of_saturated_px, portion_of_zeored_px)
-  p_increase_contrast: 10  # p-constant for increase contrast. New_contrast += p_increase_contrast * (1 - image_band)
-  p_brightness: 10   # p-constant for brightness. New_bright -= p_brighness * portion_of_saturated_px (saturated or zeroed)
-  acb_area:
+- af_area:
+    height: 0
+    width: 0
     x: 0
     y: 0
-    width: 0
+  autofunction: StepAutoFunction
+  criterion_name: working_distance - image
+  delta_x: 0
+  execute_resolution: 0
+  execute_slices: 0
+  image_name: working_distance - image
+  mask_name: none
+  max_attempts: 8
+  name: working_distance - image
+  sweeping_max_limits:
+  - 0.0005
+  - 0.07
+  sweeping_range:
+  - -0.0001
+  - 0.0001
+  sweeping_steps: 3
+  sweeping_strategy: BasicInterleavedSweeping
+  sweeping_total_cycles: 1
+  variable: electron_beam.working_distance
+- af_area:
     height: 0
-
-mask:
-  - name: 'mask'
-    update_mask: True # grab image before in order to calculate mask. If False, last image is selected
-    mask_image_li: 32 # line integration for mask acquisition
-    min_fraction: 0.1 # minimal fraction of mask to proceed to calculation
-    downsampling_factor: 4
-    model_path: '/home/pavelkrep/data/deepmib_test/seg_exported'
-    patch_size: [128, 128]
-    threshold: 0.5
-    min_area: 100 # use None for disable
-    fill_holes: true
-    iterative_training: false
-
-email:
-  sender: 'pavel.emcf@gmail.com'
-  receiver: 'pavel.krep@gmail.com'
-  password_file: 'email_password.txt'
-
+    width: 0
+    x: 0
+    y: 0
+  autofunction: LineAutoFunction
+  criterion_name: working_distance - line
+  delta_x: 0
+  execute_resolution: 0
+  execute_slices: 0
+  forbidden_sections:
+  - 0
+  image_name: working_distance - line
+  keep_time: 10
+  mask_name: none
+  max_attempts: 8
+  name: working_distance - line
+  pre_imaging_delay: 1
+  sweeping_max_limits:
+  - 0.0005
+  - 0.07
+  sweeping_range:
+  - -0.0001
+  - 0.0001
+  sweeping_steps: 20
+  sweeping_strategy: BasicSweeping
+  sweeping_total_cycles: 4
+  variable: electron_beam.working_distance
+contrast_brightness:
+  acb_area:
+    height: 0
+    width: 0
+    x: 0
+    y: 0
+  acb_enabled: true
+  allowed_minimal_band: 0.5
+  allowed_saturation: 0.01
+  mask_name: none
+  p_brightness: 10
+  p_decrease_contrast: 10
+  p_increase_contrast: 10
+criterion_calculation:
+- border: 0.3
+  criterion: frc_criterion
+  final_regions_resolution: min
+  final_resolution: min
+  mask_name: none
+  name: image_acquisition
+  tile_size: 3.0e-06
+- border: 0
+  criterion: bandpass_criterion
+  detail:
+  - 1.0e-07
+  - 3.5e-07
+  final_regions_resolution: min
+  final_resolution: min
+  mask_name: none
+  name: working_distance - image
+  tile_size: 0
+- border: 0
+  criterion: bandpass_criterion
+  detail:
+  - 1.0e-07
+  - 3.5e-07
+  final_regions_resolution: min
+  final_resolution: min
+  mask_name: none
+  name: working_distance - line
+  tile_size: 0
+dirs:
+  log: logs
+  output_images: images
+  template_matching: templates
 drift_correction:
-  type: 'template_matching' # values: 'template_matching', 'mask'
-  min_confidence: 0
   driftcorr_areas:
-    - x: 0
-      y: 0
-      width: 0
-      height: 0
+  - height: 0
+    width: 0
+    x: 0
+    y: 0
+  min_confidence: 0
+  rescan: 20
+  type: template_matching
+email:
+  password_file: email_password.txt
+  receiver: pavel.krep@gmail.com
+  sender: pavel.emcf@gmail.com
+general:
+  additive_beam_shift:
+  - 0
+  - 0
+  library: autoscript
+  log_level: 10
+  sem_settings_file: microscope_settings.yaml
+  variables_to_save:
+  - position
+  - electron_beam.working_distance
+  - electron_beam.stigmator
+  - electron_beam.lens_alignment
+  - electron_beam.beam_shift
+  - electron_beam.detector_contrast
+  - electron_beam.detector_brightness
+  - electron_beam.dwell_time
+image:
+- bit_depth: 16
+  dwell: 1.0e-06
+  field_of_view:
+  - 3.19e-05
+  - 2.12666666667e-05
+  images_line_integration: 1
+  name: image_acquisition
+  pixel_size: 5.0e-09
+- bit_depth: 8
+  dwell: 1.0e-06
+  field_of_view:
+  - 3.19e-05
+  - 2.12666666667e-05
+  images_line_integration: 1
+  name: working_distance - image
+  resolution:
+  - 6144.0
+  - 4096.0
+- bit_depth: 8
+  dwell: 1.0e-06
+  field_of_view:
+  - 3.19e-05
+  - 2.12666666667e-05
+  images_line_integration: 1
+  name: working_distance - line
+  resolution:
+  - 6144
+  - 4096
+mask:
+- downsampling_factor: 4
+  fill_holes: true
+  iterative_training: false
+  mask_image_li: 32
+  min_area: 100
+  min_fraction: 0.1
+  model_path: /home/pavelkrep/data/deepmib_test/seg_exported
+  name: mask
+  patch_size:
+  - 128
+  - 128
+  threshold: 0.5
+  update_mask: true
+microscope:
+  beam_shift_tolerance: 5.0e-08
+  ip_address: 10.56.91.11
+  relative_beam_shift_to_stage:
+  - 1
+  - 1
+  stage_tolerance: 1e-7
+  stage_trials: 3
+milling:
+  direction: -1
+  fiducial_area:
+    height: 0
+    width: 0
+    x: 0
+    y: 0
+  fiducial_margin: 1.0e-06
+  fiducial_rescan: 3
+  fiducial_update: 300
+  milling_area:
+    height: 0
+    width: 0
+    x: 0
+    y: 0
+  milling_depth: 1.0-6
+  milling_enabled: true
+  minimal_similarity: 0.9
+  pattern_file: CCS
+  settings_file: fib_microscope_settings.yaml
+  slice_distance: 1.0e-08
+  variables_to_save:
+  - position
+  - ion_beam.working_distance
+  - ion_beam.beam_shift
+  - ion_beam.detector_contrast
+  - ion_beam.detector_brightness

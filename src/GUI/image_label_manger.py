@@ -16,6 +16,8 @@ class ImageLabelManager:
             image_label_connected.repaint_events.append(image_label.update_pan_zoom)
             image_label.repaint_events.append(image_label_connected.update_pan_zoom)
 
+    def clear(self):
+        self._image_labels.clear()
 
 class ImageLabelManagers:
     sem_manager = ImageLabelManager()

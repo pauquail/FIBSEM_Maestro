@@ -6,7 +6,7 @@ import numpy as np
 import tifffile
 
 from fibsem_maestro.tools.image_tools import template_matching
-from fibsem_maestro.tools.support import Point
+from fibsem_maestro.tools.support import Point, fold_filename
 
 
 class TemplateMatchingDriftCorrection:
@@ -21,14 +21,14 @@ class TemplateMatchingDriftCorrection:
     def _settings_init(self, settings):
         self.min_confidence = settings['min_confidence']
         self.driftcorr_areas = settings['driftcorr_areas']
+        self.rescan = settings['rescan']
 
     def settings_init(self, settings):
         """ For global re-initialization of settings  (global settings always passed)"""
         self._settings_init(settings['drift_correction'])
 
     def _prepare_image(self, img):
-        pixel_size = img.metadata.binary_result.pixel_size.x
-        img = img.data
+        pixel_size = img.pixel_size
 
         # convert to 8bit if necessary
         if max(img) > 255:
@@ -37,22 +37,16 @@ class TemplateMatchingDriftCorrection:
 
         return img, pixel_size
 
-    def _calculate_shift(self, i, img, area, pixel_size, shift_x, shift_y, new_areas):
+    def _calculate_shift(self, img, slice_number, area, shift_x, shift_y):
         """
-        :param i: The index of the template image being processed.
-        :type i: int
         :param img: The image to be matched against the template image.
         :type img: numpy.ndarray
         :param area: The area of the image to be matched.
         :type area: Tuple[int, int, int, int]
-        :param pixel_size: The size of each pixel in the image.
-        :type pixel_size: float
         :param shift_x: A list to store the calculated X-shifts.
         :type shift_x: List[float]
         :param shift_y: A list to store the calculated Y-shifts.
         :type shift_y: List[float]
-        :param new_areas: A list to store the new areas after shifting.
-        :type new_areas: List[List[int]]
         :return: None
 
         This method calculates the shift between the template image and the given area of the input image. It uses
@@ -67,38 +61,40 @@ class TemplateMatchingDriftCorrection:
         template_image = tifffile.imread(template_image_name)
 
         # locate
-        dx, dy, maxVal = template_matching(template_image, img)
+        center_x = area[0] + area[2] // 2  # left + width/2
+        center_y = area[1] + area[3] // 2  # top + height/2
+        dx, dy, maxVal = template_matching(template_image, img, center_x, center_y)
 
         # log
-        self.logging_dict[f"template{i}_dx"] = dx
-        self.logging_dict[f"template{i}_dy"] = dy
-        self.logging_dict[f"template{i}_confidence"] = maxVal
+        self.logging_dict[f"template_dx"] = dx
+        self.logging_dict[f"template_dy"] = dy
+        self.logging_dict[f"template_confidence"] = maxVal
 
         # save shift
         if maxVal > self.min_confidence:
-            shift_x.append(dx * pixel_size)
-            shift_y.append(dy * pixel_size)
+            # self._microscope.image_to_beam_shift.x is applied later
+            shift_x.append(dx * img.pixel_size)
+            shift_y.append(dy * img.pixel_size)
         else:
             logging.warning("Confidence too low")
 
         # refresh template
-        new_x = int(area[0] + center_x)
-        new_y = int(area[1] + center_y)
+        new_x = int(area[0] + dx)
+        new_y = int(area[1] + dy)
         new_template_image = img[new_y:new_y + area[3], new_x:new_x + area[2]]
 
-        # add new area to logging image
+        # highlight shifted area to logging image
         rect = Rectangle((new_x, new_y), area[2], area[3], linewidth=1,
                          edgecolor='b', facecolor='none')
         self.log_img.add_patch(rect)
 
         # rewrite template
-        tifffile.imwrite(template_image_name, new_template_image)
-        # store all new areas to the list
-        new_areas.append([new_x, new_y, area[2], area[3]])
+        if slice_number % self.rescan == 0:
+            tifffile.imwrite(template_image_name, new_template_image)
 
         del template_image
 
-    def _shift_process(self, pixel_size, shift_x, shift_y, new_areas):
+    def _shift_process(self, shift_x, shift_y):
         if len(shift_x) == 0:
             logging.error("Confidence of all templates is too low. Drift correction disabled")
             shift_x, shift_y = 0, 0
@@ -107,13 +103,9 @@ class TemplateMatchingDriftCorrection:
         shift_x = np.mean(shift_x)
         shift_y = np.mean(shift_y)
 
-        # add result shift to new areas position (new area position must calculate with a result beam shift)
-        for a in new_areas:
-            a[0] += int(-shift_x // pixel_size)
-            a[1] += int(-shift_y // pixel_size)
         shift_x *= self._microscope.beam.image_to_beam_shift.x  # beam shift X axis is reversed to image axis
         shift_y *= self._microscope.beam.image_to_beam_shift.y
-        return shift_x, shift_y, new_areas
+        return shift_x, shift_y
 
     def _log(self, slice_number, shift_x, shift_y):
         if self.logging:
@@ -144,33 +136,25 @@ class TemplateMatchingDriftCorrection:
         :param slice_number: The number of the image slice.
         :return: The point object representing the calculated beam shift.
         """
-        # if areas were loaded from microscope settings
-        if hasattr(self._microscope, 'dc_areas'):
-            self.areas = self._microscope.dc_areas
-
         if self.areas is None:
             logging.error('Template matching enabled but no areas not found. Drift correction disabled')
             return
 
         shift_x = []
         shift_y = []
-        new_areas = []  # updated area positions
         # convert to 8b if needed
         img, pixel_size = self._prepare_image(img)
         # image with rectangles on areas positions
         self.log_img = self._log_plot(img)
         
         for i, area in enumerate(self.areas):
-            # update shifts and new_areas
-            self._calculate_shift(i, img, area, pixel_size, shift_x, shift_y, new_areas)
+            # update shifts
+            self._calculate_shift(img, slice_number, area, shift_x, shift_y)
 
-        # calculate final  shift and new areas
-        shift_x, shift_y, new_areas = self._shift_process(pixel_size, shift_x, shift_y, new_areas)
+        # calculate final shift
+        shift_x, shift_y = self._shift_process(shift_x, shift_y)
 
         self._log(slice_number, shift_x, shift_y)
-
-        # update areas
-        self.areas = new_areas
 
         # perform beam shift
         bs = Point(shift_x, shift_y)

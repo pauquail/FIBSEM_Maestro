@@ -1,24 +1,26 @@
 from PySide6.QtCore import QRect
 from PySide6.QtGui import QPixmap
 
+from fibsem_maestro.microscope_control.autoscript_control import AutoscriptMicroscopeControl
+from fibsem_maestro.tools.dirs_management import findfile
 from fibsem_maestro.tools.support import find_in_dict
 from gui_tools import populate_form, serialize_form, create_ImageLabel, get_module_members
 from fibsem_maestro.tools.support import Image, ScanningArea, Point
 from image_label_manger import ImageLabelManagers
 
 class SemGui:
-    def __init__(self, window, acquisition_settings, imaging_settings, criterion_settings, mask_settings, serial_control):
+    def __init__(self, window):
         self.window = window
-        self.acquisition_settings = acquisition_settings
-        self.criterion_settings = criterion_settings
-        self.imaging_settings = imaging_settings
-        self.mask_settings = mask_settings
+        self.acquisition_settings = self.window.serial_control.acquisition_settings
+        self.criterion_settings = self.window.serial_control.criterion_settings
+        self.imaging_settings = self.window.serial_control.imaging_settings
+        self.mask_settings = self.window.serial_control.mask_settings
         # selected imaging settings
-        self.actual_image_settings = find_in_dict(acquisition_settings['image_name'],
-                                                  imaging_settings)
-        self.actual_criterion_settings = find_in_dict(acquisition_settings['criterion_name'],
-                                                      criterion_settings)
-        self.serial_control = serial_control
+        self.actual_image_settings = find_in_dict(self.acquisition_settings['image_name'],
+                                                  self.imaging_settings)
+        self.actual_criterion_settings = find_in_dict(self.acquisition_settings['criterion_name'],
+                                                      self.criterion_settings)
+        self.serial_control = self.window.serial_control
         self.populate_form()
         self.build_connections()
 
@@ -50,12 +52,21 @@ class SemGui:
         serialize_form(self.window.imageCriterionFormLayout, self.actual_criterion_settings)
 
     def getImagePushButton_clicked(self):
-        #from autoscript_sdb_microscope_client.structures import AdornedImage
-        #image = self.serial_control.microscope.acquire_image()
-        #image = Image.from_as(AdornedImage.load('/home/cemcof/Downloads/cell.tif'))
-        import matplotlib.image as mpimg
-        image = mpimg.imread('oxford.jpg')
-        image = Image(image, 10e-9)
+        # if acquisition running -> get last image
+        if self.serial_control.running:
+            _, img_filename = findfile(self.serial_control.dirs_output_images)
+            # load image if AS is used
+            if isinstance(self.serial_control.microscope, AutoscriptMicroscopeControl):
+                from autoscript_sdb_microscope_client.structures import AdornedImage
+                image = Image.from_as(AdornedImage.load(img_filename))
+            else:
+                raise NotImplementedError('Image loading of non-autoscript type is not implemented')
+        else:
+            #image = self.serial_control.microscope.electron_beam.get_image()
+            import matplotlib.image as mpimg
+            image = mpimg.imread('oxford.jpg')
+            image = Image(image, 10e-9)
+
         ImageLabelManagers.sem_manager.update_image(image)
 
     def setImagingPushButton_clicked(self):
