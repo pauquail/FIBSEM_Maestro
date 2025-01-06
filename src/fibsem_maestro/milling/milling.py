@@ -145,6 +145,7 @@ class Milling:
         milling_rect = ScanningArea.from_image_coordinates(image_shape, left_top[0], left_top[1], size[0], size[1])
         logging.info(f'Milling on position: {milling_rect.to_dict()}')
         self._microscope.ion_beam.rectangle_milling(self.pattern_file, rect=milling_rect, depth=self.milling_depth)
+        #set milling direction
 
         # fiducial image rescan
         if slice_number % self.fiducial_update == 0:

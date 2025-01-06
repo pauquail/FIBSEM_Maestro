@@ -41,65 +41,6 @@ class StoppingFlag:
     def stopping_flag(self, value):
         self._stopping_flag = value
 
-class SerialControlLogger:
-    def __init__(self, microscope, log_level, dirs_log):
-        self.dirs_log = dirs_log
-        self._microscope = microscope
-        self._electron = self._microscope.electron_beam
-        self._ion = self._microscope.ion_beam
-        self.log_params = {}  # logging dict (important parameters to log)
-        # logger settings
-        self.logger = logging.getLogger()  # Create a logger object.
-        self.log_level = log_level
-        fmt = '%(module)s - %(levelname)s - %(message)s'
-        self.logger_formatter = logging.Formatter(fmt)
-        self.logging_file_handler = None
-        self.set_log_file(0)
-
-    def set_log_file(self, slice_number):
-        # make dir (log/slice_number
-        os.makedirs(fold_filename(self.dirs_log, slice_number), exist_ok=True)
-        log_filename = fold_filename(self.dirs_log, slice_number, 'app.log')
-
-        # remove last logging file handler
-        if self.logging_file_handler is not None:
-            self.logger.removeHandler(self.logging_file_handler)
-        # set a new logging file handler
-        self.logging_file_handler = logging.FileHandler(log_filename)  # Configure the logger to write into a file
-        self.logging_file_handler.setFormatter(self.logger_formatter)
-        self.logger.addHandler(self.logging_file_handler)  # Add the handler to the logger object
-
-    def reset_log(self, slice_number):
-        # logging dict (important parameters)
-        self.log_params.clear()
-        self.log_params['slice_number'] = slice_number
-
-    def log(self):
-        self.log_params['wd'] = self._electron.working_distance
-        self.log_params['beam_shift_x'] = self._electron.beam_shift_x
-        self.log_params['beam_shift_y'] = self._electron.beam_shift_y
-        self.log_params['stigmator_x'] = self._electron.stigmator_x
-        self.log_params['stigmator_y'] = self._electron.stigmator_y
-        position = self._microscope.position
-        self.log_params['stage_x'] = position.x
-        self.log_params['stage_y'] = position.y
-        self.log_params['stage_z'] = position.z
-        self.log_params['ion_beam_shift_x'] = self._ion.beam_shift_x
-        self.log_params['ion_beam_shift_y'] = self._ion.beam_shift_y
-
-    def save_log(self, slice_number):
-        with open(fold_filename(self.dirs_log, slice_number, 'log_dict.yaml'), 'w') as f:
-            yaml.dump(self.log_params, f, default_flow_style=False)
-        self.log_params.clear()
-
-    @property
-    def log_level(self):
-        return self.logger.level
-
-    @log_level.setter
-    def log_level(self, value):
-        self.logger.setLevel(value)
-
 
 class SerialControl:
     def __init__(self, settings_path='settings.yaml'):
@@ -170,9 +111,6 @@ class SerialControl:
         self.actual_image_settings = find_in_dict(self.image_name, self.image_settings)
         self.actual_criterion = find_in_dict(self.criterion_name, self.criterion_calculation_settings)
 
-        if hasattr(self, 'logger'):
-            self.logger.dirs_log = self.dirs_settings['log']
-            self.logger.log_level = self.general_settings['log_level']
 
         for attr_name, attr_value in vars(self).items():
             if hasattr(attr_name, 'settings_init'):
@@ -428,8 +366,7 @@ class SerialControl:
             print(Fore.YELLOW + f'Current slice number: {slice_number}')
             logging.info(f'Current slice number: {slice_number}')
 
-            self.logger.set_log_file(slice_number)  # set logging file (logging output)
-            self.logger.reset_log(slice_number)   # set log of important parameters (dict to yaml)
+            self.logger = Logger(slice_number)
 
             if self.imaging_enabled:
                 self._microscope.beam = self._microscope.electron_beam  # switch to electrons
@@ -442,7 +379,7 @@ class SerialControl:
                 self.autofunction(slice_number)  # autofunctions handling
                 if self.stopping():
                     return False
-                self.logger.log()  # save settings and params
+                self.logger.log_microscope_settings()  # save microscope settings
                 self.acquire(slice_number)  # acquire image
                 if self.stopping():
                     return False
@@ -458,7 +395,7 @@ class SerialControl:
                 # resolution calculation
                 self.calculate_resolution(slice_number)
             else:
-                self.logger.log()  # save settings and params
+                self.logger.log_microscope_settings()  # save microscope settings
                 print(Fore.RED + 'Imaging skipped!')
                 logging.warning('Imaging skipped because imaging is disabled in configuration!')
         except Exception as e:

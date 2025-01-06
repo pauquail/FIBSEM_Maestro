@@ -10,7 +10,7 @@ VERSION = '0.1'
 #  sweeping max limits to autoscript_control.py
 #  virtual mode
 #  email test
-#  enable acquisition start
+#  action enable buttons
 
 #  test: email, reduced scanning, template matching, milling
 #  add ACB check to criterion !
