@@ -24,12 +24,15 @@
 <p style="{% if similarity < 0.8 %}color:red{% else %}color:black{% endif %}">
     Similarity: {{ similarity }}
 </p>
-<p>
-    Correction:
+<p style="{% if correction.x > 0.5e-6 correction.x > 0.5e-6  %}color:red{% else %}color:black{% endif %}">
+    Correction:<br>
     <ul>
-            <li>X: {{ stigmator.x * 10e6 }}um</li>
-            <li>Y: {{ stigmator.y * 10e6 }}um</li>
-        </ul>
+            <li>X: {{ correction.x * 10e6 }}um</li>
+            <li>Y: {{ correction.y * 10e6 }}um</li>
+    </ul>
+</p>
+<p>
+    Y coordinate: {{ mill_position }}
 </p>
 <h2> Imaging </h2>
 <p>
