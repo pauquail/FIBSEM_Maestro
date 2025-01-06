@@ -8,6 +8,7 @@ import yaml
 from fibsem_maestro.autofunctions.autofunction import StepAutoFunction
 from fibsem_maestro.autofunctions.autofunction_control import AutofunctionControl
 from fibsem_maestro.contrast_brightness.automatic_contrast_brightness import AutomaticContrastBrightness
+from fibsem_maestro.error_handler import ErrorHandler
 from fibsem_maestro.image_criteria.criteria import Criterion
 from fibsem_maestro.mask.masking import MaskingModel
 from fibsem_maestro.drift_correction.template_matching import TemplateMatchingDriftCorrection
@@ -18,6 +19,27 @@ from fibsem_maestro.tools.support import Point, find_in_dict, find_in_objects, f
 
 colorama_init(autoreset=True)  # colorful console
 
+class StoppingFlag:
+    def __init__(self, microscope):
+        self._stopping_flag = False
+        self.microscope = microscope
+    def __call__(self):
+        if self._stopping_flag:
+            logging.warning('Stopping executed')
+            self.microscope.electron_beam.stop_acquisition()
+            self.microscope.ion_beam.stop_acquisition()
+            self._stopping_flag = False
+            return True
+        else:
+            return False
+
+    @property
+    def stopping_flag(self):
+        return self._stopping_flag
+
+    @stopping_flag.setter
+    def stopping_flag(self, value):
+        self._stopping_flag = value
 
 class SerialControlLogger:
     def __init__(self, microscope, log_level, dirs_log):
@@ -98,6 +120,13 @@ class SerialControl:
                                           self.general_settings['log_level'],
                                           dirs_log=self.dirs_settings['log'])
 
+        self.stopping = StoppingFlag(self._microscope)
+        self.error_handler = ErrorHandler(self.settings, self.stopping)
+
+        # events
+        self.event_acquisition_start = []
+        self.event_acquisition_stop = []
+
         self._masks = self.initialize_masks()
         self._autofunctions = self.initialize_autofunctions(self.settings)
         self._acb = self.initialize_acb()
@@ -126,6 +155,7 @@ class SerialControl:
         self.additive_beam_shift = self.general_settings['additive_beam_shift']
         self.sem_settings_file = self.general_settings['sem_settings_file']
         self.variables_to_save = self.general_settings['variables_to_save']
+        self.error_behaviour = self.general_settings['error_behaviour']
 
         self.wd_correction = self.acquisition_settings['wd_correction']
         self.y_correction = self.acquisition_settings['y_correction']
@@ -360,11 +390,18 @@ class SerialControl:
             print(Fore.RED + 'Microscope settings saving failed!')
 
     def stop(self):
-        self._stopping_flag = True
+        self.stopping.stopping_flag = True
 
     def run(self, start_slice_number):
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            self.future = executor.submit(self.run_async, start_slice_number)
+        if not self.running:
+            # fire start event
+            for event_start in self.event_acquisition_start:
+                event_start()
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                self.future = executor.submit(self.run_async, start_slice_number)
+        else:
+            logging.warning('Acquisition already running! Attempt to stop')
+            self.stop()
 
     @property
     def running(self):
@@ -375,60 +412,61 @@ class SerialControl:
         while self.cycle(slice_number):
             logging.info(f'---Slice {slice_number} completed ---')
 
-    def check_stopping(self):
-        if self._stopping_flag:
-            logging.warning('Stopping executed')
-            self.microscope.electron_beam.stop_acquisition()
-            self.microscope.ion_beam.stop_acquisition()
-            self._stopping_flag = False
-            return True
-        else:
-            return False
+        # fire stop event
+        for event_stop in self.event_acquisition_stop:
+            event_stop()
 
     def cycle(self, slice_number):
-        # wait for resolution calculation if needed anf AF main imaging criterion calculation
-        self._criterion_resolution.join_all_threads()
-        self.wait_for_af_criterion_calculation()
-        if self.check_stopping():
-            return False
-        self.settings_init()  # read settings.yaml and reinit all
-        print(Fore.YELLOW + f'Current slice number: {slice_number}')
-        logging.info(f'Current slice number: {slice_number}')
+        try:
 
-        self.logger.set_log_file(slice_number)  # set logging file (logging output)
-        self.logger.reset_log(slice_number)   # set log of important parameters (dict to yaml)
+            # wait for resolution calculation if needed anf AF main imaging criterion calculation
+            self._criterion_resolution.join_all_threads()
+            self.wait_for_af_criterion_calculation()
+            if self.stopping():
+                return False
+            self.settings_init()  # read settings.yaml and reinit all
+            print(Fore.YELLOW + f'Current slice number: {slice_number}')
+            logging.info(f'Current slice number: {slice_number}')
 
-        if self.imaging_enabled:
-            self._microscope.beam = self._microscope.electron_beam  # switch to electrons
-            self.load_settings()  # load settings and set microscope
-            if self.check_stopping():
+            self.logger.set_log_file(slice_number)  # set logging file (logging output)
+            self.logger.reset_log(slice_number)   # set log of important parameters (dict to yaml)
+
+            if self.imaging_enabled:
+                self._microscope.beam = self._microscope.electron_beam  # switch to electrons
+                self.load_settings()  # load settings and set microscope
+                if self.stopping():
+                    return False
+                self.correction()  # wd and y correction
+                if self.stopping():
+                    return False
+                self.autofunction(slice_number)  # autofunctions handling
+                if self.stopping():
+                    return False
+                self.logger.log()  # save settings and params
+                self.acquire(slice_number)  # acquire image
+                if self.stopping():
+                    return False
+                self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
+                if self.stopping():
+                    return False
+                self.drift_correction(slice_number)  # drift correction
+                if self.stopping():
+                    return False
+                self.auto_contrast_brightness(slice_number)
+                if self.stopping():
+                    return False
+                # resolution calculation
+                self.calculate_resolution(slice_number)
+            else:
+                self.logger.log()  # save settings and params
+                print(Fore.RED + 'Imaging skipped!')
+                logging.warning('Imaging skipped because imaging is disabled in configuration!')
+        except Exception as e:
+            self.error_handler(e)
+            if self.stopping():
                 return False
-            self.correction()  # wd and y correction
-            if self.check_stopping():
-                return False
-            self.autofunction(slice_number)  # autofunctions handling
-            if self.check_stopping():
-                return False
-            self.logger.log()  # save settings and params
-            self.acquire(slice_number)  # acquire image
-            if self.check_stopping():
-                return False
-            self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
-            if self.check_stopping():
-                return False
-            self.drift_correction(slice_number)  # drift correction
-            if self.check_stopping():
-                return False
-            self.auto_contrast_brightness(slice_number)
-            if self.check_stopping():
-                return False
-            # resolution calculation
-            self.calculate_resolution(slice_number)
-        else:
-            self.logger.log()  # save settings and params
-            print(Fore.RED + 'Imaging skipped!')
-            logging.warning('Imaging skipped because imaging is disabled in configuration!')
         return True
+
 
     def change_dir_settings(self, new_dir):
         self.dirs_settings['output_images'] = os.path.join(new_dir, 'images')

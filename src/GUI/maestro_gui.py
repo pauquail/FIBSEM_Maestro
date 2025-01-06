@@ -30,6 +30,10 @@ class Window(QMainWindow, Ui_MainWindow):
         # create and configure SerialControl
         self.settings_init(settings_yaml_path)
 
+        # register events
+        self.serial_control.event_acquisition_start.append(self.acquisition_start_event_handler)
+        self.serial_control.event_acquisition_stop.append(self.acquisition_stop_event_handler)
+
     def settings_init(self, settings_yaml):
         self.serial_control = SerialControl(settings_yaml)
         self.sem_gui = SemGui(self)
@@ -87,8 +91,15 @@ class Window(QMainWindow, Ui_MainWindow):
         """ Form closing event """
         self.apply_settings()  # save on form closing
 
-    def apply_settings(self):
+    def acquisition_start_event_handler(self):
+        self.runPushButton.setEnabled(False)
+        self.stopPushButton.setEnabled(True)
 
+    def acquisition_stop_event_handler(self):
+        self.runPushButton.setEnabled(True)
+        self.stopPushButton.setEnabled(False)
+
+    def apply_settings(self):
         # can be called in initialization, that is why some components may not exist
         if hasattr(self, 'sem_gui'):
             self.sem_gui.serialize_layout()

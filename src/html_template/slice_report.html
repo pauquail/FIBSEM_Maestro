@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Slice {{ slice_number }} report</title>
+</head>
+<style>
+.image {
+    float: left;
+    width: 50%;
+    padding: 5px;
+}
+</style>
+<body>
+<h1>Slice {{ slice_number }} report</h1>
+<p>Time of report: {{ current_time }}</p>
+<h1> Milling </h1>
+<div class="image">
+    <img src="{{ fiducial_template_file }}" alt="Fiducial template" style="width:100%">
+</div>
+<div class="image">
+    <img src="{{ fiducial_template }}" alt="Fiducial" style="width:100%">
+</div>
+<p style="{% if similarity < 0.8 %}color:red{% else %}color:black{% endif %}">
+    Similarity: {{ similarity }}
+</p>
+<p>
+    Correction:
+    <ul>
+            <li>X: {{ stigmator.x * 10e6 }}um</li>
+            <li>Y: {{ stigmator.y * 10e6 }}um</li>
+        </ul>
+</p>
+<h2> Imaging </h2>
+<p>
+    <img src="{{ slice_filename }}" alt="Slice {{slice_number}} image">
+</p>
+<p>
+    Stage position:<br>
+        <ul>
+            <li>X: {{ stage_position.x * 10e6 }}um</li>
+            <li>Y: {{ stage_position.y * 10e6 }}um</li>
+            <li>Z: {{ stage_position.z * 10e6 }}um</li>
+            <li>T: {{ stage_position.tilt }}deg</li>
+        </ul>
+    WD: {{ wd*10e6 }}um <br>
+    Stigmator: <br>
+        <ul>
+            <li>X: {{ stigmator.x * 10e6 }}um</li>
+            <li>Y: {{ stigmator.y * 10e6 }}um</li>
+        </ul>
+    Lens alignment: <br>
+        <ul>
+            <li>X: {{ la.x * 10e6 }}um</li>
+            <li>Y: {{ la.y * 10e6 }}um</li>
+        </ul>
+</body>
+</html>

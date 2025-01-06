@@ -12,8 +12,8 @@ class SemGui:
     def __init__(self, window):
         self.window = window
         self.acquisition_settings = self.window.serial_control.acquisition_settings
-        self.criterion_settings = self.window.serial_control.criterion_settings
-        self.imaging_settings = self.window.serial_control.imaging_settings
+        self.criterion_settings = self.window.serial_control.criterion_calculation_settings
+        self.imaging_settings = self.window.serial_control.image_settings
         self.mask_settings = self.window.serial_control.mask_settings
         # selected imaging settings
         self.actual_image_settings = find_in_dict(self.acquisition_settings['image_name'],

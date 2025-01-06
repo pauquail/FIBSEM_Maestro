@@ -17,16 +17,19 @@ def populate_form(settings, layout=None, specific_settings={}):
     # clear layouts
     clear_layout(layout)
 
-    for s in settings:
+    # sort by settings keys - in order to keep the same layout
+    ordered_settings = dict(sorted(settings.items()))
+
+    for s in ordered_settings:
         value_edit = None
 
         if s in specific_settings:
             if isinstance(specific_settings[s], list):
                 value_edit = QComboBox()
                 value_edit.addItems(specific_settings[s])
-                value_edit.setCurrentText(settings[s])
+                value_edit.setCurrentText(ordered_settings[s])
         else:
-            value = settings[s]
+            value = ordered_settings[s]
             value_edit = QLineEdit()
             # bool
             if isinstance(value, bool):

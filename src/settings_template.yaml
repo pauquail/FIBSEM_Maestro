@@ -131,6 +131,11 @@ general:
   - electron_beam.detector_contrast
   - electron_beam.detector_brightness
   - electron_beam.dwell_time
+  error_behaviour:
+    - exception
+    - stop
+    - email
+    - ignore
 image:
 - bit_depth: 16
   dwell: 1.0e-06

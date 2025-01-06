@@ -4,19 +4,17 @@ VERSION = '0.1'
 #  !!! remove AS forced to be virtual
 
 #  v0.1
-#  ImageLabel update
 #  save debug images on drift corr and mill
-#  emailing (custom exception)
-#  set folder, save/load settings
-
+#  comments from template_settings.yaml as hints
 #  ACB and others on reduced area
 #  sweeping max limits to autoscript_control.py
-#  z score for template matching
 #  virtual mode
+#  email test
+#  enable acquisition start
 
 #  test: email, reduced scanning, template matching, milling
 #  add ACB check to criterion !
-#  comments from template_settings.yaml as hints
+
 
 #  v0.2
 #  mask for acb
