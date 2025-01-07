@@ -1,4 +1,4 @@
-from GUI.gui_tools import populate_form, serialize_form, create_ImageLabel
+from fibsem_maestro.GUI.gui_tools import populate_form, serialize_form, create_ImageLabel
 from fibsem_maestro.tools.support import Image, ScanningArea, Point
 
 

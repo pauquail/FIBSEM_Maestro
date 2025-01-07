@@ -1,4 +1,4 @@
-from GUI.image_label import ImageLabel
+from fibsem_maestro.GUI.image_label import ImageLabel
 
 
 class ImageLabelManager:

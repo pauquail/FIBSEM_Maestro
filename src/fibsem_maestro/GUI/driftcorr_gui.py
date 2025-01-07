@@ -3,10 +3,10 @@ import typing
 
 from PySide6.QtCore import QRect
 
-from GUI.gui_tools import create_ImageLabel, serialize_form, populate_form, get_module_members
-from GUI.image_label import ImageLabel
+from fibsem_maestro.GUI.gui_tools import create_ImageLabel, serialize_form, populate_form, get_module_members
+from fibsem_maestro.GUI.image_label import ImageLabel
 from image_label_manger import ImageLabelManagers
-from fibsem_maestro.tools.support import ScanningArea, Point
+from fibsem_maestro.tools.support import ScanningArea
 
 
 class DriftCorrGui:

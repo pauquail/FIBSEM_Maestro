@@ -166,7 +166,7 @@ class BeamControl(ABC):
         pass
 
     @abstractmethod
-    def rectangle_milling(self, app_file: str, rect: ScanningArea, depth: float):
+    def rectangle_milling(self, app_file: str, rect: ScanningArea, depth: float, direction: str):
         pass
 
     @property

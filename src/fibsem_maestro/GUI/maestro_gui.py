@@ -1,25 +1,24 @@
 import os
 import shutil
 import sys
-import version
+from fibsem_maestro import version
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QMessageBox, QFileDialog
 )
 from PySide6.QtCore import QCoreApplication
 
-from GUI.forms.EmailSettingsDialog import EmailSettingsDialog
-from GUI.image_label_manger import ImageLabelManagers
+from fibsem_maestro.GUI.forms.EmailSettingsDialog import EmailSettingsDialog
+from fibsem_maestro.GUI.image_label_manger import ImageLabelManagers
 from fib_gui import FibGui
-from GUI.forms.FIBSEM_Maestro_GUI import Ui_MainWindow
+from fibsem_maestro.GUI.forms.FIBSEM_Maestro_GUI import Ui_MainWindow
 from fibsem_maestro.serial_control import SerialControl
-from fibsem_maestro.tools.dirs_management import findfile, make_dirs
+from fibsem_maestro.tools.dirs_management import findfile
 from sem_gui import SemGui
 from autofunctions_gui import AutofunctionsGui
 from acb_gui import AcbGui
-from driftcorr_gui import DriftCorrGui
 
-default_settings_yaml_path = '../settings.yaml'  # default yaml settings
+default_settings_yaml_path = '../../settings.yaml'  # default yaml settings
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, settings_yaml_path, parent=None):

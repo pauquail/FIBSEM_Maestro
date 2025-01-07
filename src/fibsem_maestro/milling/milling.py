@@ -6,14 +6,12 @@ from colorama import Fore
 from fibsem_maestro.microscope_control.settings import load_settings, save_settings
 from fibsem_maestro.tools.image_tools import template_matching
 from fibsem_maestro.tools.support import ScanningArea, Point
-
+import fibsem_maestro.logger as log
 
 class Milling:
-    def __init__(self, microscope, milling_settings, logging_dict, log_dir):
+    def __init__(self, microscope, milling_settings):
         self._microscope = microscope
         self.settings_init(milling_settings)
-        self.logging_dict = logging_dict
-        self._log_dir = log_dir
         self._fiducial_template = None
         self.position = None  # position [m] from milling start edge
 
@@ -99,6 +97,7 @@ class Milling:
         self.position = 0
         # calculate template as mean of images
         self._fiducial_template = np.mean(image, axis=0)
+        log.logger.fib_fiducial_template_image = self._fiducial_template  # log image
 
     def fiducial_correction(self):
         """ Set beam_shift & stage to mill """
@@ -106,7 +105,7 @@ class Milling:
         fiducial_image = self._microscope.area_scanning()
         center_x = fiducial_image.shape[0] // 2
         center_y = fiducial_image.shape[1] // 2
-        dx, dy, sim = template_matching(fiducial_image, self._fiducial_template, center_x, center_y)
+        dx, dy, sim, heatmap = template_matching(fiducial_image, self._fiducial_template, center_x, center_y, return_heatmap=True)
         if sim < self.minimal_similarity:
             print(Fore.RED, 'Fiducial localization failed')
             raise RuntimeError(f'Fiducial localization failed. Similarity={sim}')
@@ -120,6 +119,12 @@ class Milling:
             logging.warning('Stage moved. The fiducial must be rescanned!')
             self.fiducial_correction()
 
+        log.logger.fib_fiducial_image = fiducial_image  # log image
+        log.logger.fib_similarity_map = heatmap
+        log.logger.log_params['fib_similarity'] = sim
+        log.logger.log_params['fib_driftcorr'] = Point(shift_x, shift_y)
+
+
     def milling(self, slice_number: int):
         pixel_size = self._fiducial_template.pixel_size
         # increment milling pattern position by slice distance
@@ -131,8 +136,8 @@ class Milling:
 
         logging.debug('Pattern position: ' + str(pattern_position))
         logging.debug('Beam shift: ' + str(beam_shift.y))
-        self.logging_dict['ion_pattern_position'] = pattern_position
-        self.logging_dict['ion_beam_shift'] = beam_shift.y
+        log.logger.log_params['fib_pattern_position'] = pattern_position
+        log.logger.log_params['fib_beam_shift'] = beam_shift.y
 
         if not self._microscope.beam_shift_with_verification(self._microscope.ion_beam.beam_shift + beam_shift):
             print(Fore.RED, 'Beam shift is on the limit')
@@ -144,8 +149,9 @@ class Milling:
         size[1] = self.slice_distance  # modify height
         milling_rect = ScanningArea.from_image_coordinates(image_shape, left_top[0], left_top[1], size[0], size[1])
         logging.info(f'Milling on position: {milling_rect.to_dict()}')
-        self._microscope.ion_beam.rectangle_milling(self.pattern_file, rect=milling_rect, depth=self.milling_depth)
-        #set milling direction
+        direction = 'down' if self.direction < 0 else direction = 'up'
+        self._microscope.ion_beam.rectangle_milling(self.pattern_file, rect=milling_rect, depth=self.milling_depth,
+                                                    direction=direction)
 
         # fiducial image rescan
         if slice_number % self.fiducial_update == 0:

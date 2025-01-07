@@ -4,25 +4,20 @@
     <meta charset="UTF-8">
     <title>Slice {{ slice_number }} report</title>
 </head>
-<style>
-.image {
-    float: left;
-    width: 50%;
-    padding: 5px;
-}
-</style>
-<body>
 <h1>Slice {{ slice_number }} report</h1>
 <p>Time of report: {{ current_time }}</p>
 <h1> Milling </h1>
-<div class="image">
-    <img src="{{ fiducial_template_file }}" alt="Fiducial template" style="width:100%">
+<div style="display: flex; justify-content: space-between;">
+    <img src="{{ fib_fiducial_template_image }}" alt="Fiducial template" style="width: 30%; padding: 5px;">
 </div>
-<div class="image">
-    <img src="{{ fiducial_template }}" alt="Fiducial" style="width:100%">
+<div style="display: flex; justify-content: space-between;">
+    <img src="{{ fib_fiducial_image }}" alt="Fiducial image" style="width: 30%; padding: 5px;">
+</div>
+<div>
+    <img src="{{ fib_similarity_map }}" alt="Fiducial heat map" style="width: 30%; padding: 5px;">
 </div>
 <p style="{% if similarity < 0.8 %}color:red{% else %}color:black{% endif %}">
-    Similarity: {{ similarity }}
+    Similarity: {{ fib_similarity }}
 </p>
 <p style="{% if correction.x > 0.5e-6 correction.x > 0.5e-6  %}color:red{% else %}color:black{% endif %}">
     Correction:<br>
@@ -58,6 +53,17 @@ Lens alignment: <br>
         <li>Y: {{ la.y * 10e6 }}um</li>
     </ul>
 Resolution criterion: {{ image_resolution }} <br>
-</p>
+{% if log_af is not none %}
+<h2>Autofunction</h2>
+<p>Name: {{log_af.name}}</p>
+<div style="display: flex; justify-content: space-between;">
+    <img src="{{ log_af.curve_image_filename }}" alt="Autofunction log" style="width: 50%; padding: 5px;">
+</div>
+{% if hasattr(log_af, 'line_image_filename') %}
+<div style="display: flex; justify-content: space-between;">
+    <img src="{{ log_af.line_image_filename }}" alt="Line autofunction log" style="width: 50%; padding: 5px;">
+</div>
+{% endif %}
+{% endif %}
 </body>
 </html>

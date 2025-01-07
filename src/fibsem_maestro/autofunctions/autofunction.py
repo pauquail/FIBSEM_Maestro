@@ -1,16 +1,16 @@
 import logging
 import numpy as np
-import matplotlib.pyplot as plt
 import time
 
 from fibsem_maestro.image_criteria.criteria import Criterion
 from fibsem_maestro.autofunctions.sweeping import BasicSweeping
 from fibsem_maestro.tools.support import Point, fold_filename
 from fibsem_maestro.tools.image_tools import get_stripes
+import fibsem_maestro.logger as log
 
 class AutoFunction:
     def __init__(self, criterion: Criterion, sweeping: BasicSweeping, microscope,
-                 auto_function_settings, image_settings, log_dir=None):
+                 auto_function_settings, image_settings):
         """
         :param criterion: The focusing criterion instance.
         :param sweeping: The sweeping instance for controlling the sweep process.
@@ -27,11 +27,11 @@ class AutoFunction:
         self._criterion.finalize_thread_func = self.get_image_finalize  # set the function called on resolution calculation (in separated thread)
         # init criterion dict (array of focusing crit for each variable value)
         self._criterion_values = {}
-        self.af_curve_plot = None
         self.slice_number = None
         self.last_sweeping_value = None
         self.attempt = 0
-        self._log_dir = log_dir
+        self.initial_af_value = None  # value before executing af
+        self.final_af_value = None  # value after executing af
 
     def _settings_init(self, auto_function_settings):
         self.name = auto_function_settings['name']
@@ -92,18 +92,6 @@ class AutoFunction:
             logging.warning('Criterion omitted (not enough masked region)!')
         logging.info(f"Criterion value: {resolution}")
 
-    def save_log_files(self, slice_number):
-        # logging plots
-        if self._logging:
-            filename_prefix = fold_filename(self._log_dir, slice_number, postfix=self.name)
-            fig = self.af_curve_plot
-            fig.savefig(filename_prefix+'_af_curve.png')
-            plt.close(fig)
-            if hasattr(self, 'line_focus_plot'):
-                fig = self.line_focus_plot
-                fig.savefig(filename_prefix+'_line_focus.png')
-                plt.close(fig)
-
     def _evaluate(self, slice_number):
         """
         This method is used to evaluate the criteria and determine the best value. It also generates plots.
@@ -116,26 +104,10 @@ class AutoFunction:
         best_value = max(self._criterion_values, key=self._criterion_values.get)
 
         self._sweeping.value = best_value  # set best value
+        self.final_af_value = self._sweeping.value
         logging.info(f'Autofunction best value {self.variable} is {best_value}.')
-        # update af plot
-        self.af_curve_plot = self._show_af_curve()
-        self.save_log_files(slice_number)  # save af_curve_plot and line_plot
+        log.logger.create_log_af(self)
 
-    def _show_af_curve(self):
-        """
-        Display the AF curve.
-
-        :return: The figure object representing the AF curve plot.
-        """
-        criteria = list(self._criterion_values.values())
-        values = list(self._criterion_values.keys())
-        fig = plt.figure()
-        plt.plot(values, criteria, 'r.')
-        plt.axvline(x=values[len(values) // 2], color='b')  # make horizontal line in the middle
-        plt.tight_layout()
-
-        plt.title('Focus criterion')
-        return fig
 
     def check_firing(self, slice_number, image_resolution):
         """ Check if the firing condition is passed"""
@@ -161,6 +133,7 @@ class AutoFunction:
         In both cases, it returns True if the process is finished and False if the process is not yet finished.
         """
         # Focusing on different area
+        self.initial_af_value = self._sweeping.value
         self._initialize_criteria_dict()
         self.move_stage_x()
         self._prepare(image_for_mask)  # update mask image if needed and set microscope
@@ -187,6 +160,13 @@ class AutoFunction:
         else:
             return None
 
+    @property
+    def criterion_values(self):
+        return self._criterion_values
+
+    @property
+    def best_value(self):
+        return
 
 class LineAutoFunction(AutoFunction):
     def __init__(self, criterion, sweeping: BasicSweeping, microscope,
@@ -195,7 +175,6 @@ class LineAutoFunction(AutoFunction):
         self.pre_imaging_delay = auto_function_settings['pre_imaging_delay']
         self.keep_time = auto_function_settings['keep_time']
         self.forbidden_sections = auto_function_settings['forbidden_sections']
-        self.line_focus_plot = None
         self._line_focuses = {}
 
     def _estimate_line_time(self):
@@ -267,11 +246,9 @@ class LineAutoFunction(AutoFunction):
         # variable sweeping
         self._variable_sweeping(line_time)
         # get image
-        img = self._microscope.beam.get_image()
+        self.line_focusing_image = self._microscope.beam.get_image()
         # calculate self._criterion_values
-        self._process_image(img)
-        # set focus plot
-        self.line_focus_plot = self.show_line_focus(img)
+        self._process_image(self.line_focusing_image)
         self._evaluate(slice_number)
 
     def __call__(self, image_for_mask=None, slice_number=None):
@@ -281,6 +258,7 @@ class LineAutoFunction(AutoFunction):
 
         """
         assert not self._microscope.beam.extended_resolution, "Line focus cannot work with extended resolution"
+        self.initial_af_value = self._sweeping.value
         self._initialize_criteria_dict()
         self.move_stage_x()  # focusing on different area
         self._prepare(image_for_mask)
@@ -288,28 +266,9 @@ class LineAutoFunction(AutoFunction):
         self.move_stage_x(back=True)
         return True  # af finished
 
-    def show_line_focus(self, img):
-        """
-        :param img: Image array
-        :return: Figure object
-
-        Displays an image with a line plot overlay representing focus values.
-
-        The method takes an image array and plots a line representation of focus values
-        on top of the image. The focus values are scaled to fit within the visible range
-        of the image.
-        """
-        values_y = np.array(list(self._line_focuses.values()))
-        values_y -= min(values_y)
-        scale = img.shape[1] / max(values_y)  # scale values to visible range
-        values_x = list(self._line_focuses.keys())
-        fig = plt.figure(figsize=(10, 5))
-        plt.imshow(img, cmap='gray')
-        plt.axis('off')
-        plt.plot(values_y * scale, values_x, c='r')
-        plt.tight_layout()
-        plt.title('Line focus plot')
-        return fig
+    @property
+    def line_focuses(self):
+        return self._line_focuses
 
 
 class StepAutoFunction(AutoFunction):
@@ -330,6 +289,7 @@ class StepAutoFunction(AutoFunction):
         """
         # step image mode
         if self._step_number == 0:
+            self.initial_af_value = self._sweeping.value
             self.sweep_list = list(self._sweeping.sweep())
             self._initialize_criteria_dict()
         repetition, value = self.sweep_list[self._step_number]  # select sweeping variable based on current step

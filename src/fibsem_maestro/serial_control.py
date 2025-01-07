@@ -14,8 +14,10 @@ from fibsem_maestro.mask.masking import MaskingModel
 from fibsem_maestro.drift_correction.template_matching import TemplateMatchingDriftCorrection
 from fibsem_maestro.microscope_control.microscope import create_microscope
 from fibsem_maestro.microscope_control.settings import load_settings, save_settings
+from fibsem_maestro.milling.milling import Milling
 from fibsem_maestro.tools.dirs_management import make_dirs
-from fibsem_maestro.tools.support import Point, find_in_dict, find_in_objects, fold_filename
+from fibsem_maestro.tools.support import Point, find_in_dict, find_in_objects
+import fibsem_maestro.logger as log
 
 colorama_init(autoreset=True)  # colorful console
 
@@ -57,10 +59,6 @@ class SerialControl:
         self._microscope = self.initialize_microscope()
         self._electron = self._microscope.electron_beam
 
-        self.logger = SerialControlLogger(self._microscope,
-                                          self.general_settings['log_level'],
-                                          dirs_log=self.dirs_settings['log'])
-
         self.stopping = StoppingFlag(self._microscope)
         self.error_handler = ErrorHandler(self.settings, self.stopping)
 
@@ -69,6 +67,7 @@ class SerialControl:
         self.event_acquisition_stop = []
 
         self._masks = self.initialize_masks()
+        self._milling = self.initialize_milling()
         self._autofunctions = self.initialize_autofunctions(self.settings)
         self._acb = self.initialize_acb()
         self._criterion_resolution = self.initialize_criterion_resolution()
@@ -140,6 +139,16 @@ class SerialControl:
             logging.error("Microscope initialization failed! "+repr(e))
             raise RuntimeError('Microscope initialization failed!') from e
         return microscope
+
+    def initialize_milling(self):
+        """ Slicing init """
+        try:
+            milling = Milling(self._microscope, self.fib_settings)
+            print('Milling initialized')
+        except Exception as e:
+            logging.error("Milling initialization failed! " + repr(e))
+            raise RuntimeError("Milling initialization failed!") from e
+        return milling
 
     def initialize_masks(self):
         """ Masking init """
@@ -224,6 +233,15 @@ class SerialControl:
 
         self.logger.save_log(slice_number)  # save log dict
 
+    def milling(self, slice_number):
+        """ Cut slice (with drift correction by fiducial)  """
+        try:
+            self._milling(slice_number)
+        except Exception as e:
+            logging.error('Milling error'+repr(e))
+            print(Fore.RED + 'Milling failed')
+            self.error_handler(e)
+
     def calculate_resolution(self, slice_number):
         """ Calculate resolution """
         try:
@@ -234,6 +252,7 @@ class SerialControl:
             logging.error('Image resolution calculation error. Setting resolution to 0.'+repr(e))
             print(Fore.RED + 'Resolution measurement failed')
             self.image_resolution = 0
+            self.error_handler(e)
 
     def correction(self):
         """ WD and Y correction"""
@@ -246,6 +265,7 @@ class SerialControl:
         except Exception as e:
             logging.error('Working distance settings failed! '+repr(e))
             print(Fore.RED + 'Working distance settings failed!')
+            self.error_handler(e)
 
         # y correction + beam shift
         try:
@@ -258,6 +278,7 @@ class SerialControl:
         except Exception as e:
             logging.error('Y correction failed! '+repr(e))
             print(Fore.RED + 'Y correction failed!')
+            self.error_handler(e)
 
     def autofunction(self, slice_number):
         """" Autofunctions handling """
@@ -270,6 +291,7 @@ class SerialControl:
         except Exception as e:
             logging.error('Autofunction error. '+repr(e))
             print(Fore.RED + 'Autofunction error!')
+            self.error_handler(e)
 
     def auto_contrast_brightness(self, slice_number):
         try:
@@ -281,6 +303,7 @@ class SerialControl:
         except Exception as e:
             logging.error('Autofunction error. ' + repr(e))
             print(Fore.RED + 'Autofunction error!')
+            self.error_handler(e)
 
     def acquire(self, slice_number):
         """ Acquire and save image """
@@ -290,6 +313,7 @@ class SerialControl:
         except Exception as e:
             logging.error('Image acquisition error. '+repr(e))
             print(Fore.RED + 'Image acquisition failed!')
+            self.error_handler(e)
 
     def drift_correction(self, slice_number):
         """ Drift correction handling """
@@ -302,8 +326,9 @@ class SerialControl:
             except Exception as e:
                 logging.error('Drift correction error. ' + repr(e))
                 print(Fore.RED + 'Application of drift correction failed!')
+                self.error_handler(e)
 
-    def load_settings(self):
+    def load_sem_settings(self):
         """ Load microscope settings from file and set microscope """
         # set microscope
         try:
@@ -314,8 +339,9 @@ class SerialControl:
         except Exception as e:
             logging.error('Loading of microscope settings failed! ' + repr(e))
             print(Fore.RED + 'Application of microscope settings failed!')
+            self.error_handler(e)
 
-    def save_settings(self):
+    def save_sem_settings(self):
         """ Save microscope settings from file from microscope """
         settings_to_save = self.variables_to_save
         try:
@@ -326,6 +352,7 @@ class SerialControl:
         except Exception as e:
             logging.error('Microscope settings saving error! ' + repr(e))
             print(Fore.RED + 'Microscope settings saving failed!')
+            self.error_handler(e)
 
     def stop(self):
         self.stopping.stopping_flag = True
@@ -350,58 +377,62 @@ class SerialControl:
         while self.cycle(slice_number):
             logging.info(f'---Slice {slice_number} completed ---')
 
+        # remove logger of current slice
+        if self.logger is not None:
+            del self.logger
+
         # fire stop event
         for event_stop in self.event_acquisition_stop:
             event_stop()
 
     def cycle(self, slice_number):
-        try:
+        # wait for resolution calculation if needed anf AF main imaging criterion calculation
+        self._criterion_resolution.join_all_threads()
+        self.wait_for_af_criterion_calculation()
+        if self.stopping():
+            return False
+        self.settings_init()  # read settings.yaml and reinit all
+        print(Fore.YELLOW + f'Current slice number: {slice_number}')
+        logging.info(f'Current slice number: {slice_number}')
 
-            # wait for resolution calculation if needed anf AF main imaging criterion calculation
-            self._criterion_resolution.join_all_threads()
-            self.wait_for_af_criterion_calculation()
+        del log.logger
+        log.logger = log.Logger(self.settings, self.microscope, slice_number)
+
+        if self.imaging_enabled:
+            self._microscope.beam = self._microscope.ion_beam  # switch to ions
+            self.milling(slice_number)  # FIB milling (slicing)
             if self.stopping():
                 return False
-            self.settings_init()  # read settings.yaml and reinit all
-            print(Fore.YELLOW + f'Current slice number: {slice_number}')
-            logging.info(f'Current slice number: {slice_number}')
 
-            self.logger = Logger(slice_number)
-
-            if self.imaging_enabled:
-                self._microscope.beam = self._microscope.electron_beam  # switch to electrons
-                self.load_settings()  # load settings and set microscope
-                if self.stopping():
-                    return False
-                self.correction()  # wd and y correction
-                if self.stopping():
-                    return False
-                self.autofunction(slice_number)  # autofunctions handling
-                if self.stopping():
-                    return False
-                self.logger.log_microscope_settings()  # save microscope settings
-                self.acquire(slice_number)  # acquire image
-                if self.stopping():
-                    return False
-                self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
-                if self.stopping():
-                    return False
-                self.drift_correction(slice_number)  # drift correction
-                if self.stopping():
-                    return False
-                self.auto_contrast_brightness(slice_number)
-                if self.stopping():
-                    return False
-                # resolution calculation
-                self.calculate_resolution(slice_number)
-            else:
-                self.logger.log_microscope_settings()  # save microscope settings
-                print(Fore.RED + 'Imaging skipped!')
-                logging.warning('Imaging skipped because imaging is disabled in configuration!')
-        except Exception as e:
-            self.error_handler(e)
+            self._microscope.beam = self._microscope.electron_beam  # switch to electrons
+            self.load_sem_settings()  # load settings and set microscope
             if self.stopping():
                 return False
+            self.correction()  # wd and y correction
+            if self.stopping():
+                return False
+            self.autofunction(slice_number)  # autofunctions handling
+            if self.stopping():
+                return False
+            self.logger.log_microscope_settings()  # save microscope settings
+            self.acquire(slice_number)  # acquire image
+            if self.stopping():
+                return False
+            self.check_af_on_acquired_image(slice_number)  # check if the autofunction on main_imaging is activated
+            if self.stopping():
+                return False
+            self.drift_correction(slice_number)  # drift correction
+            if self.stopping():
+                return False
+            self.auto_contrast_brightness(slice_number)
+            if self.stopping():
+                return False
+            # resolution calculation
+            self.calculate_resolution(slice_number)
+        else:
+            self.logger.log_microscope_settings()  # save microscope settings
+            print(Fore.RED + 'Imaging skipped!')
+            logging.warning('Imaging skipped because imaging is disabled in configuration!')
         return True
 
 

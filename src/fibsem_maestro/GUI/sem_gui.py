@@ -78,7 +78,7 @@ class SemGui:
         # apply shift and fov change
         self.serial_control.microscope.beam_shift_with_verification(shift)
         self.serial_control.microscope.electron_beam.resolution = fov
-        self.serial_control.save_settings()  # save microscope settings to file
+        self.serial_control.save_sem_settings()  # save microscope settings to file
         self.window.imageLabel.rect = QRect()  # clear the rectangle
         image = self.serial_control.microscope.acquire_image()  # update image
         self.window.imageLabel.setImage(image)
@@ -87,7 +87,7 @@ class SemGui:
     def testImagingPushButton_clicked(self):
         """Acquire image and show im imageLabel"""
         # Load microscope settings from file
-        self.serial_control.load_settings()
+        self.serial_control.load_sem_settings()
         applied_images_settings = self.actual_image_settings
 
         # Fast scan checkbox reduces dwell or LI

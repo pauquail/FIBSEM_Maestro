@@ -396,7 +396,7 @@ class ElectronBeam(BeamControl):
         img = self._microscope.imaging.get_image()
         return Image.from_as(img)
 
-    def rectangle_milling(self, app_file: str, rect: ScanningArea, depth: float):
+    def rectangle_milling(self, app_file: str, rect: ScanningArea, depth: float, direction: str):
         self.select_modality()  # activate right quad
         self._microscope.patterning.clear_patterns()
         self._microscope.patterning.set_default_beam_type(self._beam_type)
@@ -420,6 +420,10 @@ class ElectronBeam(BeamControl):
                                                                        width=rect.width,
                                                                        height=rect.height,
                                                                        depth=depth)
+            if direction == 'up':
+                pattern.scan_direction = 'bottom_to_top'
+            if direction == 'down':
+                pattern.scan_direction = 'top_to_bottom'
         except Exception as e:
             logging.error('Pattern create error. ' + repr(e))
             raise Exception('Pattern create error. ' + repr(e))

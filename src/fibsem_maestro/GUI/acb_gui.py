@@ -1,6 +1,6 @@
 from PySide6.QtCore import QRect
 
-from GUI.gui_tools import create_ImageLabel, serialize_form, populate_form
+from fibsem_maestro.GUI.gui_tools import create_ImageLabel, serialize_form, populate_form
 from image_label_manger import ImageLabelManagers
 from fibsem_maestro.tools.support import ScanningArea, Point
 

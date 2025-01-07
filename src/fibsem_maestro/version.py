@@ -11,6 +11,7 @@ VERSION = '0.1'
 #  virtual mode
 #  email test
 #  action enable buttons
+#  generate full report
 
 #  test: email, reduced scanning, template matching, milling
 #  add ACB check to criterion !
