@@ -6,7 +6,7 @@ import yaml
 from matplotlib import pyplot as plt
 
 from fibsem_maestro.tools.support import fold_filename
-from fibsem_maestro.autofunctions.autofunction import LineAutoFunction
+
 class AutofocusLog:
     def __init__(self, af, slice_number, log_dir):
         self.af = af
@@ -17,7 +17,7 @@ class AutofocusLog:
         self.curve_image.savefig(self.curve_image_filename)  # save image to file
         plt.close(self.curve_image)
 
-        if isinstance(af, LineAutoFunction):
+        if hasattr(af, 'line_focus_image'):  # af is LineAutoFunction
             self.line_image = self.line_focus_image()  # on the fly focusing image
             self.line_image_filename = fold_filename(filename_prefix + '_line_focus.png')
             self.line_image.savefig(self.line_image_filename)

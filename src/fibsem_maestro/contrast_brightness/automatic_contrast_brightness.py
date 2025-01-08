@@ -3,14 +3,12 @@ import logging
 import numpy as np
 
 from fibsem_maestro.tools.image_tools import image_saturation_info, image_bit_dept_band
-
+import fibsem_maestro.logger as log
 
 class AutomaticContrastBrightness:
-    def __init__(self, settings, microscope, logging_dict, log_dir=None):
+    def __init__(self, settings, microscope):
         self._settings_init(settings)
         self._microscope = microscope
-        self._logging_dict = logging_dict
-        self._log_dir = log_dir
 
     def _settings_init(self, acb_settings):
         self.acb_enabled = acb_settings['acb_enabled']
@@ -28,6 +26,7 @@ class AutomaticContrastBrightness:
 
     def decrease_contrast(self, decrease_value):
         self._microscope.beam.contrast -= decrease_value * self.p_decrease_contrast
+        return -decrease_value * self.p_decrease_contrast
 
     def increase_contrast(self, increase_value):
         self._microscope.beam.contrast += increase_value * self.p_increase_contrast
@@ -50,6 +49,7 @@ class AutomaticContrastBrightness:
             if saturated > self.allowed_saturation and zeroed > self.allowed_saturation:
                 logging.info(f'Contrast lowering needed. Saturated fraction: {saturated}, Zeroed fraction: {zeroed}')
                 self.decrease_contrast(max(saturated-self.allowed_saturation, zeroed-self.allowed_saturation))
+                log.logger.log_params['ACB'] = f'Contrast decreased '
 
             # too low contrast
             elif image_band < self.allowed_minimal_band:

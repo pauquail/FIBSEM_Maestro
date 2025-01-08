@@ -176,6 +176,7 @@ class LineAutoFunction(AutoFunction):
         self.keep_time = auto_function_settings['keep_time']
         self.forbidden_sections = auto_function_settings['forbidden_sections']
         self._line_focuses = {}
+        self.line_focus_image = None
 
     def _estimate_line_time(self):
         return (self._microscope.beam.dwell_time * self._microscope.beam.line_integration
@@ -245,10 +246,10 @@ class LineAutoFunction(AutoFunction):
         self._microscope.blank_screen()
         # variable sweeping
         self._variable_sweeping(line_time)
-        # get image
-        self.line_focusing_image = self._microscope.beam.get_image()
+        # get imageb
+        self.line_focus_image = self._microscope.beam.get_image()
         # calculate self._criterion_values
-        self._process_image(self.line_focusing_image)
+        self._process_image(self.line_focus_image)
         self._evaluate(slice_number)
 
     def __call__(self, image_for_mask=None, slice_number=None):
